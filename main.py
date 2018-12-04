@@ -36,10 +36,10 @@ def plot_fundamental_diagram(flow, occupancy):
     plt.title("Detector 608219 Flow-Occupancy Diagram January 2017")
     plt.xlabel("Occupancy (%)")
     plt.ylabel("Flow (vph)")
-    plt.xlim(0, 100)
-    plt.ylim(bottom=0)
 
     plt.scatter(occupancy, flow)
+    plt.xlim(0, 100)
+    plt.ylim(bottom=0)
     plt.show()
 
 def query_detector_data(cursor, graph=False):
@@ -73,8 +73,9 @@ def query_detector_data(cursor, graph=False):
 def calculate_flow_occupancy(time, volume, occupancy, graph=False):
     occupancy_percentage = occupancy / 3600 * 100
 
-    plot_data_over_time("Detector 608219 Occupancy January 2017", time, occupancy_percentage, ylabel="Occupancy (%)", figsize=(12, 5))
-    plot_fundamental_diagram(volume, occupancy_percentage)
+    if graph:
+        plot_data_over_time("Detector 608219 Occupancy January 2017", time, occupancy_percentage, ylabel="Occupancy (%)", figsize=(12, 5))
+        plot_fundamental_diagram(volume, occupancy_percentage)
 
 
 
@@ -87,7 +88,7 @@ if __name__ == '__main__':
     cursor = cnx.cursor()
 
     time, volume, occupancy = query_detector_data(cursor)
-    calculate_flow_occupancy(time, volume, occupancy, graph=True)
+    calculate_flow_occupancy(time, volume, occupancy)
 
     cursor.close()
     cnx.close()
