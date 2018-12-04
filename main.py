@@ -32,6 +32,16 @@ def plot_data_over_time(title, x, y, xlabel="Date", ylabel=None, figsize=None):
     plt.plot(x, y)
     plt.show()
 
+def plot_fundamental_diagram(flow, occupancy):
+    plt.title("Detector 608219 Flow-Occupancy Diagram January 2017")
+    plt.xlabel("Occupancy (%)")
+    plt.ylabel("Flow (vph)")
+    plt.xlim(0, 100)
+    plt.ylim(bottom=0)
+
+    plt.scatter(occupancy, flow)
+    plt.show()
+
 def query_detector_data(cursor, graph=False):
     query = ("SELECT * FROM {} WHERE DetectorID = {}".format("detector_data_processed_2017_1", "608219"))
     cursor.execute(query)
@@ -39,7 +49,7 @@ def query_detector_data(cursor, graph=False):
     time = []
     volume = []
     occupancy = []
-    speed = []
+    #speed = []
 
     for row in cursor:
         d = dt.datetime(row[1], row[2], row[3], row[4] // 3600, (row[4] % 3600) // 60, row[4] % 60)
@@ -47,23 +57,26 @@ def query_detector_data(cursor, graph=False):
 
         volume.append(row[5])
         occupancy.append(row[6])
-        speed.append(row[7])
+        #speed.append(row[7])
+
+    volume = np.array(volume)
+    occupancy = np.array(occupancy)
+    #speed = np.array(speed)
 
     if graph:
-        plot_detector_data_over_time(time, volume, occupancy, speed)
+        plot_data_over_time("Detector 608219 Volume January 2017", time, volume, ylabel="Volume (vph)", figsize=(12, 5))
+        plot_data_over_time("Detector 608219 Occupancy January 2017", time, occupancy, ylabel="Occupancy (s)", figsize=(12, 5))
+        #plot_data_over_time("Detector 608219 Speed January 2017", time, speed, ylabel="Speed", figsize=(12, 5))
 
     return time, volume, occupancy
 
-def plot_detector_data_over_time(time, volume, occupancy, speed):
-    plot_data_over_time("Detector Volume January 2017", time, volume, ylabel="Volume", figsize=(12, 5))
-    plot_data_over_time("Detector Occupancy January 2017", time, occupancy, ylabel="Occupancy", figsize=(12, 5))
-    plot_data_over_time("Detector Speed January 2017", time, speed, ylabel="Speed", figsize=(12, 5))
-
 def calculate_flow_occupancy(time, volume, occupancy, graph=False):
-    plot_flow_occupancy_graphs()
+    occupancy_percentage = occupancy / 3600 * 100
 
-def plot_flow_occupancy_graphs():
-    pass
+    plot_data_over_time("Detector 608219 Occupancy January 2017", time, occupancy_percentage, ylabel="Occupancy (%)", figsize=(12, 5))
+    plot_fundamental_diagram(volume, occupancy_percentage)
+
+
 
 if __name__ == '__main__':
     cnx = connect_to_database(**config)
@@ -73,7 +86,7 @@ if __name__ == '__main__':
 
     cursor = cnx.cursor()
 
-    time, volume, occupancy = query_detector_data(cursor, graph=True)
+    time, volume, occupancy = query_detector_data(cursor)
     calculate_flow_occupancy(time, volume, occupancy, graph=True)
 
     cursor.close()
