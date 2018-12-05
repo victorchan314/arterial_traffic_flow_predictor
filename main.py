@@ -22,14 +22,14 @@ def connect_to_database(user, password, host, database):
     else:
         return cnx
 
-def plot_data_over_time(title, x, y, xlabel="Date", ylabel=None, figsize=None):
+def plot_data_over_time(title, time, y, xlabel="Date", ylabel=None, figsize=None):
     fig, ax = plt.subplots(figsize=figsize)
     plt.title(title)
     fig.autofmt_xdate()
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
 
-    plt.plot(x, y)
+    plt.plot(time, y)
     plt.show()
 
 def plot_fundamental_diagram(flow, occupancy):
