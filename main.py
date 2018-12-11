@@ -47,7 +47,13 @@ def plot_fundamental_diagram(flow, occupancy, detector_id):
     plt.show()
 
 def query_detector_data(cursor, table, detector_id, graph=False):
-    cursor.execute(DETECTOR_DATA_QUERY.format(table, detector_id))
+    query = DETECTOR_DATA_QUERY.format(table, detector_id)
+
+    try:
+        cursor.execute(query)
+    except mysql.connector.Error as err:
+        print("Error: failed query: {}".format(query))
+        return
 
     time = []
     volume = []
@@ -86,7 +92,7 @@ if __name__ == '__main__':
 
     cursor = cnx.cursor()
 
-    time, volume, occupancy = query_detector_data(cursor, DETECTOR_DATA_TABLE, DETECTOR_ID, graph=True)
+    time, volume, occupancy = query_detector_data(cursor, DETECTOR_DATA_TABLE, DETECTOR_ID)
 
     cursor.close()
     cnx.close()
