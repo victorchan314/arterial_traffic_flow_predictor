@@ -1,10 +1,10 @@
 import sys
-import mysql.connector
 
 import numpy as np
 import datetime as dt
 
 from config import config
+import mysql_utils as mysql
 import visualization
 
 
@@ -12,29 +12,13 @@ DETECTOR_DATA_TABLE = "detector_data_processed_2017_1"
 DETECTOR_ID = "608219"
 DETECTOR_DATA_QUERY = "SELECT * FROM {} WHERE DetectorID = {}"
 
-def connect_to_database(user, password, host, database):
-    try:
-        cnx = mysql.connector.connect(user=user, password=password, host=host, database=database)
-    except mysql.connector.Error as err:
-        if err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Error: Username or password denied")
-        elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
-            print("Error: Database does not exist")
-        else:
-            print(err)
-
-        return None
-    else:
-        return cnx
-
 
 def query_detector_data(cursor, table, detector_id, graph=False):
     query = DETECTOR_DATA_QUERY.format(table, detector_id)
 
-    try:
-        cursor.execute(query)
-    except mysql.connector.Error as err:
-        print("Error: failed query: {}".format(query))
+    cursor = mysql.query(cursor, query)
+    
+    if cursor == None:
         return
 
     time = []
@@ -67,7 +51,7 @@ def query_detector_data(cursor, table, detector_id, graph=False):
 
 
 if __name__ == '__main__':
-    cnx = connect_to_database(**config)
+    cnx = mysql.connect_to_database(**config)
 
     if cnx == None:
         sys.exit()
