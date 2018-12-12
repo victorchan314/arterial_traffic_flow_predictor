@@ -2,10 +2,11 @@ import sys
 import mysql.connector
 
 import numpy as np
-import matplotlib.pyplot as plt
 import datetime as dt
 
 from config import config
+import visualization
+
 
 DETECTOR_DATA_TABLE = "detector_data_processed_2017_1"
 DETECTOR_ID = "608219"
@@ -26,25 +27,6 @@ def connect_to_database(user, password, host, database):
     else:
         return cnx
 
-def plot_data_over_time(title, time, y, xlabel="Date", ylabel=None, figsize=None):
-    fig, ax = plt.subplots(figsize=figsize)
-    plt.title(title)
-    fig.autofmt_xdate()
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-
-    plt.plot(time, y)
-    plt.show()
-
-def plot_fundamental_diagram(flow, occupancy, detector_id):
-    plt.title("Detector {} Flow-Occupancy Diagram January 2017".format(detector_id))
-    plt.xlabel("Occupancy (%)")
-    plt.ylabel("Flow (vph)")
-
-    plt.scatter(occupancy, flow)
-    plt.xlim(0, 100)
-    plt.ylim(bottom=0)
-    plt.show()
 
 def query_detector_data(cursor, table, detector_id, graph=False):
     query = DETECTOR_DATA_QUERY.format(table, detector_id)
@@ -74,11 +56,11 @@ def query_detector_data(cursor, table, detector_id, graph=False):
     #speed = np.array(speed)
 
     if graph:
-        plot_data_over_time("Detector {} Volume January 2017".format(detector_id), time, volume, ylabel="Volume (vph)", figsize=(12, 5))
-        plot_data_over_time("Detector {} Occupancy January 2017".format(detector_id), time, occupancy, ylabel="Occupancy (s)", figsize=(12, 5))
-        #plot_data_over_time("Detector {} Speed January 2017".format(detector_id), time, speed, ylabel="Speed", figsize=(12, 5))
-        plot_data_over_time("Detector {} Occupancy January 2017".format(detector_id), time, occupancy_percentage, ylabel="Occupancy (%)", figsize=(12, 5))
-        plot_fundamental_diagram(volume, occupancy_percentage, detector_id)
+        visualization.plot_data_over_time(time, volume, title="Detector {} Volume January 2017".format(detector_id), ylabel="Volume (vph)", figsize=(12, 5))
+        visualization.plot_data_over_time(time, occupancy, title="Detector {} Occupancy January 2017".format(detector_id), ylabel="Occupancy (s)", figsize=(12, 5))
+        #visualization.plot_data_over_time(time, speed, title="Detector {} Speed January 2017".format(detector_id), ylabel="Speed", figsize=(12, 5))
+        visualization.plot_data_over_time(time, occupancy_percentage, title="Detector {} Occupancy January 2017".format(detector_id), ylabel="Occupancy (%)", figsize=(12, 5))
+        visualization.plot_fundamental_diagram(volume, occupancy_percentage, title="Detector {} Flow-Occupancy Diagram January 2017".format(detector_id))
 
     return time, volume, occupancy
 
