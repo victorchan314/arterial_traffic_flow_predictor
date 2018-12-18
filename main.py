@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import datetime as dt
 
+import armax
 from config import config
 import mysql_utils as mysql
 import visualization
@@ -10,7 +11,7 @@ import visualization
 
 DETECTOR_DATA_TABLE = "detector_data_processed_2017_1"
 DETECTOR_ID = "608219"
-DETECTOR_DATA_QUERY = "SELECT * FROM {} WHERE DetectorID = {}"
+DETECTOR_DATA_QUERY = "SELECT * FROM {} WHERE DetectorID = {} ORDER BY Year, Month, Day, Time"
 
 
 def query_detector_data(cursor, table, detector_id, graph=False):
