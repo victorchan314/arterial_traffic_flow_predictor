@@ -36,6 +36,7 @@ def query_detector_data(cursor, table, detector_id, graph=False):
         occupancy.append(row[6])
         #speed.append(row[7])
 
+    time = np.array(time)
     volume = np.array(volume)
     occupancy = np.array(occupancy)
     occupancy_percentage = occupancy / 3600 * 100
