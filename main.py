@@ -3,13 +3,14 @@ import sys
 import numpy as np
 import datetime as dt
 
-import armax
+from armax import armax
 from config import config
 import mysql_utils as mysql
 import visualization
 
 
-DETECTOR_DATA_TABLE = "detector_data_processed_2017_1"
+#DETECTOR_DATA_TABLE = "detector_data_processed_2017_1"
+DETECTOR_DATA_TABLE = "detector_data_processed_2017"
 DETECTOR_ID = "608219"
 DETECTOR_DATA_QUERY = "SELECT * FROM {} WHERE DetectorID = {} ORDER BY Year, Month, Day, Time"
 
@@ -59,7 +60,7 @@ if __name__ == '__main__':
 
     cursor = cnx.cursor()
 
-    time, volume, occupancy = query_detector_data(cursor, DETECTOR_DATA_TABLE, DETECTOR_ID)
+    time, flow, occupancy = query_detector_data(cursor, DETECTOR_DATA_TABLE, DETECTOR_ID)
 
     cursor.close()
     cnx.close()
