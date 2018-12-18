@@ -3,12 +3,17 @@ from statsmodels.tsa import arima_model
 
 class armax:
 
+    PREPROCESSING_SMOOTHING = "smoothing"
+    PREPROCESSING_AGGREGATING = "aggregating"
+    PREPROCESSING_METHODS = [PREPROCESSING_SMOOTHING, PREPROCESSING_AGGREGATING]
+
     def __init__(self, endog, exog=None, dates=None):
         self.endog = endog
         self.exog = exog
         self.dates = dates
-        self.smoothed_endog = None
-        self.smoothed_exog = None
+        self.preprocessing_method = None
+        self.preprocessed_endog = None
+        self.preprocessed_exog = None
         self.w = 1
         self._armax_models = {}
         self.best_model = None
@@ -23,15 +28,23 @@ class armax:
     
     def get_dates(self):
         return self.dates
-
-    def get_smoothed_endog(self):
-        return self.smoothed_endog
-
-    def get_smoothed_exog(self):
-        return self.smoothed_exog
     
-    def get_smoothed_dates(self):
-        return self.dates[self.w-1:]
+    def get_preprocessing_method(self):
+        return self.preprocessing_method
+
+    def get_preprocessed_endog(self):
+        return self.preprocessed_endog
+
+    def get_preprocessed_exog(self):
+        return self.preprocessed_exog
+    
+    def get_preprocessed_dates(self):
+        if self.preprocessing_method == self.PREPROCESSING_SMOOTHING:
+            return self.dates[self.w-1:]
+        elif self.preprocessing_method == self.PREPROCESSING_AGGREGATING:
+            return self.dates[self.w-1::self.w]
+        else:
+            return None
     
     def get_preprocessing_order(self):
         return self.w
@@ -52,22 +65,34 @@ class armax:
         return self.best_model_exog
 
     def preprocess(self, method, w):
-        if method == "smoothing":
+        if method == self.PREPROCESSING_SMOOTHING:
             self.w = w
             self.smoothed_endog = self._smooth(self.endog, w)
-            self.smoothed_exog = self._smooth(self.exog, w)
-        elif method == "aggregation":
+            self.smoothed_exog = self._smooth(self.exog, w) if self.exog else None
+        elif method == self.PREPROCESSING_AGGREGATING:
             self.w = w
             self.smoothed_endog = self._aggregate(self.endog, w)
-            self.smoothed_exog = self._aggregate(self.exog, w)
+            self.smoothed_exog = self._aggregate(self.exog, w) if self.exog else None
         else:
-            raise ValueError("Illegal method passed: must be 'smoothing' or 'aggregation'")
+            raise ValueError("Illegal method passed: must be one of '{}'".format(self.PREPROCESSING_METHODS))
     
-    def smooth(self, data, w):
+    def _smooth(self, data):
+        smoothed_data = self.data[self.w-1:]
+
+        for i in range(1, self.w):
+            smoothed_data += self.data[self.w-1-i:-i]
+
+        smoothed_data /= self.w
+
         return smoothed_data
     
-    def aggregate(self, data, w):
-        pass
+    def _aggregate(self, data):
+        aggregated_data = self.data[self.w-1::self.w]
+
+        for i in range(1, self.w):
+            aggregated_data += self.data[self.w-1-i::self.w]
+
+        return aggregated_data
 
     def fit(self, ar_max=5, ma_max=5):
         self.grid_search(ar_max, ma_max)
