@@ -15,7 +15,7 @@ class armax:
         preprocessed_exog (np.array): Preprocessed exog
         w (int): Order of preprocessing
         _armax_models (dict): Dictionary of all the armax models fit
-        self.fit (bool): Whether a model has been fit or not
+        self.has_fit (bool): Whether a model has been fit or not
         best_model (arima_model.ARMAResults): Results of the best model fit
         best_model_order (tuple): Model order with the lowest llf
         best_model_exog (bool): 
@@ -35,7 +35,7 @@ class armax:
         self.preprocessed_exog = None
         self.w = 1
         self._armax_models = {}
-        self.fit = False
+        self.has_fit = False
         self.best_model = None
         self.best_model_order = (-1, -1)
         self.best_model_exog = False
@@ -76,7 +76,7 @@ class armax:
         return self.w
 
     def get_best_model(self):
-        if self.fit:
+        if self.has_fit:
             return self._armax_models[self.get_best_model_order]
         else:
             return None
