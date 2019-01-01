@@ -133,8 +133,8 @@ class armax:
         min_order = (0, 0)
         min_llf = np.inf
 
-        for ar in range(ar_max):
-            for ma in range(ma_max):
+        for ar in range(1, ar_max + 1):
+            for ma in range(1, ma_max + 1):
                 order = (ar, ma)
                 model = arima_model.ARMA(self.get_endog(), order, self.get_exog())
 
