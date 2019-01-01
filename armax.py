@@ -15,6 +15,7 @@ class armax:
         preprocessed_exog (np.array): Preprocessed exog
         w (int): Order of preprocessing
         _armax_models (dict): Dictionary of all the armax models fit
+        self.fit (bool): Whether a model has been fit or not
         best_model (arima_model.ARMAResults): Results of the best model fit
         best_model_order (tuple): Model order with the lowest llf
         best_model_exog (bool): 
@@ -34,6 +35,7 @@ class armax:
         self.preprocessed_exog = None
         self.w = 1
         self._armax_models = {}
+        self.fit = False
         self.best_model = None
         self.best_model_order = (-1, -1)
         self.best_model_exog = False
@@ -74,7 +76,10 @@ class armax:
         return self.w
 
     def get_best_model(self):
-        return self.best_model
+        if self.fit:
+            return self._armax_models[self.get_best_model_order]
+        else:
+            return None
 
     def get_best_model_order(self):
         return self.best_model_order
@@ -122,10 +127,11 @@ class armax:
 
     def fit(self, ar_max=5, ma_max=5):
         self.grid_search(ar_max, ma_max)
+        self.fit = True
 
     def grid_search(self, ar_max=5, ma_max=5):
         min_order = (0, 0)
-        min_likelihood = np.inf
+        min_llf = np.inf
 
         for ar in range(ar_max):
             for ma in range(ma_max):
@@ -134,5 +140,10 @@ class armax:
 
                 results = model.fit()
                 llf = results.llf
-
                 self._armax_models[order] = results
+
+                if llf <= min_llf:
+                    min_llf = llf
+                    min_order = order
+
+        self.best_model_order = min_order
