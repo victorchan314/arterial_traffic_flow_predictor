@@ -125,25 +125,32 @@ class armax:
 
         return aggregated_data
 
-    def fit(self, ar_max=5, ma_max=5):
-        self.grid_search(ar_max, ma_max)
+    def fit(self, ar_max=3, ma_max=3, verbose=False):
+        self.grid_search(ar_max, ma_max, verbose=verbose)
         self.fit = True
+        print("Done fitting ARMA model; best order: {}".format(self.get_best_model_order()))
 
-    def grid_search(self, ar_max=5, ma_max=5):
+    def grid_search(self, ar_max=3, ma_max=3, verbose=False):
         min_order = (0, 0)
-        min_llf = np.inf
+        min_aic = np.inf
 
         for ar in range(1, ar_max + 1):
             for ma in range(1, ma_max + 1):
                 order = (ar, ma)
                 model = arima_model.ARMA(self.get_endog(), order, self.get_exog())
 
+                if verbose:
+                    print("Fitting order {}".format(order))
+
                 results = model.fit()
-                llf = results.llf
+                aic = results.aic
                 self._armax_models[order] = results
 
-                if llf <= min_llf:
-                    min_llf = llf
+                if verbose:
+                    print("Order {} aic: {}".format(order, aic))
+
+                if aic < min_aic:
+                    min_aic = aic
                     min_order = order
 
         self.best_model_order = min_order
