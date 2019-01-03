@@ -82,7 +82,7 @@ class armax:
 
     def get_best_model(self):
         if self.has_fit:
-            return self._armax_models[self.get_best_model_order]
+            return self._armax_models[self.get_best_model_order()]
         else:
             return None
 
