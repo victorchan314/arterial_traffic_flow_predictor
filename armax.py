@@ -157,10 +157,12 @@ class armax:
             print("Fitting order {}".format(order))
 
         if not cross_validate:
-            model = arima_model.ARMA(self.get_endog(), order, self.get_exog())
+            model = arima_model.ARMA(self.get_endog(), order, self.get_exog(), dates=self.get_dates())
             results = model.fit(method=method)
             results.sse = np.sum(np.power(results.resid, 2))
         else:
+            if self.dates is None:
+                raise ValueError("Cannot cross validate time series without dates")
             results, sse = self._cross_validate_model(folds=folds, method=method, verbose=verbose)
             results.sse = sse
 
@@ -181,7 +183,8 @@ class armax:
         if verbose:
             print("Cross validating monthly results in {} folds".format(len(folds)))
 
-        model = arima_model.ARMA(self.get_endog(), order, self.get_exog())
-        model.fit(method=method)
+        for fold in folds:
+            model = arima_model.ARMA(endog[fold[0]:fold[1]], order, exog, dates=dates[fold[0]:fold[1]])
+            model.fit(method=method)
 
         return results, sse
