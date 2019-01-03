@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from statsmodels.tsa import arima_model
 
 class armax:
@@ -25,10 +26,11 @@ class armax:
     PREPROCESSING_AGGREGATING = "aggregating"
     PREPROCESSING_METHODS = [PREPROCESSING_SMOOTHING, PREPROCESSING_AGGREGATING]
 
-    def __init__(self, endog, exog=None, dates=None):
+    def __init__(self, endog, exog=None, dates=None, frequency=None):
         self.endog = endog
         self.exog = exog
         self.dates = dates
+        self.frequency = pd.Timedelta(frequency)
         self.preprocessed = False
         self.preprocessing_method = None
         self.preprocessed_endog = None
@@ -54,6 +56,9 @@ class armax:
     
     def get_dates(self):
         return self.dates
+    
+    def get_frequency(self):
+        return self.frequency
     
     def get_preprocessing_method(self):
         return self.preprocessing_method
@@ -180,6 +185,7 @@ class armax:
         endog = self.get_endog()
         exog = self.get_exog()
         dates = self.get_dates()
+        frequency = self.get_frequency()
         folds = self._split_by_date(dates, period="month")
         total_sse = 0
 
@@ -190,11 +196,22 @@ class armax:
             training_fold = folds[i] + 1
             validation_fold = folds[i+1]
 
-            model = arima_model.ARMA(endog[0:training_fold], order, exog=exog, dates=dates[0:training_fold])
+            training_endog = endog[0:training_fold]
+            training_dates = dates[0:training_fold]
+            validation_endog = endog[training_fold:validation_fold+1]
+            validation_dates = dates[training_fold:validation_fold+1]
+
+            model = arima_model.ARMA(training_endog, order, exog=exog, dates=training_dates, freq=frequency)
             result = model.fit(method=method)
 
-            predictions = result.predict(start=dates[training_fold], end=dates[validation_fold], exog=exog, dynamic=True)
-            prediction_residuals = endog[training_fold:validation_fold+1] - predictions
+            start_date = dates[training_fold]
+            end_date = dates[validation_fold]
+
+            predictions = result.predict(start=start_date, end=end_date, exog=exog, dynamic=True)
+            prediction_dates = start_date + np.arange(len(predictions))*frequency
+            filtered_predictions = predictions[np.isin(prediction_dates, validation_dates)]
+
+            prediction_residuals = validation_endog - filtered_predictions
             sse = np.sum(np.power(prediction_residuals, 2))
 
             if verbose:
