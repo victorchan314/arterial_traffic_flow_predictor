@@ -163,21 +163,22 @@ class armax:
         else:
             if self.dates is None:
                 raise ValueError("Cannot cross validate time series without dates")
-            results, sse = self._cross_validate_model(folds=folds, method=method, verbose=verbose)
+            results, sse = self._cross_validate_model(order, folds=folds, method=method, verbose=verbose)
             results.sse = sse
 
         return results
 
-    def _cross_validate_model(self, folds="monthly", method="css-mle", verbose=False):
+    def _cross_validate_model(self, order, folds="monthly", method="css-mle", verbose=False):
         if folds == "monthly":
-            results, sse = self._cross_validate_model_monthly(method=method, verbose=verbose)
+            results, sse = self._cross_validate_model_monthly(order, method=method, verbose=verbose)
 
             return results, sse
         else:
             raise ValueError("Invalid cross validation folding method argument: {}".format(folds))
 
-    def _cross_validate_model_monthly(self, method="css-mle", verbose=False):
+    def _cross_validate_model_monthly(self, order, method="css-mle", verbose=False):
         endog = self.get_endog()
+        exog = self.get_exog()
         dates = self.get_dates()
         folds = self._split_by_date(dates, period="month")
         total_sse = 0
@@ -187,13 +188,13 @@ class armax:
 
         for i in range(len(folds) - 1):
             training_fold = folds[i] + 1
-            validation_fold = folds[i+1] + 1
+            validation_fold = folds[i+1]
 
             model = arima_model.ARMA(endog[0:training_fold], order, exog=exog, dates=dates[0:training_fold])
             result = model.fit(method=method)
 
             predictions = result.predict(start=dates[training_fold], end=dates[validation_fold], exog=exog, dynamic=True)
-            prediction_residuals = endog[training_fold:validation_fold] - predictions[training_fold:validation_fold]
+            prediction_residuals = endog[training_fold:validation_fold+1] - predictions
             sse = np.sum(np.power(prediction_residuals, 2))
 
             if verbose:
@@ -211,5 +212,7 @@ class armax:
 
         if period == "month":
             folds = [i for i in range(len(dates)) if i == len(dates) - 1 or dates[i].month != dates[i+1].month]
+
+            return folds
         else:
             raise ValueError("Internal period argument error with _split_by_date")
