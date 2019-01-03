@@ -12,7 +12,10 @@ import visualization
 #DETECTOR_DATA_TABLE = "detector_data_processed_2017_1"
 DETECTOR_DATA_TABLE = "detector_data_processed_2017"
 DETECTOR_ID = "608219"
-DETECTOR_DATA_QUERY = "SELECT * FROM {} WHERE DetectorID = {} ORDER BY Year, Month, Day, Time"
+DETECTOR_DATA_QUERY = "SELECT DetectorID, Year, Month, Day, Time, Volume, Occupancy\
+                        FROM {} AS DD NATURAL JOIN detector_health AS DH\
+                        WHERE DetectorID = {} AND Health = 1\
+                        ORDER BY Year, Month, Day, Time;"
 
 
 def query_detector_data(cursor, table, detector_id, graph=False):
@@ -43,11 +46,11 @@ def query_detector_data(cursor, table, detector_id, graph=False):
     #speed = np.array(speed)
 
     if graph:
-        visualization.plot_data_over_time(time, volume, title="Detector {} Volume January 2017".format(detector_id), ylabel="Volume (vph)", figsize=(12, 5))
-        visualization.plot_data_over_time(time, occupancy, title="Detector {} Occupancy January 2017".format(detector_id), ylabel="Occupancy (s)", figsize=(12, 5))
-        #visualization.plot_data_over_time(time, speed, title="Detector {} Speed January 2017".format(detector_id), ylabel="Speed", figsize=(12, 5))
-        visualization.plot_data_over_time(time, occupancy_percentage, title="Detector {} Occupancy January 2017".format(detector_id), ylabel="Occupancy (%)", figsize=(12, 5))
-        visualization.plot_fundamental_diagram(volume, occupancy_percentage, title="Detector {} Flow-Occupancy Diagram January 2017".format(detector_id))
+        visualization.plot_data_over_time(time, volume, title="Detector {} Volume 2017".format(detector_id), ylabel="Volume (vph)", figsize=(12, 5))
+        visualization.plot_data_over_time(time, occupancy, title="Detector {} Occupancy 2017".format(detector_id), ylabel="Occupancy (s)", figsize=(12, 5))
+        #visualization.plot_data_over_time(time, speed, title="Detector {} Speed 2017".format(detector_id), ylabel="Speed", figsize=(12, 5))
+        visualization.plot_data_over_time(time, occupancy_percentage, title="Detector {} Occupancy 2017".format(detector_id), ylabel="Occupancy (%)", figsize=(12, 5))
+        visualization.plot_fundamental_diagram(volume, occupancy_percentage, title="Detector {} Flow-Occupancy Diagram 2017".format(detector_id))
 
     return time, volume, occupancy
 
