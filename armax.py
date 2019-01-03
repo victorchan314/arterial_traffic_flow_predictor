@@ -221,6 +221,9 @@ class armax:
 
         average_sse = total_sse / len(folds)
 
+        model = arima_model.ARMA(endog, order, exog=exog, dates=dates, freq=frequency)
+        results = model.fit(method=method)
+
         return results, average_sse
 
     def _split_by_date(self, dates, period="month"):
