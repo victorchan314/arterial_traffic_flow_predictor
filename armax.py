@@ -178,13 +178,38 @@ class armax:
 
     def _cross_validate_model_monthly(self, method="css-mle", verbose=False):
         endog = self.get_endog()
-        folds = []
+        dates = self.get_dates()
+        folds = self._split_by_date(dates, period="month")
+        total_sse = 0
 
         if verbose:
-            print("Cross validating monthly results in {} folds".format(len(folds)))
+            print("Cross validating monthly results in {} folds".format(len(folds) - 1))
 
-        for fold in folds:
-            model = arima_model.ARMA(endog[fold[0]:fold[1]], order, exog, dates=dates[fold[0]:fold[1]])
-            model.fit(method=method)
+        for i in range(len(folds) - 1):
+            training_fold = folds[i] + 1
+            validation_fold = folds[i+1] + 1
 
-        return results, sse
+            model = arima_model.ARMA(endog[0:training_fold], order, exog=exog, dates=dates[0:training_fold])
+            result = model.fit(method=method)
+
+            predictions = result.predict(start=dates[training_fold], end=dates[validation_fold], exog=exog, dynamic=True)
+            prediction_residuals = endog[training_fold:validation_fold] - predictions[training_fold:validation_fold]
+            sse = np.sum(np.power(prediction_residuals, 2))
+
+            if verbose:
+                print("Cross validated month {}; sse {}".format(i, sse))
+
+            total_sse += sse
+
+        average_sse = total_sse / len(folds)
+
+        return results, average_sse
+
+    def _split_by_date(self, dates, period="month"):
+        """Returns a list of indices of all the datetime objects in dates
+        that are the last datetime for that period."""
+
+        if period == "month":
+            pass
+        else:
+            raise ValueError("Internal period argument error with _split_by_date")
