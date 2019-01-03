@@ -27,10 +27,10 @@ class armax:
     PREPROCESSING_METHODS = [PREPROCESSING_SMOOTHING, PREPROCESSING_AGGREGATING]
 
     def __init__(self, endog, exog=None, dates=None, frequency=None):
-        self.endog = endog
+        self.endog = pd.DataFrame(endog, index=dates)
         self.exog = exog
         self.dates = dates
-        self.frequency = pd.Timedelta(frequency)
+        self.frequency = frequency
         self.preprocessed = False
         self.preprocessing_method = None
         self.preprocessed_endog = None
@@ -211,11 +211,11 @@ class armax:
             prediction_dates = start_date + np.arange(len(predictions))*frequency
             filtered_predictions = predictions[np.isin(prediction_dates, validation_dates)]
 
-            prediction_residuals = validation_endog - filtered_predictions
-            sse = np.sum(np.power(prediction_residuals, 2))
+            prediction_residuals = validation_endog.subtract(filtered_predictions, axis=0)
+            sse = np.sum(np.power(prediction_residuals, 2))[0]
 
             if verbose:
-                print("Cross validated month {}; sse {}".format(i, sse))
+                print("Trained month {}; sse {}".format(i, sse))
 
             total_sse += sse
 
