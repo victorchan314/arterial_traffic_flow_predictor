@@ -176,10 +176,13 @@ class armax:
     def _cross_validate_model(self, order, folds="monthly", method="css-mle", verbose=False):
         if folds == "monthly":
             results, sse = self._cross_validate_model_monthly(order, method=method, verbose=verbose)
-
-            return results, sse
         else:
             raise ValueError("Invalid cross validation folding method argument: {}".format(folds))
+
+        if verbose:
+            print("Finished cross validation with order {}; average sse {}".format(order, sse))
+
+        return results, sse
 
     def _cross_validate_model_monthly(self, order, method="css-mle", verbose=False):
         endog = self.get_endog()
