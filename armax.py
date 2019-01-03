@@ -212,7 +212,7 @@ class armax:
             filtered_predictions = predictions[np.isin(prediction_dates, validation_dates)]
 
             prediction_residuals = validation_endog.subtract(filtered_predictions, axis=0)
-            sse = np.sum(np.power(prediction_residuals, 2))[0]
+            sse = prediction_residuals.applymap(lambda x: x**2).sum()[0]
 
             if verbose:
                 print("Trained month {}; sse {}".format(i, sse))
