@@ -132,7 +132,7 @@ class armax:
 
     def fit(self, ar_max=3, ma_max=3, method="css-mle", cross_validate=False, folds="monthly", verbose=False):
         self.grid_search(ar_max, ma_max, method=method, cross_validate=cross_validate, folds=folds, verbose=verbose)
-        self.fit = True
+        self.has_fit = True
         print("Done fitting ARMA model; best order: {}".format(self.get_best_model_order()))
 
     def grid_search(self, ar_max=3, ma_max=3, method="css-mle", cross_validate=False, folds="monthly", verbose=False):
