@@ -125,22 +125,22 @@ class armax:
 
         return aggregated_data
 
-    def fit(self, ar_max=3, ma_max=3, method="css-mle", cross_validate=True, verbose=False):
-        self.grid_search(ar_max, ma_max, method=method, cross_validate=cross_validate, verbose=verbose)
+    def fit(self, ar_max=3, ma_max=3, method="css-mle", cross_validate=False, folds="monthly", verbose=False):
+        self.grid_search(ar_max, ma_max, method=method, cross_validate=cross_validate, folds=folds, verbose=verbose)
         self.fit = True
         print("Done fitting ARMA model; best order: {}".format(self.get_best_model_order()))
 
-    def grid_search(self, ar_max=3, ma_max=3, method="css-mle", cross_validate=True, verbose=False):
+    def grid_search(self, ar_max=3, ma_max=3, method="css-mle", cross_validate=False, folds="monthly", verbose=False):
         min_order = (0, 0)
         min_sse = np.inf
 
         for ar in range(1, ar_max + 1):
             for ma in range(1, ma_max + 1):
                 order = (ar, ma)
-                results = self.fit_to_order(order, method=method, cross_validate=cross_validate, verbose=verbose)
+                results = self.fit_to_order(order, method=method, cross_validate=cross_validate, folds=folds, verbose=verbose)
+                sse = results.sse
 
                 aic = results.aic
-                sse = np.sum(np.power(results.resid, 2))
                 self._armax_models[order] = results
 
                 if verbose:
@@ -152,15 +152,36 @@ class armax:
 
         self.best_model_order = min_order
 
-    def fit_to_order(self, order, method="css-mle", cross_validate=True, verbose=False):
-        model = arima_model.ARMA(self.get_endog(), order, self.get_exog())
-
+    def fit_to_order(self, order, method="css-mle", cross_validate=False, folds="monthly", verbose=False):
         if verbose:
             print("Fitting order {}".format(order))
 
         if not cross_validate:
+            model = arima_model.ARMA(self.get_endog(), order, self.get_exog())
             results = model.fit(method=method)
+            results.sse = np.sum(np.power(results.resid, 2))
         else:
-            results = self._cross_validate_model()
+            results, sse = self._cross_validate_model(folds=folds, method=method, verbose=verbose)
+            results.sse = sse
 
         return results
+
+    def _cross_validate_model(self, folds="monthly", method="css-mle", verbose=False):
+        if folds == "monthly":
+            results, sse = self._cross_validate_model_monthly(method=method, verbose=verbose)
+
+            return results, sse
+        else:
+            raise ValueError("Invalid cross validation folding method argument: {}".format(folds))
+
+    def _cross_validate_model_monthly(self, method="css-mle", verbose=False):
+        endog = self.get_endog()
+        folds = []
+
+        if verbose:
+            print("Cross validating monthly results in {} folds".format(len(folds)))
+
+        model = arima_model.ARMA(self.get_endog(), order, self.get_exog())
+        model.fit(method=method)
+
+        return results, sse
