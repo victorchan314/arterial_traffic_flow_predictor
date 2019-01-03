@@ -125,32 +125,42 @@ class armax:
 
         return aggregated_data
 
-    def fit(self, ar_max=3, ma_max=3, verbose=False):
-        self.grid_search(ar_max, ma_max, verbose=verbose)
+    def fit(self, ar_max=3, ma_max=3, method="css-mle", cross_validate=True, verbose=False):
+        self.grid_search(ar_max, ma_max, method=method, cross_validate=cross_validate, verbose=verbose)
         self.fit = True
         print("Done fitting ARMA model; best order: {}".format(self.get_best_model_order()))
 
-    def grid_search(self, ar_max=3, ma_max=3, verbose=False):
+    def grid_search(self, ar_max=3, ma_max=3, method="css-mle", cross_validate=True, verbose=False):
         min_order = (0, 0)
-        min_aic = np.inf
+        min_sse = np.inf
 
         for ar in range(1, ar_max + 1):
             for ma in range(1, ma_max + 1):
                 order = (ar, ma)
-                model = arima_model.ARMA(self.get_endog(), order, self.get_exog())
+                results = self.fit_to_order(order, method=method, cross_validate=cross_validate, verbose=verbose)
 
-                if verbose:
-                    print("Fitting order {}".format(order))
-
-                results = model.fit()
                 aic = results.aic
+                sse = np.sum(np.power(results.resid, 2))
                 self._armax_models[order] = results
 
                 if verbose:
-                    print("Order {} aic: {}".format(order, aic))
+                    print("Order {} sse: {}".format(order, sse))
 
-                if aic < min_aic:
-                    min_aic = aic
+                if sse < min_sse:
+                    min_sse = sse
                     min_order = order
 
         self.best_model_order = min_order
+
+    def fit_to_order(self, order, method="css-mle", cross_validate=True, verbose=False):
+        model = arima_model.ARMA(self.get_endog(), order, self.get_exog())
+
+        if verbose:
+            print("Fitting order {}".format(order))
+
+        if not cross_validate:
+            results = model.fit(method=method)
+        else:
+            results = self._cross_validate_model()
+
+        return results
