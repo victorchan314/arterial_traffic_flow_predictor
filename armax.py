@@ -210,6 +210,6 @@ class armax:
         that are the last datetime for that period."""
 
         if period == "month":
-            pass
+            folds = [i for i in range(len(dates)) if i == len(dates) - 1 or dates[i].month != dates[i+1].month]
         else:
             raise ValueError("Internal period argument error with _split_by_date")
