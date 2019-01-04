@@ -188,7 +188,7 @@ class armax:
         if not cross_validate:
             model = arima_model.ARMA(self.get_endog(), order, self.get_exog(), dates=self.get_dates(), freq=self.get_frequency())
             results = model.fit(method=method)
-            results.sse = np.sum(np.power(results.resid, 2))
+            results.sse = np.sum(np.power(results.resid, 2)) / results.resid.shape[0]
         else:
             if self.get_dates() is None:
                 raise ValueError("Cannot cross validate time series without dates")
