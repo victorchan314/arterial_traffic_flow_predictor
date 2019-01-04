@@ -3,3 +3,4 @@ config.py
 .ipynb_checkpoints
 *.swp
 *.swo
+data
