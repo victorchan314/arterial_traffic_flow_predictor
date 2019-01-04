@@ -12,10 +12,10 @@ import visualization
 #DETECTOR_DATA_TABLE = "detector_data_processed_2017_1"
 DETECTOR_DATA_TABLE = "detector_data_processed_2017"
 DETECTOR_ID = "608219"
-DETECTOR_DATA_QUERY = "SELECT DetectorID, Year, Month, Day, Time, Volume, Occupancy\
-                        FROM {} AS DD NATURAL JOIN detector_health AS DH\
-                        WHERE DetectorID = {} AND Health = 1\
-                        ORDER BY Year, Month, Day, Time;"
+DETECTOR_DATA_QUERY = "SELECT DetectorID, Year, Month, Day, Time, Volume, Occupancy \
+FROM {} AS DD NATURAL JOIN detector_health AS DH \
+WHERE DetectorID = {} AND Health = 1 \
+ORDER BY Year, Month, Day, Time;"
 
 
 def query_detector_data(cursor, table, detector_id, graph=False):
