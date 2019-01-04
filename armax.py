@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pandas as pd
 from statsmodels.tsa import arima_model
@@ -27,7 +29,7 @@ class armax:
     PREPROCESSING_METHODS = [PREPROCESSING_SMOOTHING, PREPROCESSING_AGGREGATING]
 
     def __init__(self, endog, exog=None, dates=None, frequency=None):
-        self.endog = pd.DataFrame(endog, index=dates)
+        self.endog = endog
         self.exog = exog
         self.dates = dates
         self.frequency = frequency
@@ -41,6 +43,12 @@ class armax:
         self.best_model = None
         self.best_model_order = (-1, -1)
         self.best_model_exog = False
+
+        if dates is None:
+            try:
+                self.dates = endog.index.to_pydatetime()
+            except Exception:
+                warnings.warn("Date not passed, but endog is not pandas dataframe. This can cause trouble in the future.", UserWarning, stacklevel=2)
 
     def get_endog(self):
         if self.preprocessed:
@@ -166,7 +174,7 @@ class armax:
             results = model.fit(method=method)
             results.sse = np.sum(np.power(results.resid, 2))
         else:
-            if self.dates is None:
+            if self.get_dates() is None:
                 raise ValueError("Cannot cross validate time series without dates")
             results, sse = self._cross_validate_model(order, folds=folds, method=method, verbose=verbose)
             results.sse = sse
