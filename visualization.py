@@ -1,14 +1,18 @@
 import matplotlib.pyplot as plt
 
 
-def plot_data_over_time(time, y, title=None, xlabel="Date", ylabel=None, figsize=None):
+def plot_data_over_time(x, y=None, title=None, xlabel="Date", ylabel=None, figsize=None):
     fig, ax = plt.subplots(figsize=figsize)
     plt.title(title)
     fig.autofmt_xdate()
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
 
-    plt.plot(time, y)
+    if y is None:
+        plt.plot(x)
+    else:
+        plt.plot(x, y)
+
     plt.show()
 
 def plot_fundamental_diagram(flow, occupancy, title=None):
