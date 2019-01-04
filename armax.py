@@ -27,6 +27,7 @@ class armax:
     PREPROCESSING_SMOOTHING = "smoothing"
     PREPROCESSING_AGGREGATING = "aggregating"
     PREPROCESSING_METHODS = [PREPROCESSING_SMOOTHING, PREPROCESSING_AGGREGATING]
+    ERROR_TYPES = ["sse", "aic", "bic"]
 
     def __init__(self, endog, exog=None, dates=None, frequency=None):
         self.endog = endog
@@ -39,6 +40,8 @@ class armax:
         self.preprocessed_exog = None
         self.w = 1
         self._armax_models = {}
+        self._ar_max = -1
+        self._ma_max = -1
         self.has_fit = False
         self.best_model = None
         self.best_model_order = (-1, -1)
@@ -106,6 +109,17 @@ class armax:
     def get_best_model_exog(self):
         return self.best_model_exog
 
+    def get_model_error_distribution(error="sse"):
+        if error not in self.ERROR_TYPES:
+            raise ValueError("Error type {} not valid: must be one of {}".format(error, self.ERROR_TYPES))
+
+        grid = np.zeros((self._ar_max, self._ma_max))
+
+        for order, model in self._armax_models:
+            grid[order[0] - 1, order[1] - 1] = model[error]
+
+        return grid
+
     def preprocess(self, method, w):
         if method == self.PREPROCESSING_SMOOTHING:
             self.w = w
@@ -141,6 +155,8 @@ class armax:
     def fit(self, ar_max=3, ma_max=3, method="css-mle", cross_validate=False, folds="monthly", verbose=False):
         self.grid_search(ar_max, ma_max, method=method, cross_validate=cross_validate, folds=folds, verbose=verbose)
         self.has_fit = True
+        self._ar_max = ar_max
+        self._ma_max = ma_max
         print("Done fitting ARMA model; best order: {}".format(self.get_best_model_order()))
 
     def grid_search(self, ar_max=3, ma_max=3, method="css-mle", cross_validate=False, folds="monthly", verbose=False):
