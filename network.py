@@ -13,8 +13,13 @@ DATA_FREQUENCY = dt.timedelta(minutes=5)
 
 DETECTOR_DATA_TABLE = "detector_data_processed_2017"
 INTERSECTION = [608217, 608219, 608103, 608102, 608106, 608114, 608108]
-QUERY = "WITH intersection AS (SELECT Year, Month, Day, Time, Volume AS Flow, DetectorID FROM {} WHERE DetectorID = 608217 OR DetectorID = 608219 OR DetectorID = 608103 OR DetectorID = 608102 OR DetectorID = 608106 OR DetectorID = 608114 OR DetectorID = 608108) SELECT Year, Month, Day, Time, {} FROM intersection GROUP BY Year, Month, Day, Time ORDER BY Year, Month, Day, Time;".format(DETECTOR_DATA_TABLE, ", ".join(["SUM(IF (DetectorId = {}, Flow, NULL))".format(detector_id) for detector_id in INTERSECTION]))
-
+QUERY = "WITH intersection AS (SELECT Year, Month, Day, Time, Volume AS Flow, DetectorID \
+        FROM {} NATURAL JOIN detector_health WHERE ({}) AND Health = 1) \
+        SELECT Year, Month, Day, Time, {} FROM intersection \
+        GROUP BY Year, Month, Day, Time \
+        ORDER BY Year, Month, Day, Time;".format(DETECTOR_DATA_TABLE,
+                " OR ".join(["DetectorId = {}".format(detector_id) for detector_id in INTERSECTION]),
+                ", ".join(["SUM(IF (DetectorId = {}, Flow, NULL))".format(detector_id) for detector_id in INTERSECTION]))
 
 
 def query_detector_data(cursor):
