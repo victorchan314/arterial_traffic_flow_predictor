@@ -29,7 +29,7 @@ class armax:
     PREPROCESSING_METHODS = [PREPROCESSING_SMOOTHING, PREPROCESSING_AGGREGATING]
     ERROR_TYPES = ["sse", "aic", "bic"]
 
-    def __init__(self, endog, exog=None, dates=None, frequency=None):
+    def __init__(self, endog, exog=None, dates=None, frequency=None, testing_data=None):
         self.endog = endog
         self.exog = exog
         self.dates = dates
@@ -186,7 +186,7 @@ class armax:
             print("Fitting order {}".format(order))
 
         if not cross_validate:
-            model = arima_model.ARMA(self.get_endog(), order, self.get_exog(), dates=self.get_dates())
+            model = arima_model.ARMA(self.get_endog(), order, self.get_exog(), dates=self.get_dates(), freq=self.get_frequency())
             results = model.fit(method=method)
             results.sse = np.sum(np.power(results.resid, 2))
         else:
