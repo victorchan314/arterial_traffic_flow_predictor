@@ -4,24 +4,8 @@ import matplotlib.pyplot as plt
 import datetime as dt
 from statsmodels.tsa.seasonal import seasonal_decompose
 
+import utils
 import visualization
-
-def mape(data, test, replace_zeros=True, epsilon=0.01):
-    if replace_zeros:
-        data = data.replace(0, epsilon)
-
-    ape = np.sum(np.abs(data - test) / data)
-    return 1 / data.shape[0] * ape
-
-def mase(data, test, seasonal_freq):
-    s = seasonal_freq
-    T = data.shape[0]
-
-    if s >= T:
-        raise ValueError("Seasonality {} is larger than data size".format(s, T))
-
-    mae = 1 / (T - s) * np.sum(np.abs(data[s:].values - data[:T-s].values))
-    return 1 / T * np.sum(np.abs(data - test)) / mae
 
 def reindex_with_nans(data, data_freq):
     time = data.index.to_pydatetime()
@@ -113,9 +97,9 @@ def test_imputation(data, data_freq, seasonal_freq, imputation_function, params=
     errors = []
 
     if error == "mape":
-        error_function = mape
+        error_function = utils.mape
     elif error == "mase":
-        error_function = mase
+        error_function = utils.mase
     else:
         raise ValueError("Invalid error type")
 
