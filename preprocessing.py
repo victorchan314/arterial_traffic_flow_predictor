@@ -52,3 +52,23 @@ def impute_seasonal_data(data, data_freq, seasonal_freq, graph=False, lower_boun
         visualization.plot_data_over_time(data_imputed, title="{} Imputed".format(title), ylabel=ylabel, figsize=figsize)
 
     return data_imputed
+
+def get_longest_continuous_stretch_of_data(data, freq):
+    data = data.dropna()
+    index = data.index
+
+    break_indices = np.argwhere((index[1:] - index[:-1]) != freq).flatten() + 1
+    stretch_starts = np.concatenate(([0], break_indices, [data.shape[0]]))
+    stretch_lengths = stretch_starts[1:] - stretch_starts[:-1]
+    longest_stretch_start_index = stretch_lengths.argmax()
+
+    stretch_start = stretch_starts[longest_stretch_start_index]
+    stretch_end = stretch_starts[longest_stretch_start_index + 1]
+
+    indices = (stretch_start, stretch_end)
+    stretch = data.iloc[stretch_start:stretch_end]
+
+    return indices, stretch
+
+def test_seasonal_decomposition_imputation(data):
+    pass
