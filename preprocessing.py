@@ -70,5 +70,15 @@ def get_longest_continuous_stretch_of_data(data, freq):
 
     return indices, stretch
 
+def get_longest_missing_data_stretch_length(data, freq):
+    data = data.dropna()
+    index = data.index
+
+    break_ends = np.argwhere((index[1:] - index[:-1]) != freq).flatten()
+    break_lengths = index[break_ends + 1] - index[break_ends]
+    longest_break_length = max(break_lengths) - freq
+
+    return longest_break_length
+
 def test_seasonal_decomposition_imputation(data):
     pass
