@@ -10,7 +10,7 @@ def mape(data, test, replace_zeros=True, epsilon=0.01):
     ape = np.sum(np.abs(data - test) / data)
     return 1 / data.shape[0] * ape
 
-def mase(data, test, seasonal_freq):
+def mase(data, test, seasonal_freq=1):
     s = seasonal_freq
     T = data.shape[0]
 
