@@ -6,6 +6,10 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 
 import visualization
 
+def mape(data, test):
+    ape = np.sum(np.abs(data - test) / data)
+    return 1 / data.shape[0] * ape
+
 def reindex_with_nans(data, data_freq):
     time = data.index.to_pydatetime()
     full_time = min(time) + np.arange((max(time) - min(time)) / data_freq + 1)*data_freq
@@ -14,7 +18,7 @@ def reindex_with_nans(data, data_freq):
 
     return data_unimputed
 
-def impute_seasonal_data(data, data_freq, seasonal_freq, graph=False, lower_bound=None, upper_bound=None, title=None, ylabel=None, figsize=None):
+def seasonal_decomposition_linear_interpolation_imputation(data, data_freq, seasonal_freq, graph=False, lower_bound=None, upper_bound=None, title=None, ylabel=None, figsize=None):
     """Imputes seasonal time series data for a dataframe with a Datetime
     Index with missing values."""
 
@@ -75,10 +79,41 @@ def get_longest_missing_data_stretch_length(data, freq):
     index = data.index
 
     break_ends = np.argwhere((index[1:] - index[:-1]) != freq).flatten()
+
+    if len(break_ends) == 0:
+        return dt.timedelta()
+
     break_lengths = index[break_ends + 1] - index[break_ends]
     longest_break_length = max(break_lengths) - freq
 
     return longest_break_length
 
-def test_seasonal_decomposition_imputation(data):
-    pass
+def test_imputation(data, data_freq, seasonal_freq, imputation_function, params={}, k=10, error="mape"):
+    stretch_length = int(get_longest_missing_data_stretch_length(data, data_freq) / data_freq)
+
+    if stretch_length == 0:
+        return data
+
+    _, data = get_longest_continuous_stretch_of_data(data, data_freq)
+
+    test_indices = np.random.randint(1, data.shape[0] - stretch_length - 1, k)
+    errors = []
+
+    if error == "mape":
+        error_function = mape
+    else:
+        raise ValueError("Invalid error type")
+
+    for i in range(k):
+        test_index = test_indices[i]
+        test_stretch = data.iloc[test_index:test_index + stretch_length]
+        current_data = data.drop(data.index[test_index:test_index + stretch_length])
+
+        imputed_data = imputation_function(current_data, data_freq, seasonal_freq, **params)
+        imputed_stretch = imputed_data.iloc[test_index:test_index + stretch_length]
+        current_error = error_function(test_stretch, imputed_stretch)
+        errors.append(current_error)
+
+    average_error = sum(errors) / len(errors)
+
+    return average_error, errors
