@@ -15,7 +15,7 @@ def reindex_with_nans(data, data_freq):
 
     return data_unimputed
 
-def seasonal_decomposition_linear_interpolation_imputation(data, data_freq, seasonal_freq, graph=False, lower_bound=None, upper_bound=None, title=None, ylabel=None, figsize=None):
+def seasonal_decomposition_linear_interpolation_imputation(data, data_freq, seasonal_freq, lower_bound=None, upper_bound=None, graph=False, title=None, ylabel=None, figsize=None):
     """Imputes seasonal time series data for a dataframe with a Datetime
     Index with missing values."""
 
@@ -85,7 +85,7 @@ def get_longest_missing_data_stretch_length(data, freq):
 
     return longest_break_length
 
-def test_imputation(data, data_freq, seasonal_freq, imputation_function, imputation_params={}, k=10, error="mape", error_params={}, graph=False, figsize=None, graph_zoom=False):
+def test_imputation(data, data_freq, seasonal_freq, imputation_function, imputation_params={}, k=10, error="mape", error_params={}, graph=False, figsize=None, graph_zoom=False, graph_naive_forecast=False):
     stretch_length = int(get_longest_missing_data_stretch_length(data, data_freq) / data_freq)
 
     if stretch_length == 0:
@@ -116,12 +116,12 @@ def test_imputation(data, data_freq, seasonal_freq, imputation_function, imputat
 
         imputed_data = imputation_function(current_data, data_freq, seasonal_freq, **imputation_params)
         imputed_stretch = imputed_data.iloc[test_index:test_index + stretch_length]
-        current_error = error_function(test_stretch, imputed_stretch, **error_params)
+        current_error = error_function(test_stretch, imputed_stretch, **error_params)[0]
         errors.append(current_error)
 
         if graph:
             plt.figure(figsize=figsize)
-            plt.title("{}: {}".format(error, current_error[0]))
+            plt.title("{}: {}".format(error, current_error))
 
             if graph_zoom:
                 plt.plot(data[max(0, test_index - stretch_length):min(data.shape[0], test_index + stretch_length + stretch_length)])
@@ -129,6 +129,10 @@ def test_imputation(data, data_freq, seasonal_freq, imputation_function, imputat
                 plt.plot(data)
 
             plt.plot(imputed_stretch)
+
+            if graph_naive_forecast:
+                plt.plot(imputed_stretch.index, data[test_index - seasonal_freq:test_index + stretch_length - seasonal_freq].values)
+
             plt.show()
 
     average_error = sum(errors) / len(errors)
