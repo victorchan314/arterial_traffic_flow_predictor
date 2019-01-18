@@ -85,7 +85,7 @@ def get_longest_missing_data_stretch_length(data, freq):
 
     return longest_break_length
 
-def test_imputation(data, data_freq, seasonal_freq, imputation_function, params={}, k=10, error="mape", error_params={}):
+def test_imputation(data, data_freq, seasonal_freq, imputation_function, imputation_params={}, k=10, error="mape", error_params={}, graph=False, figsize=None, graph_zoom=False):
     stretch_length = int(get_longest_missing_data_stretch_length(data, data_freq) / data_freq)
 
     if stretch_length == 0:
@@ -108,10 +108,22 @@ def test_imputation(data, data_freq, seasonal_freq, imputation_function, params=
         test_stretch = data.iloc[test_index:test_index + stretch_length]
         current_data = data.drop(data.index[test_index:test_index + stretch_length])
 
-        imputed_data = imputation_function(current_data, data_freq, seasonal_freq, **params)
+        imputed_data = imputation_function(current_data, data_freq, seasonal_freq, **imputation_params)
         imputed_stretch = imputed_data.iloc[test_index:test_index + stretch_length]
         current_error = error_function(test_stretch, imputed_stretch, **error_params)
         errors.append(current_error)
+
+        if graph:
+            plt.figure(figsize=figsize)
+            plt.title("{}: {}".format(error, current_error[0]))
+
+            if graph_zoom:
+                plt.plot(data[max(0, test_index - stretch_length):min(data.shape[0], test_index + stretch_length + stretch_length)])
+            else:
+                plt.plot(data)
+
+            plt.plot(imputed_stretch)
+            plt.show()
 
     average_error = sum(errors) / len(errors)
 
