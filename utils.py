@@ -19,4 +19,3 @@ def mase(data, test, seasonal_freq):
 
     mae = 1 / (T - s) * np.sum(np.abs(data[s:].values - data[:T-s].values))
     return 1 / T * np.sum(np.abs(data - test)) / mae
-

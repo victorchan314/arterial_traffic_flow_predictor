@@ -90,10 +90,16 @@ def test_imputation(data, data_freq, seasonal_freq, imputation_function, imputat
 
     if stretch_length == 0:
         return data
+    elif data.shape[0] < 2 * stretch_length + 2:
+        # 2 * stretch_length + N; Not sure if N = 1 or N = 2
+        # Using N = 2 means no false positives
+        # If N = 1, then should be np.random.randint(stretch_length - 1...
+        # Not a huge deal if data.shape[0] >> stretch_length
+        raise ValueError("Missing data longer than half of the existing continuous data to test")
 
     _, data = get_longest_continuous_stretch_of_data(data, data_freq)
 
-    test_indices = np.random.randint(1, data.shape[0] - stretch_length - 1, k)
+    test_indices = np.random.randint(stretch_length, data.shape[0] - stretch_length - 1, k)
     errors = []
 
     if error == "mape":
