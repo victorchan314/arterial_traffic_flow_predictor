@@ -6,9 +6,22 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 
 import visualization
 
-def mape(data, test):
+def mape(data, test, replace_zeros=True, epsilon=0.01):
+    if replace_zeros:
+        data = data.replace(0, epsilon)
+
     ape = np.sum(np.abs(data - test) / data)
     return 1 / data.shape[0] * ape
+
+def mase(data, test, seasonal_freq):
+    s = seasonal_freq
+    T = data.shape[0]
+
+    if s >= T:
+        raise ValueError("Seasonality {} is larger than data size".format(s, T))
+
+    mae = 1 / (T - s) * np.sum(np.abs(data[s:].values - data[:T-s].values))
+    return 1 / T * np.sum(np.abs(data - test)) / mae
 
 def reindex_with_nans(data, data_freq):
     time = data.index.to_pydatetime()
@@ -88,7 +101,7 @@ def get_longest_missing_data_stretch_length(data, freq):
 
     return longest_break_length
 
-def test_imputation(data, data_freq, seasonal_freq, imputation_function, params={}, k=10, error="mape"):
+def test_imputation(data, data_freq, seasonal_freq, imputation_function, params={}, k=10, error="mape", error_params={}):
     stretch_length = int(get_longest_missing_data_stretch_length(data, data_freq) / data_freq)
 
     if stretch_length == 0:
@@ -101,6 +114,8 @@ def test_imputation(data, data_freq, seasonal_freq, imputation_function, params=
 
     if error == "mape":
         error_function = mape
+    elif error == "mase":
+        error_function = mase
     else:
         raise ValueError("Invalid error type")
 
@@ -111,7 +126,7 @@ def test_imputation(data, data_freq, seasonal_freq, imputation_function, params=
 
         imputed_data = imputation_function(current_data, data_freq, seasonal_freq, **params)
         imputed_stretch = imputed_data.iloc[test_index:test_index + stretch_length]
-        current_error = error_function(test_stretch, imputed_stretch)
+        current_error = error_function(test_stretch, imputed_stretch, **error_params)
         errors.append(current_error)
 
     average_error = sum(errors) / len(errors)
