@@ -120,18 +120,20 @@ def test_imputation(data, data_freq, seasonal_freq, imputation_function, imputat
         errors.append(current_error)
 
         if graph:
-            plt.figure(figsize=figsize)
+            fig, ax = plt.subplots(figsize=figsize)
             plt.title("{}: {}".format(error, current_error))
 
             if graph_zoom:
-                plt.plot(data[max(0, test_index - stretch_length):min(data.shape[0], test_index + stretch_length + stretch_length)])
+                plt.plot(data[max(0, test_index - stretch_length):min(data.shape[0], test_index + stretch_length + stretch_length)], label="Original")
             else:
-                plt.plot(data)
+                plt.plot(data, label="Original")
 
-            plt.plot(imputed_stretch)
+            plt.plot(imputed_stretch, label="Imputed")
 
             if graph_naive_forecast:
-                plt.plot(imputed_stretch.index, data[test_index - seasonal_freq:test_index + stretch_length - seasonal_freq].values)
+                plt.plot(imputed_stretch.index, data[test_index - seasonal_freq:test_index + stretch_length - seasonal_freq].values, label="Naive Forecast")
+
+            ax.legend()
 
             plt.show()
 
