@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 from statsmodels.tsa import arima_model
 
+import utils
+
 class armax:
     """
     A wrapper class for statsmodels.tsa.arima_model.ARMA.
@@ -263,3 +265,44 @@ class armax:
             return folds
         else:
             raise ValueError("Internal period argument error with _split_by_date")
+
+    def random_selection_train(self, order, train_length, pred_length, seasonal_freq, use_exog=False, k=10, method="css-mle", alpha=.05):
+        train_index_length = train_length // self.frequency
+        pred_index_length = pred_length // self.frequency
+
+        if use_exog:
+            training_data = self.endog.iloc[train_index_length:-pred_index_length]
+        else:
+            training_data = self.endog.iloc[:-pred_index_length]
+
+        starts = np.random.randint(0, training_data.shape[0], k)
+        start_dates = training_data.index[starts]
+        errors = []
+
+        for start in starts:
+            data_slice = training_data.iloc[start:start + train_index_length]
+            data_slice_values = data_slice.values
+            test_data = training_data.iloc[start + train_index_length:start + train_index_length + pred_index_length]
+            
+            if use_exog:
+                exog = training_data.iloc[start_date - train_length:start_date]
+            else:
+                exog = None
+
+            model = arima_model.ARMA(data_slice, order, exog=exog, freq=self.frequency)
+            results = model.fit(method=method)
+
+            predict_start = start + train_index_length
+            predict_end = start + train_index_length + pred_index_length
+
+            if use_exog:
+                predict_exog = training_data.iloc[start:start + pred_index_length]
+            else:
+                predict_exog = None
+
+            predictions = results.forecast(pred_index_length, exog=predict_exog, alpha=alpha)[0]
+
+            current_error = utils.mape(predictions, test_data.values)
+            errors.append(current_error)
+
+        return np.mean(errors), np.array(errors)
