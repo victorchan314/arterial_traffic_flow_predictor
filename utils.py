@@ -5,7 +5,7 @@ import datetime as dt
 
 def mape(data, test, replace_zeros=True, epsilon=0.01):
     if replace_zeros:
-        data = data.replace(0, epsilon)
+        data[data == 0] = epsilon
 
     ape = np.sum(np.abs(data - test) / data)
     return 1 / data.shape[0] * ape
