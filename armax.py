@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 import pandas as pd
 from statsmodels.tsa import arima_model
+import matplotlib.pyplot as plt
 
 import utils
 
@@ -266,7 +267,7 @@ class armax:
         else:
             raise ValueError("Internal period argument error with _split_by_date")
 
-    def random_selection_train(self, order, train_length, pred_length, seasonal_freq, use_exog=False, k=10, method="css-mle", alpha=.05):
+    def random_selection_train(self, order, train_length, pred_length, seasonal_freq, use_exog=False, k=10, method="css-mle", alpha=.05, title=None, ylabel=None):
         train_index_length = train_length // self.frequency
         pred_index_length = pred_length // self.frequency
 
@@ -300,7 +301,17 @@ class armax:
             else:
                 predict_exog = None
 
-            predictions = results.forecast(pred_index_length, exog=predict_exog, alpha=alpha)[0]
+            predictions, stderr, conf_int = results.forecast(pred_index_length, exog=predict_exog, alpha=alpha)
+
+            fig, ax = plt.subplots(figsize=(20, 3))
+            plt.title(title)
+            fig.autofmt_xdate()
+            plt.xlabel("Date")
+            plt.ylabel(ylabel)
+
+            plt.plot(data_slice.iloc[-50*pred_index_length:])
+            plt.plot(training_data.index[predict_start:predict_end], predictions)
+            plt.show()
 
             current_error = utils.mape(predictions, test_data.values)
             errors.append(current_error)
