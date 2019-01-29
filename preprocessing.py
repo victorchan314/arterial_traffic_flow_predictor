@@ -15,14 +15,14 @@ def reindex_with_nans(data, data_freq):
 
     return data_unimputed
 
-def seasonal_decomposition_linear_interpolation_imputation(data, data_freq, seasonal_freq, lower_bound=None, upper_bound=None, graph=False, title=None, ylabel=None, figsize=None):
+def seasonal_decomposition_interpolation_imputation(data, data_freq, seasonal_freq, method="linear", lower_bound=None, upper_bound=None, graph=False, title=None, ylabel=None, figsize=None):
     """Imputes seasonal time series data for a dataframe with a Datetime
     Index with missing values."""
 
     data_unimputed = reindex_with_nans(data, data_freq)
 
-    # Perform linear interpolation so we can use seasonal_decompose
-    data = data_unimputed.interpolate()
+    # Perform interpolation so we can use seasonal_decompose
+    data = data_unimputed.interpolate(method=method)
 
     sd = seasonal_decompose(data, freq=seasonal_freq)
 
