@@ -85,8 +85,12 @@ def get_longest_missing_data_stretch_length(data, freq):
 
     return longest_break_length
 
-def test_imputation(data, data_freq, seasonal_freq, imputation_function, imputation_params={}, k=10, error="mape", error_params={}, graph=False, figsize=None, graph_zoom=False, graph_naive_forecast=False):
-    stretch_length = int(get_longest_missing_data_stretch_length(data, data_freq) / data_freq)
+def test_imputation(data, data_freq, seasonal_freq, imputation_function, imputation_length=None, imputation_params={}, k=10, error="mape", error_params={}, graph=False, figsize=None, graph_zoom=False, graph_naive_forecast=False):
+    if imputation_length is None:
+        stretch_length = int(get_longest_missing_data_stretch_length(data, data_freq) / data_freq)
+    else:
+        # 1 week is the default stretch length
+        stretch_length = int(imputation_length / data_freq)
 
     if stretch_length == 0:
         return data
