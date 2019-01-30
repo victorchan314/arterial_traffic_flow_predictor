@@ -15,6 +15,23 @@ def reindex_with_nans(data, data_freq):
 
     return data_unimputed
 
+def fillna_with_means(data, data_freq):
+    data = reindex_with_nans(data, data_freq)
+    na_mask = data.isnull().values.flatten()
+
+    break_starts = np.argwhere(na_mask[1:] & ~na_mask[:-1]).flatten() + 1
+    break_ends = np.argwhere(~na_mask[1:] & na_mask[:-1]).flatten() + 1
+
+    if len(break_starts) == 0:
+        return data
+
+    means = (data.iloc[break_ends].values - data.iloc[break_starts - 1].values).flatten() / 2
+
+    for i in range(len(break_starts)):
+        data.iloc[break_starts[i]:break_ends[i] + 1] = means[i]
+
+    return data
+
 def seasonal_decomposition_interpolation_imputation(data, data_freq, seasonal_freq, method="linear", lower_bound=None, upper_bound=None, graph=False, title=None, ylabel=None, figsize=None):
     """Imputes seasonal time series data for a dataframe with a Datetime
     Index with missing values."""
@@ -22,7 +39,10 @@ def seasonal_decomposition_interpolation_imputation(data, data_freq, seasonal_fr
     data_unimputed = reindex_with_nans(data, data_freq)
 
     # Perform interpolation so we can use seasonal_decompose
-    data = data_unimputed.interpolate(method=method)
+    if method == "mean":
+        data = fillna_with_mean(data_unimputed, data_freq)
+    else:
+        data = data_unimputed.interpolate(method=method)
 
     sd = seasonal_decompose(data, freq=seasonal_freq)
 
