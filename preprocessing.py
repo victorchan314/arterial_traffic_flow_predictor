@@ -85,7 +85,7 @@ def get_longest_missing_data_stretch_length(data, freq):
 
     return longest_break_length
 
-def test_imputation(data, data_freq, seasonal_freq, imputation_function, imputation_length=None, imputation_params={}, k=10, error="mape", error_params={}, graph=False, figsize=None, graph_zoom=False, graph_naive_forecast=False):
+def test_imputation_random(data, data_freq, seasonal_freq, imputation_function, imputation_length=None, imputation_params={}, k=10, error="mape", error_params={}, graph=False, figsize=None, graph_zoom=False, graph_naive_forecast=False):
     if imputation_length is None:
         stretch_length = int(get_longest_missing_data_stretch_length(data, data_freq) / data_freq)
     else:
@@ -112,6 +112,69 @@ def test_imputation(data, data_freq, seasonal_freq, imputation_function, imputat
         error_function = utils.mase
     else:
         raise ValueError("Invalid error type")
+
+    for i in range(k):
+        test_index = test_indices[i]
+        test_stretch = data.iloc[test_index:test_index + stretch_length]
+        current_data = data.drop(data.index[test_index:test_index + stretch_length])
+
+        imputed_data = imputation_function(current_data, data_freq, seasonal_freq, **imputation_params)
+        imputed_stretch = imputed_data.iloc[test_index:test_index + stretch_length]
+        current_error = error_function(test_stretch, imputed_stretch, **error_params)[0]
+        errors.append(current_error)
+
+        if graph:
+            fig, ax = plt.subplots(figsize=figsize)
+            plt.title("{}: {}".format(error, current_error))
+
+            if graph_zoom:
+                plt.plot(data[max(0, test_index - stretch_length):min(data.shape[0], test_index + stretch_length + stretch_length)], label="Original")
+            else:
+                plt.plot(data, label="Original")
+
+            plt.plot(imputed_stretch, label="Imputed")
+
+            if graph_naive_forecast:
+                plt.plot(imputed_stretch.index, data[test_index - seasonal_freq:test_index + stretch_length - seasonal_freq].values, label="Naive Forecast")
+
+            ax.legend()
+
+            plt.show()
+
+    average_error = sum(errors) / len(errors)
+
+    return average_error, errors
+
+def test_imputation_sequential(data, data_freq, seasonal_freq, imputation_function, imputation_length=None, imputation_params={}, k=10, error="mape", error_params={}, graph=False, figsize=None, graph_zoom=False, graph_naive_forecast=False):
+    if imputation_length is None:
+        stretch_length = int(get_longest_missing_data_stretch_length(data, data_freq) / data_freq)
+    else:
+        # 1 week is the default stretch length
+        stretch_length = int(imputation_length / data_freq)
+
+    if stretch_length == 0:
+        return data
+    elif data.shape[0] < 2 * stretch_length + 2:
+        # 2 * stretch_length + N; Not sure if N = 1 or N = 2
+        # Using N = 2 means no false positives
+        # If N = 1, then should be np.random.randint(stretch_length - 1...
+        # Not a huge deal if data.shape[0] >> stretch_length
+        raise ValueError("Missing data longer than half of the existing continuous data to test")
+
+    _, data = get_longest_continuous_stretch_of_data(data, data_freq)
+
+    test_indices = np.random.randint(stretch_length, data.shape[0] - stretch_length - 1, k)
+    errors = []
+
+    # if error == "mape":
+    #     error_function = utils.mape
+    # elif error == "mase":
+    #     error_function = utils.mase
+    # else:
+    #     raise ValueError("Invalid error type")
+
+    # Default error function is MAPE
+    error_function = utils.mape
 
     for i in range(k):
         test_index = test_indices[i]
