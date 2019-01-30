@@ -27,8 +27,11 @@ def fillna_with_means(data, data_freq):
 
     means = (data.iloc[break_ends].values + data.iloc[break_starts - 1].values).flatten() / 2
 
-    for i in range(len(break_starts)):
-        data.iloc[break_starts[i]:break_ends[i] + 1] = means[i]
+def fillna_with_data_mean(data, data_freq):
+    data = reindex_with_nans(data, data_freq)
+    mean = data.mean()
+
+    data[data.isnull()] = mean.iloc[0]
 
     return data
 
@@ -41,6 +44,8 @@ def seasonal_decomposition_interpolation_imputation(data, data_freq, seasonal_fr
     # Perform interpolation so we can use seasonal_decompose
     if method == "mean":
         data = fillna_with_means(data_unimputed, data_freq)
+    elif method == "data_mean":
+        data = fillna_with_data_mean(data_unimputed, data_freq)
     else:
         data = data_unimputed.interpolate(method=method)
 
