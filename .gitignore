@@ -5,4 +5,3 @@ config.py
 *.swo
 data
 .gitignore
-.gitattributes
