@@ -6,3 +6,4 @@ config.py
 data
 .gitignore
 .gitattributes
+.DS_Store
