@@ -1,4 +1,5 @@
 import mysql.connector
+from config import config
 
 def connect_to_database(user, password, host, database):
     try:
@@ -15,10 +16,35 @@ def connect_to_database(user, password, host, database):
     else:
         return cnx
 
-def query(cursor, query):
+def query(cursor, query_string):
     try:
-        cursor.execute(query)
+        cursor.execute(query_string)
         return cursor
     except mysql.connector.Error as err:
-        print("Error: failed query: {}".format(query))
+        cursor.close()
+        print("Error: failed query: {}".format(query_string))
+        cursor.close()
         return None
+
+def execute_query(query_string):
+    cnx = connect_to_database(**config)
+
+    if cnx == None:
+        sys.exit()
+
+    cursor = cnx.cursor()
+    cursor = query(cursor, query_string)
+    
+    if cursor == None:
+        cnx.close()
+        sys.exit()
+
+    results = []
+
+    for row in cursor:
+        results.append([x for x in row])
+
+    cursor.close()
+    cnx.close()
+
+    return results
