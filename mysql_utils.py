@@ -21,8 +21,7 @@ def query(cursor, query_string):
         cursor.execute(query_string)
         return cursor
     except mysql.connector.Error as err:
-        cursor.close()
-        print("Error: failed query: {}".format(query_string))
+        print("Error: {}\n on failed query: {}".format(err, query_string))
         cursor.close()
         return None
 
@@ -37,7 +36,7 @@ def execute_query(query_string):
     
     if cursor == None:
         cnx.close()
-        sys.exit()
+        return None
 
     results = []
 
