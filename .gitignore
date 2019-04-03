@@ -5,3 +5,6 @@ config.py
 *.swo
 data
 .gitignore
+.gitattributes
+.DS_Store
+DCRNN
