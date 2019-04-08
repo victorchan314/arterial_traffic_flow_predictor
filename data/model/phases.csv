@@ -1,0 +1,15 @@
+Phase,From,To
+1,EB,NB
+2,EB,NB
+2,EB,EB
+2,EB,SB
+3,SB,EB
+4,SB,SB
+4,SB,WB
+5,WB,SB
+6,WB,WB
+6,WB,NB
+6,WB,SB
+7,NB,WB
+8,NB,NB
+8,NB,EB

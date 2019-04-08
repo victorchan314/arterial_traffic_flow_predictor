@@ -3,7 +3,7 @@ config.py
 .ipynb_checkpoints
 *.swp
 *.swo
-data
+data/sensor_data
 .gitignore
 .gitattributes
 .DS_Store
