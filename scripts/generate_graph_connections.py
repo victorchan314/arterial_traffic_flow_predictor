@@ -47,11 +47,14 @@ if __name__ == "__main__":
 
     phase_timings = pd.DataFrame(phase_timings, columns=["IntersectionID", "EndDate", "EndTime", "PhaseTimings"])
     detector_inventory = pd.DataFrame(detector_inventory, columns=["Sensor", "IntersectionID", "SensorID", "Direction", "Movement"])
+    detector_inventory.set_index("Sensor", inplace=True)
     edges = pd.read_csv("data/model/edges.csv", header=None)
     phases = pd.read_csv("data/model/phases.csv")
 
     if generate_sensors_advanced:
-        detector_inventory["Sensor"].to_csv("data/model/sensors_advanced.csv", index=False)
+        with open("data/model/sensors_advanced.txt", "w") as f:
+            f.write(",".join(detector_inventory.index.values))
+            f.close()
     
     #print(phase_timings.head())
     print(detector_inventory)
