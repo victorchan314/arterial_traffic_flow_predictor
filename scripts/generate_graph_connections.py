@@ -37,19 +37,22 @@ AND (IntersectionID = 5083 OR IntersectionID = 6081 OR IntersectionID = 6082);"
 
 
 generate_sensors_advanced = False
+generate_adjacency_matrix = False
 
 if __name__ == "__main__":
-    phase_timings = mysql_utils.execute_query(PHASE_TIMINGS_QUERY)
+    #phase_timings = mysql_utils.execute_query(PHASE_TIMINGS_QUERY)
     detector_inventory = mysql_utils.execute_query(DETECTOR_INVENTORY_QUERY)
     
-    if phase_timings == None or detector_inventory == None:
+    #if phase_timings == None or detector_inventory == None:
+    if detector_inventory == None:
         sys.exit()
 
-    phase_timings = pd.DataFrame(phase_timings, columns=["IntersectionID", "EndDate", "EndTime", "PhaseTimings"])
+    #phase_timings = pd.DataFrame(phase_timings, columns=["IntersectionID", "EndDate", "EndTime", "PhaseTimings"])
     detector_inventory = pd.DataFrame(detector_inventory, columns=["Sensor", "IntersectionID", "SensorID", "Direction", "Movement"])
     detector_inventory.set_index("Sensor", inplace=True)
     edges = pd.read_csv("data/model/edges.csv", header=None)
     phases = pd.read_csv("data/model/phases.csv")
+    phase_plans = pd.read_csv("data/model/phase_plans.csv")
 
     if generate_sensors_advanced:
         with open("data/model/sensors_advanced.txt", "w") as f:
@@ -57,4 +60,13 @@ if __name__ == "__main__":
             f.close()
     
     #print(phase_timings.head())
-    print(detector_inventory)
+    print(detector_inventory.head())
+    print(phases.head())
+    print(phase_plans)
+
+    edges["Distance"] = 1
+
+    print(edges.head())
+
+    if generate_adjacency_matrix:
+        edges.to_csv("data/model/sensors_adjacency_matrix.csv")
