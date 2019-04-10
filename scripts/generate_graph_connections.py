@@ -59,14 +59,33 @@ if __name__ == "__main__":
             f.write(",".join(detector_inventory.index.values))
             f.close()
     
-    #print(phase_timings.head())
-    print(detector_inventory.head())
-    print(phases.head())
-    print(phase_plans)
+    edges["Distance"] = 0
 
-    edges["Distance"] = 1
+    for i in range(edges.shape[0]):
+        sensor_from = edges.iloc[i, 0]
+        sensor_to = edges.iloc[i, 1]
+        intersection_from, direction_from = detector_inventory.loc[str(sensor_from), ["IntersectionID", "Direction"]]
+        intersection_to, direction_to = detector_inventory.loc[str(sensor_to), ["IntersectionID", "Direction"]]
 
-    print(edges.head())
+        if intersection_from == intersection_to:
+            edges.iloc[i, 2] = 1
+
+        edge_phases = phases[(phases["From"] == direction_from) & (phases["To"] == direction_to)]["Phase"].values
+        edge_plans = phase_plans[phase_plans["Intersection"] == intersection_from]
+        edge_greentime_fraction = 0.0
+
+        for j in range(edge_plans.shape[0]):
+            plan = edge_plans.iloc[j]
+            plan_cycle = plan["Cycle"]
+            green_times = plan["PhasePlannedGreenTime"].split(";")
+            
+            for k in range(edge_phases.shape[0]):
+                phase_weight = (plan["EndTime"] - plan["StartTime"]) / 24
+                phase_greentime_fraction = int(green_times[k]) / plan_cycle
+
+                edge_greentime_fraction += phase_weight * phase_greentime_fraction
+            
+        edges.loc[edges.index[i], "Distance"] = edge_greentime_fraction
 
     if generate_adjacency_matrix:
         edges.to_csv("data/model/sensors_adjacency_matrix.csv")
