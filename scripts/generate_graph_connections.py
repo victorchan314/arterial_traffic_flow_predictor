@@ -37,7 +37,7 @@ AND (IntersectionID = 5083 OR IntersectionID = 6081 OR IntersectionID = 6082);"
 
 
 generate_sensors_advanced = False
-generate_adjacency_matrix = False
+generate_adjacency_matrix = True
 
 if __name__ == "__main__":
     #phase_timings = mysql_utils.execute_query(PHASE_TIMINGS_QUERY)
@@ -88,4 +88,4 @@ if __name__ == "__main__":
         edges.loc[edges.index[i], "Distance"] = edge_greentime_fraction
 
     if generate_adjacency_matrix:
-        edges.to_csv("data/model/sensors_adjacency_matrix.csv")
+        edges.to_csv("data/model/sensor_distances.csv", header=False, index=False)
