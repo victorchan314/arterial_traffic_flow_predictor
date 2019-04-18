@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 
@@ -9,56 +10,44 @@ import pandas as pd
 
 import mysql_utils
 
-PHASE_TIMINGS_QUERY =\
-"SELECT IntersectionID, EndDate, EndTime, PhaseActualGreenTime FROM phase_time_2017 \
-WHERE (IntersectionID = 5083 OR IntersectionID = 6081 OR IntersectionID = 6082)\
-    AND (EndDate > (\
-        SELECT MAX(t.EndDate) FROM (SELECT MIN(EndDate) AS EndDate FROM phase_time_2017\
-        WHERE IntersectionID = 5083 OR IntersectionID = 6081 OR IntersectionID = 6082\
-        GROUP BY IntersectionID) AS t)\
-    OR EndTime > (\
-        SELECT MAX(t2.EndTime) FROM (SELECT Min(EndTime) AS EndTime FROM phase_time_2017\
-        WHERE IntersectionID = 5083 OR IntersectionID = 6081 OR IntersectionID = 6082\
-        AND EndDate IN\
-            (SELECT MAX(t.EndDate) FROM\
-            (SELECT MIN(EndDate) AS EndDate FROM phase_time_2017\
-            WHERE IntersectionID = 5083 OR IntersectionID = 6081 OR IntersectionID = 6082\
-            GROUP BY IntersectionID) AS t)\
-        GROUP BY IntersectionID) AS t2\
-    )\
-);"
+
+
+INTERSECTIONS = [5083, 5082, 6081, 5091, 5072]
+
+#PHASE_TIMINGS_QUERY =\
+#"SELECT IntersectionID, EndDate, EndTime, PhaseActualGreenTime FROM phase_time_2017 \
+#WHERE (IntersectionID = 5083 OR IntersectionID = 6081 OR IntersectionID = 6082)\
+#    AND (EndDate > (\
+#        SELECT MAX(t.EndDate) FROM (SELECT MIN(EndDate) AS EndDate FROM phase_time_2017\
+#        WHERE IntersectionID = 5083 OR IntersectionID = 6081 OR IntersectionID = 6082\
+#        GROUP BY IntersectionID) AS t)\
+#    OR EndTime > (\
+#        SELECT MAX(t2.EndTime) FROM (SELECT Min(EndTime) AS EndTime FROM phase_time_2017\
+#        WHERE IntersectionID = 5083 OR IntersectionID = 6081 OR IntersectionID = 6082\
+#        AND EndDate IN\
+#            (SELECT MAX(t.EndDate) FROM\
+#            (SELECT MIN(EndDate) AS EndDate FROM phase_time_2017\
+#            WHERE IntersectionID = 5083 OR IntersectionID = 6081 OR IntersectionID = 6082\
+#            GROUP BY IntersectionID) AS t)\
+#        GROUP BY IntersectionID) AS t2\
+#    )\
+#);"
 
 DETECTOR_INVENTORY_QUERY =\
 "SELECT IF(SensorID < 10, CONCAT(IntersectionID, 0, SensorID), CONCAT(IntersectionID, SensorID)) AS Sensor,\
 IntersectionID, SensorID, Direction, Movement FROM detector_inventory \
-WHERE Movement = 'Advanced' \
-AND (IntersectionID = 5083 OR IntersectionID = 6081 OR IntersectionID = 6082);"
+WHERE Movement LIKE 'Advanced%' \
+AND ({});"\
+.format(" OR ".join(["IntersectionID = {}".format(intersection) for intersection in INTERSECTIONS]))
 
 
 
-generate_sensors_advanced = False
-generate_adjacency_matrix = True
+def generate_sensors_advanced_file(detector_inventory, path):
+    with open(path, "w") as f:
+        f.write(",".join(detector_inventory.index.values))
+        f.close()
 
-if __name__ == "__main__":
-    #phase_timings = mysql_utils.execute_query(PHASE_TIMINGS_QUERY)
-    detector_inventory = mysql_utils.execute_query(DETECTOR_INVENTORY_QUERY)
-    
-    #if phase_timings == None or detector_inventory == None:
-    if detector_inventory == None:
-        sys.exit()
-
-    #phase_timings = pd.DataFrame(phase_timings, columns=["IntersectionID", "EndDate", "EndTime", "PhaseTimings"])
-    detector_inventory = pd.DataFrame(detector_inventory, columns=["Sensor", "IntersectionID", "SensorID", "Direction", "Movement"])
-    detector_inventory.set_index("Sensor", inplace=True)
-    edges = pd.read_csv("data/model/edges.csv", header=None)
-    phases = pd.read_csv("data/model/phases.csv")
-    phase_plans = pd.read_csv("data/model/phase_plans.csv")
-
-    if generate_sensors_advanced:
-        with open("data/model/sensors_advanced.txt", "w") as f:
-            f.write(",".join(detector_inventory.index.values))
-            f.close()
-    
+def generate_adjacency_matrix(detector_inventory, edges, phases, phase_plans):
     edges["Distance"] = 0
 
     for i in range(edges.shape[0]):
@@ -87,5 +76,40 @@ if __name__ == "__main__":
             
         edges.loc[edges.index[i], "Distance"] = edge_greentime_fraction
 
-    if generate_adjacency_matrix:
-        edges.to_csv("data/model/sensor_distances.csv", header=False, index=False)
+    return edges
+
+
+
+SENSORS_ADVANCED = False
+ADJACENCY_MATRIX = True
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--intersection", help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
+    parser.add_argument("--adjacency_matrix_path", help="output file for adjacency matrix, if one is generated")
+    args = parser.parse_args()
+
+    intersection = "_{}".format(args.intersection) if args.intersection else ""
+    adjacency_matrix_path = args.adjacency_matrix_path or "data/model/sensor_distances{}.csv".format(intersection)
+
+    #phase_timings = mysql_utils.execute_query(PHASE_TIMINGS_QUERY)
+    detector_inventory = mysql_utils.execute_query(DETECTOR_INVENTORY_QUERY)
+    
+    #if phase_timings == None or detector_inventory == None:
+    if detector_inventory == None:
+        sys.exit()
+
+    #phase_timings = pd.DataFrame(phase_timings, columns=["IntersectionID", "EndDate", "EndTime", "PhaseTimings"])
+    detector_inventory = pd.DataFrame(detector_inventory, columns=["Sensor", "IntersectionID", "SensorID", "Direction", "Movement"])
+    detector_inventory.set_index("Sensor", inplace=True)
+    edges = pd.read_csv("data/model/edges{}.csv".format(intersection), header=None)
+    phases = pd.read_csv("data/model/phases.csv")
+    phase_plans = pd.read_csv("data/model/phase_plans{}.csv".format(intersection))
+
+    if SENSORS_ADVANCED:
+        generate_sensors_advanced_file(detector_inventory, "data/model/sensors_advanced{}.txt".format(intersection))
+    
+    edges = generate_adjacency_matrix(detector_inventory, edges, phases, phase_plans)
+
+    if ADJACENCY_MATRIX:
+        edges.to_csv(adjacency_matrix_path, header=False, index=False)
