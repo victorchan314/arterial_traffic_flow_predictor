@@ -47,7 +47,7 @@ def generate_sensors_advanced_file(detector_inventory, path):
         f.write(",".join(detector_inventory.index.values))
         f.close()
 
-def generate_adjacency_matrix(detector_inventory, edges, phases, phase_plans):
+def generate_adjacency_matrix(detector_inventory, edges, phases, phase_plans, plan_name):
     edges["Distance"] = 0
 
     for i in range(edges.shape[0]):
@@ -61,6 +61,8 @@ def generate_adjacency_matrix(detector_inventory, edges, phases, phase_plans):
 
         edge_phases = phases[(phases["From"] == direction_from) & (phases["To"] == direction_to)]["Phase"].values
         edge_plans = phase_plans[phase_plans["Intersection"] == intersection_from]
+        edge_plans = edge_plans if not plan_name else edge_plans[edge_plans["PlanName"] == plan_name]
+        total_hours = 0.0
         edge_greentime_fraction = 0.0
 
         for j in range(edge_plans.shape[0]):
@@ -68,12 +70,14 @@ def generate_adjacency_matrix(detector_inventory, edges, phases, phase_plans):
             plan_cycle = plan["Cycle"]
             green_times = plan["PhasePlannedGreenTime"].split(";")
             
-            for k in range(edge_phases.shape[0]):
-                phase_weight = (plan["EndTime"] - plan["StartTime"]) / 24
-                phase_greentime_fraction = int(green_times[k]) / plan_cycle
+            for k in edge_phases:
+                phase_weight = plan["EndTime"] - plan["StartTime"]
+                phase_greentime_fraction = int(green_times[k-1]) / plan_cycle
+                total_hours += phase_weight
 
                 edge_greentime_fraction += phase_weight * phase_greentime_fraction
-            
+
+        edge_greentime_fraction = edge_greentime_fraction / total_hours if total_hours > 0 else 0
         edges.loc[edges.index[i], "Distance"] = edge_greentime_fraction
 
     return edges
@@ -87,10 +91,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--intersection", help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
     parser.add_argument("--adjacency_matrix_path", help="output file for adjacency matrix, if one is generated")
+    parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3")
     args = parser.parse_args()
 
     intersection = "_{}".format(args.intersection) if args.intersection else ""
     adjacency_matrix_path = args.adjacency_matrix_path or "data/model/sensor_distances{}.csv".format(intersection)
+    plan_name = args.plan_name
 
     #phase_timings = mysql_utils.execute_query(PHASE_TIMINGS_QUERY)
     detector_inventory = mysql_utils.execute_query(DETECTOR_INVENTORY_QUERY)
@@ -109,7 +115,7 @@ if __name__ == "__main__":
     if SENSORS_ADVANCED:
         generate_sensors_advanced_file(detector_inventory, "data/model/sensors_advanced{}.txt".format(intersection))
     
-    edges = generate_adjacency_matrix(detector_inventory, edges, phases, phase_plans)
+    edges = generate_adjacency_matrix(detector_inventory, edges, phases, phase_plans, plan_name)
 
     if ADJACENCY_MATRIX:
         edges.to_csv(adjacency_matrix_path, header=False, index=False)
