@@ -13,8 +13,9 @@ import mysql_utils
 
 
 
-DETECTOR_LIST_PATH = "data/model/sensors_advanced_5083.txt"
-DETECTOR_DATA_QUERY = "SELECT DetectorID, Year, Month, Day, Time / 86400, Volume AS Flow FROM detector_data_processed_2017 WHERE {}"
+PHASE_PLANS_PATH = "data/model/phase_plans{}.csv"
+DETECTOR_LIST_PATH = "data/model/sensors_advanced{}.txt"
+DETECTOR_DATA_QUERY = "SELECT DetectorID, Year, Month, Day, Time / 86400, Volume AS Flow FROM detector_data_processed_2017 WHERE ({})"
 
 
 
@@ -23,12 +24,18 @@ def get_sensors_list(path):
         sensors = f.read()
         f.close()
 
-    sensors_list = sensors.split(",")
+    sensors_list = sensors[:-1].split(",")
 
     return sensors_list
 
-def get_detector_data(detector_list, limit=np.inf):
+def get_detector_data(detector_list, intersection="", plan=None, limit=np.inf):
     query = DETECTOR_DATA_QUERY.format(" OR ".join(["DetectorID = {}".format(d) for d in detector_list]))
+    if plan:
+        phase_plans = pd.read_csv(PHASE_PLANS_PATH.format(intersection))
+        relevant_phase_plans = phase_plans[phase_plans["PlanName"] == plan]
+        intervals = relevant_phase_plans.loc[:, ["StartTime", "EndTime"]].values * 3600
+        query += " AND ({})".format(" OR ".join(["(Time >= {} AND Time < {})".format(interval[0], interval[1]) for interval in intervals]))
+
     query_results = mysql_utils.execute_query(query)
     
     results = []
@@ -99,10 +106,10 @@ def main(args):
     output_path = args.output_dir or "data"
     plan_name = args.plan_name
 
-    detector_list = get_sensors_list(DETECTOR_LIST_PATH)
-    detector_data = get_detector_data(detector_list, limit=50)
+    detector_list = get_sensors_list(DETECTOR_LIST_PATH.format(intersection))
+    detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name, limit=50)
 
-    print(detector_data)
+    print(detector_data.iloc[-1])
 
     #generate_splits(args)
 
