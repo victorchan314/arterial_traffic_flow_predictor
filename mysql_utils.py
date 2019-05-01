@@ -38,12 +38,8 @@ def execute_query(query_string):
         cnx.close()
         return None
 
-    results = []
-
     for row in cursor:
-        results.append([x for x in row])
+        yield row
 
     cursor.close()
     cnx.close()
-
-    return results
