@@ -58,15 +58,23 @@ def get_detector_data(detector_list, intersection="", plan=None, limit=np.inf, d
 def clean_detector_data(detector_data):
     return detector_data
 
-def filter_detector_data_by_num_detectors(detector_data, num_detectors):
-    detector_data_filtered = detector_data.groupby(["Time"]).filter(lambda x: x.shape[0] == num_detectors)
+def filter_detector_data_by_num_detectors(detector_data, detector_list):
+    detector_list_sorted = sorted([int(x) for x in detector_list])
+    detector_data_filtered = detector_data.groupby(["Time"]).filter(lambda x: detector_list_sorted == sorted(list(x["DetectorID"])))
     timestamps = np.sort(detector_data_filtered["Time"].unique())
 
     return detector_data_filtered, timestamps
 
 def filter_timestamps(timestamps, stretch_length):
-    break_indices = np.argwhere(utils.compare_timedeltas("!=", timestamps[1:] - timestamps[:-1], DETECTOR_DATA_FREQUENCY)).flatten()
-    print(break_indices)
+    break_indices = np.argwhere(utils.compare_timedeltas("!=", timestamps[1:] - timestamps[:-1], DETECTOR_DATA_FREQUENCY)).flatten() + 1
+    stretch_starts = np.concatenate(([0], break_indices))
+    stretch_ends = np.concatenate((stretch_starts, [timestamps.shape[0]]))[1:]
+
+    long_enough_indices = np.argwhere(stretch_ends - stretch_starts > stretch_length).flatten()
+    #stretches 
+    print(long_enough_indices)
+    print(stretch_starts[long_enough_indices])
+    print(stretch_ends)
     print(1/0)
 
 def break_data_into_stretches(data, freq):
@@ -103,7 +111,7 @@ def process_detector_data(detector_data, detector_list, stretch_length):
     detector_data_clean = clean_detector_data(detector_data)
 
     # Keep only timestamps that have data for all len(detector_list) detectors
-    detector_data_filtered_by_num_detectors, timestamps = filter_detector_data_by_num_detectors(detector_data_clean, len(detector_list))
+    detector_data_filtered_by_num_detectors, timestamps = filter_detector_data_by_num_detectors(detector_data_clean, detector_list)
     # Get timestamps that have at least stretch_length 
     # Get 3D data array without offsets, filtered by timestamps within stretches
     detector_data_filtered = filter_timestamps(timestamps, stretch_length)
