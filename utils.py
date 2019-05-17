@@ -19,3 +19,19 @@ def mase(data, test, seasonal_freq=1):
 
     mae = 1 / (T - s) * np.sum(np.abs(data[s:].values - data[:T-s].values))
     return 1 / T * np.sum(np.abs(data - test)) / mae
+
+def compare_timedeltas(operation, timedelta1, timedelta2):
+    if operation == "==":
+        return pd.to_timedelta(timedelta1) == pd.to_timedelta(timedelta2)
+    elif operation == "!=":
+        return pd.to_timedelta(timedelta1) != pd.to_timedelta(timedelta2)
+    elif operation == ">":
+        return pd.to_timedelta(timedelta1) > pd.to_timedelta(timedelta2)
+    elif operation == "<":
+        return pd.to_timedelta(timedelta1) < pd.to_timedelta(timedelta2)
+    elif operation == ">=":
+        return pd.to_timedelta(timedelta1) >= pd.to_timedelta(timedelta2)
+    elif operation == "<=":
+        return pd.to_timedelta(timedelta1) <= pd.to_timedelta(timedelta2)
+    else:
+        raise Exception("Operation {} not recognized".format(operation))

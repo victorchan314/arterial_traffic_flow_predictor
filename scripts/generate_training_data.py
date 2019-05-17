@@ -10,6 +10,7 @@ import pandas as pd
 import datetime as dt
 
 import mysql_utils
+import utils
 
 
 
@@ -58,13 +59,14 @@ def clean_detector_data(detector_data):
     return detector_data
 
 def filter_detector_data_by_num_detectors(detector_data, num_detectors):
-    detector_data_filtered = detector_data.groupby(["Date", "Time"]).filter(lambda x: x.shape[0] == num_detectors)
-    timestamps = sorted(list(detector_data_filtered.groupby(["Date", "Time"]).groups.keys()))
+    detector_data_filtered = detector_data.groupby(["Time"]).filter(lambda x: x.shape[0] == num_detectors)
+    timestamps = np.sort(detector_data_filtered["Time"].unique())
 
     return detector_data_filtered, timestamps
 
 def filter_timestamps(timestamps, stretch_length):
-    print(timestamps)
+    break_indices = np.argwhere(utils.compare_timedeltas("!=", timestamps[1:] - timestamps[:-1], DETECTOR_DATA_FREQUENCY)).flatten()
+    print(break_indices)
     print(1/0)
 
 def break_data_into_stretches(data, freq):
@@ -102,8 +104,9 @@ def process_detector_data(detector_data, detector_list, stretch_length):
 
     # Keep only timestamps that have data for all len(detector_list) detectors
     detector_data_filtered_by_num_detectors, timestamps = filter_detector_data_by_num_detectors(detector_data_clean, len(detector_list))
+    # Get timestamps that have at least stretch_length 
+    # Get 3D data array without offsets, filtered by timestamps within stretches
     detector_data_filtered = filter_timestamps(timestamps, stretch_length)
-    # get timestamps
     print(len(detector_data_grouped.groups))
     detector_data_grouped = detector_data_grouped.filter(lambda group: group.shape[0] >= len(detector_list))
     print(len(detector_data_grouped))
@@ -179,8 +182,6 @@ def main(args):
 
     detector_list = get_sensors_list(DETECTOR_LIST_PATH.format(intersection))
     detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name, date_limit=dt.date(2017, 1, 9))
-    print(detector_data.head(10))
-    print(1/0)
     detector_data_processed = process_detector_data(detector_data, detector_list, x_offset + y_offset)
 
     #generate_splits(args)
