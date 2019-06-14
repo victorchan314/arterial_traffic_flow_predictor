@@ -16,8 +16,11 @@ import utils
 
 PHASE_PLANS_PATH = "data/model/phase_plans{}.csv"
 DETECTOR_LIST_PATH = "data/model/sensors_advanced{}.txt"
+
 DETECTOR_DATA_QUERY = "SELECT DetectorID, Year, Month, Day, Time, Volume AS Flow FROM detector_data_processed_2017 WHERE ({})"
 DETECTOR_DATA_FREQUENCY = dt.timedelta(minutes=5)
+
+DUMMY_DATA_TYPES = ["zeroes", "ones", "linear", "square"]
 
 
 
@@ -130,27 +133,19 @@ def process_detector_data(detector_data, detector_list, stretch_length, verbose=
 
         for i in range(start, end - stretch_length + 1):
             time_stretch = timestamps[i:i+stretch_length]
+            detector_datum = np.zeros((end - start - stretch_length + 1, *detector_datum_shape))
 
             for index, timestamp in enumerate(time_stretch):
-                detector_datum = np.zeros((len(timestamps) - stretch_length + 1, *detector_datum_shape))
                 detector_data_at_timestamp = detector_data_grouped_by_time.get_group(timestamp)
                 detector_data_array_at_timestamp = detector_data_at_timestamp.set_index("DetectorID").loc[detector_list].iloc[:, 2:].values
 
-                for x in range(index, -1, -1):
-                    y = index - x
+                for y in range(min(index, end - start - stretch_length), max(-1, index - stretch_length), -1):
+                    x = index - y
                     detector_datum[y, x, :, :] = np.array(detector_data_array_at_timestamp)
 
-                detector_data_array = np.vstack((detector_data_array, detector_datum))
+            detector_data_array = np.vstack((detector_data_array, detector_datum))
 
-    print(detector_data_array.shape)
-    print(1/0)
-
-    for key, group in detector_data_group:
-        if group.shape[0] < stretch_length:
-            pass
-
-    #print(detector_data_grouped.get_group(timestamps[0]))
-    print(detector_data_grouped.indices)
+    print(detector_data_array[:5, :, :, :])
     print(1/0)
 
     return detector_data_array
@@ -207,6 +202,9 @@ def generate_splits():
 
 
 def main(args):
+    if args.dummy and args.dummy in DUMMY_DATA_TYPES:
+        return
+
     intersection = "_{}".format(args.intersection) if args.intersection else ""
     output_path = args.output_dir or "data"
     plan_name = args.plan_name
@@ -226,6 +224,7 @@ if __name__ == "__main__":
     parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3")
     parser.add_argument("--x_offset", help="number of time steps to use for training")
     parser.add_argument("--y_offset", help="number of time steps to predict ahead")
+    parser.add_argument("--dummy", help="Overrides other arguments. Generate dummy training data with the specified pattern: {}".format(DUMMY_DATA_TYPES))
     args = parser.parse_args()
 
     main(args)
