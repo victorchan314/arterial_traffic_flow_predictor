@@ -59,23 +59,22 @@ def clean_detector_data(detector_data):
     return detector_data
 
 def filter_detector_data_by_num_detectors(detector_data, detector_list):
-    detector_list_sorted = sorted([int(x) for x in detector_list])
+    detector_list_sorted = sorted([x for x in detector_list])
     detector_data_filtered = detector_data.groupby(["Time"]).filter(lambda x: detector_list_sorted == sorted(list(x["DetectorID"])))
     timestamps = np.sort(detector_data_filtered["Time"].unique())
 
     return detector_data_filtered, timestamps
 
-def filter_timestamps(timestamps, stretch_length):
+def get_long_enough_stretch_indices(timestamps, stretch_length):
     break_indices = np.argwhere(utils.compare_timedeltas("!=", timestamps[1:] - timestamps[:-1], DETECTOR_DATA_FREQUENCY)).flatten() + 1
     stretch_starts = np.concatenate(([0], break_indices))
     stretch_ends = np.concatenate((stretch_starts, [timestamps.shape[0]]))[1:]
 
     long_enough_indices = np.argwhere(stretch_ends - stretch_starts > stretch_length).flatten()
-    #stretches 
-    print(long_enough_indices)
-    print(stretch_starts[long_enough_indices])
-    print(stretch_ends)
-    print(1/0)
+    stretch_starts, stretch_ends = stretch_starts[long_enough_indices], stretch_ends[long_enough_indices]
+    stretches = zip(stretch_starts, stretch_ends)
+
+    return stretches
 
 def break_data_into_stretches(data, freq):
     index = data.index
@@ -107,17 +106,43 @@ def consolidate_detector_data(detector_data, x_offset, y_offset):
     print(data[0].shape)
     #print(len(data))
 
-def process_detector_data(detector_data, detector_list, stretch_length):
+def process_detector_data(detector_data, detector_list, stretch_length, verbose=False):
     detector_data_clean = clean_detector_data(detector_data)
+    if verbose:
+        print("Clean detector data shape: {}".format(detector_data_clean.shape))
 
     # Keep only timestamps that have data for all len(detector_list) detectors
     detector_data_filtered_by_num_detectors, timestamps = filter_detector_data_by_num_detectors(detector_data_clean, detector_list)
-    # Get timestamps that have at least stretch_length 
-    # Get 3D data array without offsets, filtered by timestamps within stretches
-    detector_data_filtered = filter_timestamps(timestamps, stretch_length)
-    print(len(detector_data_grouped.groups))
-    detector_data_grouped = detector_data_grouped.filter(lambda group: group.shape[0] >= len(detector_list))
-    print(len(detector_data_grouped))
+    if verbose:
+        print("Filtered detector data: {}".format(detector_data_filtered_by_num_detectors.shape))
+        print("Number of timestamps: {}".format(len(timestamps)))
+
+    # Get indices of timestamps that have at least stretch_length 
+    stretches = get_long_enough_stretch_indices(timestamps, stretch_length)
+    detector_data_grouped_by_time = detector_data_filtered_by_num_detectors.groupby("Time")
+
+    detector_datum_shape = (stretch_length, len(detector_list), detector_data.shape[1] - 3)
+    detector_data_array = np.empty((0, *detector_datum_shape))
+
+    for start, end in stretches:
+        if verbose:
+            print("Working on stretch ({}, {})".format(start, end))
+
+        for i in range(start, end - stretch_length + 1):
+            time_stretch = timestamps[i:i+stretch_length]
+
+            for index, timestamp in enumerate(time_stretch):
+                detector_datum = np.zeros((len(timestamps) - stretch_length + 1, *detector_datum_shape))
+                detector_data_at_timestamp = detector_data_grouped_by_time.get_group(timestamp)
+                detector_data_array_at_timestamp = detector_data_at_timestamp.set_index("DetectorID").loc[detector_list].iloc[:, 2:].values
+
+                for x in range(index, -1, -1):
+                    y = index - x
+                    detector_datum[y, x, :, :] = np.array(detector_data_array_at_timestamp)
+
+                detector_data_array = np.vstack((detector_data_array, detector_datum))
+
+    print(detector_data_array.shape)
     print(1/0)
 
     for key, group in detector_data_group:
@@ -188,9 +213,9 @@ def main(args):
     x_offset = int(args.x_offset or "12")
     y_offset = int(args.y_offset or "12")
 
-    detector_list = get_sensors_list(DETECTOR_LIST_PATH.format(intersection))
-    detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name, date_limit=dt.date(2017, 1, 9))
-    detector_data_processed = process_detector_data(detector_data, detector_list, x_offset + y_offset)
+    detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection))]
+    detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name, date_limit=dt.date(2017, 1, 5))
+    detector_data_processed = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=True)
 
     #generate_splits(args)
 
