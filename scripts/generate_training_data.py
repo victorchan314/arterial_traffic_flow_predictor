@@ -76,7 +76,7 @@ def create_4d_detector_data_array(detector_data, timestamps, detector_list, stre
     detector_data_array = np.empty((0, *detector_datum_shape))
 
     for start, end in stretches:
-        if verbose:
+        if verbose > 1:
             print("Working on stretch ({}, {})".format(start, end))
 
         time_stretch = timestamps[start:end]
@@ -85,6 +85,8 @@ def create_4d_detector_data_array(detector_data, timestamps, detector_list, stre
         for i, timestamp in enumerate(time_stretch):
             detector_data_at_timestamp = detector_data_grouped_by_time.get_group(timestamp)
             detector_data_array_at_timestamp = detector_data_at_timestamp.set_index("DetectorID").loc[detector_list].iloc[:, 2:].values
+            if verbose > 2:
+                print("Working on detector data at timestamp {}".format(timestamp))
 
             # Populate the diagonal corresponding to the current timestamp to take care of offsets
             for y in range(min(i, end - start - stretch_length), max(-1, i - stretch_length), -1):
@@ -126,7 +128,7 @@ def process_detector_data(detector_data, detector_list, stretch_length, verbose=
 
     return detector_data_array
 
-def generate_splits(detector_data_processed, x_offset, y_offset, output_path, verbose=False):
+def generate_splits(detector_data_processed, x_offset, y_offset, output_path, verbose=0):
     x_offsets = np.arange(-x_offset + 1, 1, 1)
     y_offsets = np.arange(1, y_offset + 1, 1)
     x = detector_data_processed[:, :x_offset, :, :]
@@ -169,11 +171,12 @@ def main(args):
     plan_name = args.plan_name
     x_offset = int(args.x_offset or "12")
     y_offset = int(args.y_offset or "12")
+    verbose = args.verbose or 0
 
     detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection))]
     detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name)
-    detector_data_processed = process_detector_data(detector_data, detector_list, x_offset + y_offset)
-    generate_splits(detector_data_processed, x_offset, y_offset, output_path, verbose=True)
+    detector_data_processed = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
+    generate_splits(detector_data_processed, x_offset, y_offset, output_path, verbose=verbose)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -182,7 +185,8 @@ if __name__ == "__main__":
     parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3")
     parser.add_argument("--x_offset", help="number of time steps to use for training")
     parser.add_argument("--y_offset", help="number of time steps to predict ahead")
-    parser.add_argument("--dummy", help="Overrides other arguments. Generate dummy training data with the specified pattern: {}".format(DUMMY_DATA_TYPES))
+    parser.add_argument("--dummy", help="overrides other arguments. Generate dummy training data with the specified pattern: {}".format(DUMMY_DATA_TYPES))
+    parser.add_argument("-v", "--verbose", action="count", help="verbosity of script")
     args = parser.parse_args()
 
     main(args)
