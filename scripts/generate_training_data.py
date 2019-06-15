@@ -131,21 +131,21 @@ def process_detector_data(detector_data, detector_list, stretch_length, verbose=
         if verbose:
             print("Working on stretch ({}, {})".format(start, end))
 
-        for i in range(start, end - stretch_length + 1):
-            time_stretch = timestamps[i:i+stretch_length]
-            detector_datum = np.zeros((end - start - stretch_length + 1, *detector_datum_shape))
+        time_stretch = timestamps[start:end]
+        detector_datum = np.zeros((end - start - stretch_length + 1, *detector_datum_shape))
 
-            for index, timestamp in enumerate(time_stretch):
-                detector_data_at_timestamp = detector_data_grouped_by_time.get_group(timestamp)
-                detector_data_array_at_timestamp = detector_data_at_timestamp.set_index("DetectorID").loc[detector_list].iloc[:, 2:].values
+        for i, timestamp in enumerate(time_stretch):
+            detector_data_at_timestamp = detector_data_grouped_by_time.get_group(timestamp)
+            detector_data_array_at_timestamp = detector_data_at_timestamp.set_index("DetectorID").loc[detector_list].iloc[:, 2:].values
 
-                for y in range(min(index, end - start - stretch_length), max(-1, index - stretch_length), -1):
-                    x = index - y
-                    detector_datum[y, x, :, :] = np.array(detector_data_array_at_timestamp)
+            # Populate the diagonal corresponding to the current timestamp to take care of offsets
+            for y in range(min(i, end - start - stretch_length), max(-1, i - stretch_length), -1):
+                x = i - y
+                detector_datum[y, x, :, :] = np.array(detector_data_array_at_timestamp)
 
-            detector_data_array = np.vstack((detector_data_array, detector_datum))
+        detector_data_array = np.vstack((detector_data_array, detector_datum))
 
-    print(detector_data_array[:5, :, :, :])
+    print(detector_data_array.shape)
     print(1/0)
 
     return detector_data_array
@@ -212,7 +212,7 @@ def main(args):
     y_offset = int(args.y_offset or "12")
 
     detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection))]
-    detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name, date_limit=dt.date(2017, 1, 5))
+    detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name, date_limit=dt.date(2017, 1, 9))
     detector_data_processed = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=True)
 
     #generate_splits(args)
