@@ -126,12 +126,13 @@ def process_detector_data(detector_data, detector_list, stretch_length, verbose=
 
     return detector_data_array
 
-def generate_splits(detector_data_processed, x_offset, y_offset, verbose=False):
+def generate_splits(detector_data_processed, x_offset, y_offset, output_path, verbose=False):
     x_offsets = np.arange(-x_offset + 1, 1, 1)
     y_offsets = np.arange(1, y_offset + 1, 1)
     x = detector_data_processed[:, :x_offset, :, :]
     y = detector_data_processed[:, x_offset:, :, :]
     if verbose:
+        print("Detector data shape: {}".format(detector_data_processed.shape))
         print("x shape: {}".format(x.shape))
         print("y shape: {}".format(y.shape))
 
@@ -146,17 +147,16 @@ def generate_splits(detector_data_processed, x_offset, y_offset, verbose=False):
     x_val, y_val = x[num_train:num_train+num_val], y[num_train:num_train+num_val]
     x_test, y_test = x[-num_test:], y[-num_test:]
 
-    for cat in ["train", "val", "test"]:
-        _x, _y = locals()["x_" + cat], locals()["y_" + cat]
+    for s in ["train", "val", "test"]:
+        _x, _y = locals()["x_" + s], locals()["y_" + s]
         if verbose:
-            print("{} x: {}, y: {}".format(cat, _x.shape, _y.shape))
-#        np.savez_compressed(
-#            os.path.join(args.output_dir, "%s.npz" % cat),
-#            x=_x,
-#            y=_y,
-#            x_offsets=x_offsets.reshape(list(x_offsets.shape) + [1]),
-#            y_offsets=y_offsets.reshape(list(y_offsets.shape) + [1]),
-#        )
+            print("{} x: {}, y: {}".format(s, _x.shape, _y.shape))
+        np.savez_compressed(os.path.join(output_path, "{}.npz".format(s)),
+            x=_x,
+            y=_y,
+            x_offsets=x_offsets.reshape(list(x_offsets.shape) + [1]),
+            y_offsets=y_offsets.reshape(list(y_offsets.shape) + [1]),
+        )
 
 
 
@@ -171,15 +171,14 @@ def main(args):
     y_offset = int(args.y_offset or "12")
 
     detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection))]
-    detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name, date_limit=dt.date(2017, 1, 9))
+    detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name)
     detector_data_processed = process_detector_data(detector_data, detector_list, x_offset + y_offset)
-    print(detector_data_processed.shape)
-    generate_splits(detector_data_processed, x_offset, y_offset, verbose=True)
+    generate_splits(detector_data_processed, x_offset, y_offset, output_path, verbose=True)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--intersection", help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
-    parser.add_argument("--output_dir", help="output directory for")
+    parser.add_argument("--output_dir", help="output directory for npz data files")
     parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3")
     parser.add_argument("--x_offset", help="number of time steps to use for training")
     parser.add_argument("--y_offset", help="number of time steps to predict ahead")
