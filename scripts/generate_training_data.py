@@ -126,54 +126,37 @@ def process_detector_data(detector_data, detector_list, stretch_length, verbose=
 
     return detector_data_array
 
-def generate_splits():
-    df = pd.read_hdf(args.traffic_df_filename)
-    # 0 is the latest observed sample.
-    x_offsets = np.sort(
-        # np.concatenate(([-week_size + 1, -day_size + 1], np.arange(-11, 1, 1)))
-        np.concatenate((np.arange(-11, 1, 1),))
-    )
-    # Predict the next one hour
-    y_offsets = np.sort(np.arange(1, 13, 1))
-    # x: (num_samples, input_length, num_nodes, input_dim)
-    # y: (num_samples, output_length, num_nodes, output_dim)
-    x, y = generate_graph_seq2seq_io_data(
-        df,
-        x_offsets=x_offsets,
-        y_offsets=y_offsets,
-        add_time_in_day=True,
-        add_day_in_week=False,
-    )
+def generate_splits(detector_data_processed, x_offset, y_offset, verbose=False):
+    x_offsets = np.arange(-x_offset + 1, 1, 1)
+    y_offsets = np.arange(1, y_offset + 1, 1)
+    x = detector_data_processed[:, :x_offset, :, :]
+    y = detector_data_processed[:, x_offset:, :, :]
+    if verbose:
+        print("x shape: {}".format(x.shape))
+        print("y shape: {}".format(y.shape))
 
-    print("x shape: ", x.shape, ", y shape: ", y.shape)
-    # Write the data into npz file.
-    # num_test = 6831, using the last 6831 examples as testing.
-    # for the rest: 7/8 is used for training, and 1/8 is used for validation.
+    # Write the data into npz file
+    # 7/10 training, 1/10 validation, 2/10 test
     num_samples = x.shape[0]
     num_test = round(num_samples * 0.2)
     num_train = round(num_samples * 0.7)
     num_val = num_samples - num_test - num_train
 
-    # train
     x_train, y_train = x[:num_train], y[:num_train]
-    # val
-    x_val, y_val = (
-        x[num_train: num_train + num_val],
-        y[num_train: num_train + num_val],
-    )
-    # test
+    x_val, y_val = x[num_train:num_train+num_val], y[num_train:num_train+num_val]
     x_test, y_test = x[-num_test:], y[-num_test:]
 
     for cat in ["train", "val", "test"]:
         _x, _y = locals()["x_" + cat], locals()["y_" + cat]
-        print(cat, "x: ", _x.shape, "y:", _y.shape)
-        np.savez_compressed(
-            os.path.join(args.output_dir, "%s.npz" % cat),
-            x=_x,
-            y=_y,
-            x_offsets=x_offsets.reshape(list(x_offsets.shape) + [1]),
-            y_offsets=y_offsets.reshape(list(y_offsets.shape) + [1]),
-        )
+        if verbose:
+            print("{} x: {}, y: {}".format(cat, _x.shape, _y.shape))
+#        np.savez_compressed(
+#            os.path.join(args.output_dir, "%s.npz" % cat),
+#            x=_x,
+#            y=_y,
+#            x_offsets=x_offsets.reshape(list(x_offsets.shape) + [1]),
+#            y_offsets=y_offsets.reshape(list(y_offsets.shape) + [1]),
+#        )
 
 
 
@@ -191,9 +174,7 @@ def main(args):
     detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name, date_limit=dt.date(2017, 1, 9))
     detector_data_processed = process_detector_data(detector_data, detector_list, x_offset + y_offset)
     print(detector_data_processed.shape)
-    print(1/0)
-
-    #generate_splits(args)
+    generate_splits(detector_data_processed, x_offset, y_offset, verbose=True)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
