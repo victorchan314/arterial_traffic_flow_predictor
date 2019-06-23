@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import ast
 
 parent_dir = os.path.abspath("/Users/victorchan/Dropbox/UndergradResearch/Victor/Code")
 sys.path.append(parent_dir)
@@ -20,9 +21,31 @@ DETECTOR_LIST_PATH = "data/model/sensors_advanced{}.txt"
 DETECTOR_DATA_QUERY = "SELECT DetectorID, Year, Month, Day, Time, Volume AS Flow FROM detector_data_processed_2017 WHERE ({})"
 DETECTOR_DATA_FREQUENCY = dt.timedelta(minutes=5)
 
-DUMMY_DATA_TYPES = ["zeroes", "ones", "linear", "square"]
+DUMMY_DATA_TYPES = ["zeros", "ones", "linear_integers", "linear_floats"]
+
+BASE_HIGH = 1000
+INCREMENT_HIGH = 10
 
 
+
+def generate_dummy_data(dummy_data_type, dummy_shape, verbose=0):
+    if dummy_data_type == "zeros":
+        return np.zeros(dummy_shape)
+    elif dummy_data_type == "ones":
+        return np.ones(dummy_shape)
+    elif dummy_data_type.startswith("linear_"):
+        base_shape = (dummy_shape[0], 1, *dummy_shape[2:])
+
+        if dummy_data_type[7:] == "integers":
+            base = np.random.randint(0, BASE_HIGH + 1, base_shape)
+            increment = np.random.randint(0, INCREMENT_HIGH + 1, base_shape)
+        elif dummy_data_type[7:] == "floats":
+            base = BASE_HIGH * np.random.random_sample(base_shape)
+            increment = INCREMENT_HIGH * np.random.random_sample(base_shape)
+
+        dummy_data = np.hstack((base + i * increment for i in range(dummy_shape[1])))
+
+        return dummy_data
 
 def get_sensors_list(path):
     with open(path, "r") as f:
@@ -68,7 +91,7 @@ def filter_detector_data_by_num_detectors(detector_data, detector_list):
 
     return detector_data_filtered, timestamps
 
-def create_4d_detector_data_array(detector_data, timestamps, detector_list, stretch_length, verbose=False):
+def create_4d_detector_data_array(detector_data, timestamps, detector_list, stretch_length, verbose=0):
     stretches = get_long_enough_stretch_indices(timestamps, stretch_length)
     detector_data_grouped_by_time = detector_data.groupby("Time")
 
@@ -108,7 +131,7 @@ def get_long_enough_stretch_indices(timestamps, stretch_length):
 
     return stretches
 
-def process_detector_data(detector_data, detector_list, stretch_length, verbose=False):
+def process_detector_data(detector_data, detector_list, stretch_length, verbose=0):
     if verbose:
         print("Detector data original shape: {}".format(detector_data.shape))
 
@@ -163,29 +186,40 @@ def generate_splits(detector_data_processed, x_offset, y_offset, output_path, ve
 
 
 def main(args):
-    if args.dummy and args.dummy in DUMMY_DATA_TYPES:
-        return
-
-    intersection = "_{}".format(args.intersection) if args.intersection else ""
     output_path = args.output_dir or "data"
-    plan_name = args.plan_name
     x_offset = int(args.x_offset or "12")
     y_offset = int(args.y_offset or "12")
     verbose = args.verbose or 0
 
-    detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection))]
-    detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name)
-    detector_data_processed = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
-    generate_splits(detector_data_processed, x_offset, y_offset, output_path, verbose=verbose)
+    if args.dummy:
+        if not args.dummy in DUMMY_DATA_TYPES:
+            raise Exception("{} is not a supported dummy data type".format(args.dummy))
+            return
+
+        dummy_shape = ast.literal_eval(args.dummy_shape or "(4706, 0, 16, 2)")
+        dummy_shape = (dummy_shape[0], x_offset + y_offset, *dummy_shape[2:])
+        dummy_data = generate_dummy_data(args.dummy, dummy_shape, verbose=verbose)
+        print(dummy_data)
+        print(1/0)
+        generate_splits(dummy_data, x_offset, y_offset, output_path, verbose=verbose)
+    else:
+        intersection = "_{}".format(args.intersection) if args.intersection else ""
+        plan_name = args.plan_name
+
+        detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection))]
+        detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name)
+        detector_data_processed = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
+        generate_splits(detector_data_processed, x_offset, y_offset, output_path, verbose=verbose)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--intersection", help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
     parser.add_argument("--output_dir", help="output directory for npz data files")
+    parser.add_argument("--intersection", help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
     parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3")
     parser.add_argument("--x_offset", help="number of time steps to use for training")
     parser.add_argument("--y_offset", help="number of time steps to predict ahead")
     parser.add_argument("--dummy", help="overrides other arguments. Generate dummy training data with the specified pattern: {}".format(DUMMY_DATA_TYPES))
+    parser.add_argument("--dummy_shape", help="the shape of generated dummy data, if dummy is specified. Second value is 0, since it will be replaced by x_offset and y_offset.".format(DUMMY_DATA_TYPES))
     parser.add_argument("-v", "--verbose", action="count", help="verbosity of script")
     args = parser.parse_args()
 
