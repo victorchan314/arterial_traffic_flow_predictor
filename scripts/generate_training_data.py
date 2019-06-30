@@ -3,7 +3,7 @@ import os
 import sys
 import ast
 
-parent_dir = os.path.abspath("/Users/victorchan/Dropbox/UndergradResearch/Victor/Code")
+parent_dir = os.path.abspath("/Users/victorchan/Desktop/UC Berkeley/Research/Code")
 sys.path.append(parent_dir)
 
 import numpy as np
@@ -107,7 +107,9 @@ def create_4d_detector_data_array(detector_data, timestamps, detector_list, stre
 
         for i, timestamp in enumerate(time_stretch):
             detector_data_at_timestamp = detector_data_grouped_by_time.get_group(timestamp)
-            detector_data_array_at_timestamp = detector_data_at_timestamp.set_index("DetectorID").loc[detector_list].iloc[:, 2:].values
+            #detector_data_array_at_timestamp = detector_data_at_timestamp.set_index("DetectorID").loc[detector_list].iloc[:, 2:].values
+            # Temporary workaround to get DetectorID in the first column
+            detector_data_array_at_timestamp = detector_data_at_timestamp.set_index("DetectorID").loc[detector_list].iloc[:, [3, 2]].values
             if verbose > 2:
                 print("Working on detector data at timestamp {}".format(timestamp))
 
@@ -199,8 +201,6 @@ def main(args):
         dummy_shape = ast.literal_eval(args.dummy_shape or "(4706, 0, 16, 2)")
         dummy_shape = (dummy_shape[0], x_offset + y_offset, *dummy_shape[2:])
         dummy_data = generate_dummy_data(args.dummy, dummy_shape, verbose=verbose)
-        print(dummy_data)
-        print(1/0)
         generate_splits(dummy_data, x_offset, y_offset, output_path, verbose=verbose)
     else:
         intersection = "_{}".format(args.intersection) if args.intersection else ""
