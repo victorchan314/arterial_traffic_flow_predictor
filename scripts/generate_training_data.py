@@ -151,7 +151,7 @@ def process_detector_data(detector_data, detector_list, stretch_length, verbose=
     if verbose:
         print("Processed detector data shape: {}".format(detector_data_array.shape))
 
-    return detector_data_array
+    return detector_data_array, timestamps
 
 def generate_splits(detector_data_processed, x_offset, y_offset, output_path, verbose=0):
     x_offsets = np.arange(-x_offset + 1, 1, 1)
@@ -185,10 +185,12 @@ def generate_splits(detector_data_processed, x_offset, y_offset, output_path, ve
             y_offsets=y_offsets.reshape(list(y_offsets.shape) + [1]),
         )
 
+def save_timestamps(timestamps, output_path):
+    np.savez_compressed(os.path.join(output_path, "timestamps.npz"), timestamps=timestamps)
+
 
 
 def main(args):
-    output_path = args.output_dir or "data"
     x_offset = int(args.x_offset or "12")
     y_offset = int(args.y_offset or "12")
     verbose = args.verbose or 0
@@ -208,16 +210,22 @@ def main(args):
 
         detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection))]
         detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name)
-        detector_data_processed = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
-        generate_splits(detector_data_processed, x_offset, y_offset, output_path, verbose=verbose)
+        detector_data_processed, timestamps = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
+
+        if args.output_dir:
+            generate_splits(detector_data_processed, x_offset, y_offset, args.output_dir, verbose=verbose)
+
+        if args.timestamps_dir:
+            save_timestamps(timestamps, args.timestamps_dir)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output_dir", help="output directory for npz data files")
     parser.add_argument("--intersection", help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
     parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3")
     parser.add_argument("--x_offset", help="number of time steps to use for training")
     parser.add_argument("--y_offset", help="number of time steps to predict ahead")
+    parser.add_argument("--output_dir", help="output directory for npz data files")
+    parser.add_argument("--timestamps_dir", help="output directory for npz timestamps")
     parser.add_argument("--dummy", help="overrides other arguments. Generate dummy training data with the specified pattern: {}".format(DUMMY_DATA_TYPES))
     parser.add_argument("--dummy_shape", help="the shape of generated dummy data, if dummy is specified. Second value is 0, since it will be replaced by x_offset and y_offset.".format(DUMMY_DATA_TYPES))
     parser.add_argument("-v", "--verbose", action="count", help="verbosity of script")
