@@ -96,14 +96,16 @@ def create_4d_detector_data_array(detector_data, timestamps, detector_list, stre
     detector_data_grouped_by_time = detector_data.groupby("Time")
 
     detector_datum_shape = (stretch_length, len(detector_list), detector_data.shape[1] - 3)
-    detector_data_array = np.empty((0, *detector_datum_shape))
+    detector_data_array = np.zeros((0, *detector_datum_shape))
+    timestamps_array = np.empty((0, stretch_length), dtype="datetime64[ns]")
 
     for start, end in stretches:
         if verbose > 1:
             print("Working on stretch ({}, {})".format(start, end))
 
         time_stretch = timestamps[start:end]
-        detector_datum = np.zeros((end - start - stretch_length + 1, *detector_datum_shape))
+        detector_datum = np.empty((end - start - stretch_length + 1, *detector_datum_shape))
+        timestamps_stretch = np.empty((end - start - stretch_length + 1, stretch_length), dtype="datetime64[ns]")
 
         for i, timestamp in enumerate(time_stretch):
             detector_data_at_timestamp = detector_data_grouped_by_time.get_group(timestamp)
@@ -117,10 +119,12 @@ def create_4d_detector_data_array(detector_data, timestamps, detector_list, stre
             for y in range(min(i, end - start - stretch_length), max(-1, i - stretch_length), -1):
                 x = i - y
                 detector_datum[y, x, :, :] = np.array(detector_data_array_at_timestamp)
+                timestamps_stretch[y, x] = timestamp
 
         detector_data_array = np.vstack((detector_data_array, detector_datum))
+        timestamps_array = np.vstack((timestamps_array, timestamps_stretch))
 
-    return detector_data_array
+    return detector_data_array, timestamps_array
 
 def get_long_enough_stretch_indices(timestamps, stretch_length):
     break_indices = np.argwhere(utils.compare_timedeltas("!=", timestamps[1:] - timestamps[:-1], DETECTOR_DATA_FREQUENCY)).flatten() + 1
@@ -147,19 +151,20 @@ def process_detector_data(detector_data, detector_list, stretch_length, verbose=
         print("Filtered detector data shape: {}".format(detector_data_filtered_by_num_detectors.shape))
         print("Number of timestamps: {}".format(len(timestamps)))
 
-    detector_data_array = create_4d_detector_data_array(detector_data_filtered_by_num_detectors, timestamps, detector_list, stretch_length, verbose=verbose)
+    detector_data_array, timestamps_array = create_4d_detector_data_array(detector_data_filtered_by_num_detectors, timestamps, detector_list, stretch_length, verbose=verbose)
     if verbose:
         print("Processed detector data shape: {}".format(detector_data_array.shape))
+        print("Timestamps array shape: {}".format(timestamps_array.shape))
 
-    return detector_data_array, timestamps
+    return detector_data_array, timestamps_array
 
-def generate_splits(detector_data_processed, x_offset, y_offset, output_path, verbose=0):
+def generate_splits(data, x_offset, y_offset, output_path, label="", verbose=0):
     x_offsets = np.arange(-x_offset + 1, 1, 1)
     y_offsets = np.arange(1, y_offset + 1, 1)
-    x = detector_data_processed[:, :x_offset, :, :]
-    y = detector_data_processed[:, x_offset:, :, :]
+    x = data[:, :x_offset, ...]
+    y = data[:, x_offset:, ...]
     if verbose:
-        print("Detector data shape: {}".format(detector_data_processed.shape))
+        print("Data shape: {}".format(data.shape))
         print("x shape: {}".format(x.shape))
         print("y shape: {}".format(y.shape))
 
@@ -178,15 +183,18 @@ def generate_splits(detector_data_processed, x_offset, y_offset, output_path, ve
         _x, _y = locals()["x_" + s], locals()["y_" + s]
         if verbose:
             print("{} x: {}, y: {}".format(s, _x.shape, _y.shape))
-        np.savez_compressed(os.path.join(output_path, "{}.npz".format(s)),
+
+        if label:
+            path = os.path.join(output_path, "{}_{}.npz".format(label, s))
+        else:
+            path = os.path.join(output_path, "{}.npz".format(s))
+
+        np.savez_compressed(path,
             x=_x,
             y=_y,
             x_offsets=x_offsets.reshape(list(x_offsets.shape) + [1]),
             y_offsets=y_offsets.reshape(list(y_offsets.shape) + [1]),
         )
-
-def save_timestamps(timestamps, output_path):
-    np.savez_compressed(os.path.join(output_path, "timestamps.npz"), timestamps=timestamps)
 
 
 
@@ -210,13 +218,13 @@ def main(args):
 
         detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection))]
         detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name)
-        detector_data_processed, timestamps = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
+        detector_data_processed, timestamps_array = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
 
         if args.output_dir:
             generate_splits(detector_data_processed, x_offset, y_offset, args.output_dir, verbose=verbose)
 
         if args.timestamps_dir:
-            save_timestamps(timestamps, args.timestamps_dir)
+            generate_splits(timestamps_array, x_offset, y_offset, args.timestamps_dir, label="timestamps", verbose=verbose)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
