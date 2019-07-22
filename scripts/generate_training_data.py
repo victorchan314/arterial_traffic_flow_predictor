@@ -127,13 +127,9 @@ def create_4d_detector_data_array(detector_data, timestamps, detector_list, stre
     return detector_data_array, timestamps_array
 
 def get_long_enough_stretch_indices(timestamps, stretch_length):
-    break_indices = np.argwhere(utils.compare_timedeltas("!=", timestamps[1:] - timestamps[:-1], DETECTOR_DATA_FREQUENCY)).flatten() + 1
-    stretch_starts = np.concatenate(([0], break_indices))
-    stretch_ends = np.concatenate((stretch_starts, [timestamps.shape[0]]))[1:]
-
-    long_enough_indices = np.argwhere(stretch_ends - stretch_starts > stretch_length).flatten()
-    stretch_starts, stretch_ends = stretch_starts[long_enough_indices], stretch_ends[long_enough_indices]
-    stretches = zip(stretch_starts, stretch_ends)
+    stretches = utils.get_stretches(timestamps, DETECTOR_DATA_FREQUENCY)
+    long_enough_indices = np.argwhere(stretches[:, 1] - stretches[:, 0] > stretch_length).flatten()
+    stretches = stretches[long_enough_indices]
 
     return stretches
 

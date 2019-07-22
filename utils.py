@@ -35,3 +35,11 @@ def compare_timedeltas(operation, timedelta1, timedelta2):
         return pd.to_timedelta(timedelta1) <= pd.to_timedelta(timedelta2)
     else:
         raise Exception("Operation {} not recognized".format(operation))
+
+def get_stretches(timestamps, frequency):
+    break_indices = np.argwhere(compare_timedeltas("!=", timestamps[1:] - timestamps[:-1], frequency)).flatten() + 1
+    stretch_starts = np.concatenate(([0], break_indices))
+    stretch_ends = np.concatenate((stretch_starts, [timestamps.shape[0]]))[1:]
+    stretches = np.vstack((stretch_starts, stretch_ends)).T
+
+    return stretches
