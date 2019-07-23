@@ -97,7 +97,7 @@ def create_4d_detector_data_array(detector_data, timestamps, detector_list, stre
 
     detector_datum_shape = (stretch_length, len(detector_list), detector_data.shape[1] - 3)
     detector_data_array = np.zeros((0, *detector_datum_shape))
-    timestamps_array = np.empty((0, stretch_length), dtype="datetime64[ns]")
+    timestamps_array = np.empty((0, stretch_length), dtype=timestamps.dtype)
 
     for start, end in stretches:
         if verbose > 1:
@@ -105,7 +105,7 @@ def create_4d_detector_data_array(detector_data, timestamps, detector_list, stre
 
         time_stretch = timestamps[start:end]
         detector_datum = np.empty((end - start - stretch_length + 1, *detector_datum_shape))
-        timestamps_stretch = np.empty((end - start - stretch_length + 1, stretch_length), dtype="datetime64[ns]")
+        timestamps_stretch = np.empty((end - start - stretch_length + 1, stretch_length), dtype=timestamps.dtype)
 
         for i, timestamp in enumerate(time_stretch):
             detector_data_at_timestamp = detector_data_grouped_by_time.get_group(timestamp)
