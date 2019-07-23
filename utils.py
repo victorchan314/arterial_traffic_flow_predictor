@@ -36,10 +36,19 @@ def compare_timedeltas(operation, timedelta1, timedelta2):
     else:
         raise Exception("Operation {} not recognized".format(operation))
 
-def get_stretches(timestamps, frequency):
-    break_indices = np.argwhere(compare_timedeltas("!=", timestamps[1:] - timestamps[:-1], frequency)).flatten() + 1
+def get_stretches(datetimes, frequency):
+    break_indices = np.argwhere(compare_timedeltas("!=", datetimes[1:] - datetimes[:-1], frequency)).flatten() + 1
     stretch_starts = np.concatenate(([0], break_indices))
-    stretch_ends = np.concatenate((stretch_starts, [timestamps.shape[0]]))[1:]
+    stretch_ends = np.concatenate((stretch_starts, [datetimes.shape[0]]))[1:]
     stretches = np.vstack((stretch_starts, stretch_ends)).T
 
     return stretches
+
+# Flattens a matrix composed of sections of rolling values into one flat array
+# The first 2 dimensions of matrix should have the rolling values
+def flatten_circulant_like_matrix_by_stretches(matrix, stretches):
+    flattened = np.empty((0,) + matrix.shape[2:], dtype=matrix.dtype)
+    for start, end in stretches:
+        flattened = np.concatenate((flattened, matrix[start:end, 0, ...], matrix[end - 1, 1:, ...]), axis=0)
+
+    return flattened
