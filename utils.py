@@ -10,12 +10,18 @@ def rmse(y, y_hat):
 def mae(y, y_hat):
     return np.mean(np.abs(y - y_hat))
 
-def mape(data, test, replace_zeros=True, epsilon=0.01):
+def mape(y, y_hat, replace_zeros=True, epsilon=0.01):
     if replace_zeros:
-        data[data == 0] = epsilon
+        y[y == 0] = epsilon
 
-    ape = np.sum(np.abs(data - test) / data)
-    return 1 / data.shape[0] * ape
+    return np.mean(np.abs(y - y_hat) / y)
+
+#def mape(data, test, replace_zeros=True, epsilon=0.01):
+#    if replace_zeros:
+#        data[data == 0] = epsilon
+#
+#    ape = np.sum(np.abs(data - test) / data)
+#    return 1 / data.shape[0] * ape
 
 def mase(data, test, seasonal_freq=1):
     s = seasonal_freq
@@ -26,6 +32,16 @@ def mase(data, test, seasonal_freq=1):
 
     mae = 1 / (T - s) * np.sum(np.abs(data[s:].values - data[:T-s].values))
     return 1 / T * np.sum(np.abs(data - test)) / mae
+
+def get_standard_errors(y, y_hat, suffix=None):
+    suffix = "_" + suffix if suffix else ""
+
+    return {
+        "mse" + suffix: mse(y, y_hat),
+        "rmse" + suffix: rmse(y, y_hat),
+        "mae" + suffix: mae(y, y_hat),
+        "mape" + suffix: mape(y, y_hat)
+    }
 
 def compare_timedeltas(operation, timedelta1, timedelta2):
     if operation == "==":

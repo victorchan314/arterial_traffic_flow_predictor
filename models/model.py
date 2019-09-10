@@ -33,7 +33,7 @@ class Model(object):
             return self._get_predictions()
 
     def _get_predictions(self):
-        raise NotImplementedError
+        return self.predictions
 
     def get_errors(self):
         if not self.is_trained:
@@ -42,7 +42,7 @@ class Model(object):
             return self._get_errors()
 
     def _get_errors(self):
-        raise NotImplementedError
+        return self.errors
 
     def get_metadata(self):
         if not self.is_trained:
@@ -51,4 +51,4 @@ class Model(object):
             return self._get_metadata()
 
     def _get_metadata(self):
-        raise NotImplementedError
+        return self.metadata
