@@ -1,7 +1,14 @@
 import numpy as np
 import pandas as pd
-import matplotlib as pyplot
-import datetime as dt
+
+def mse(y, y_hat):
+    return np.mean(np.power(y - y_hat, 2))
+
+def rmse(y, y_hat):
+    return np.sqrt(mse(y, y_hat))
+
+def mae(y, y_hat):
+    return np.mean(np.abs(y - y_hat))
 
 def mape(data, test, replace_zeros=True, epsilon=0.01):
     if replace_zeros:
