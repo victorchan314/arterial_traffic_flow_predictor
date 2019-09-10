@@ -12,6 +12,7 @@ This repository contains all of the code that I have been using for my research.
 - dcrnn_cell:165: Is there an extra 2 times the last extraneous term in the sum?
 - dcrnn_model:49: It looks like the decoding cell is the same cell as the encoding cell, which may not perform as well, according to Sutskever's paper
 - dcrnn_model:39: Why are the labels using input_dim instead of output_dim?
+- Validation loss is used solely to print out results and not to select hyperparameters
 
 ### TODO
 

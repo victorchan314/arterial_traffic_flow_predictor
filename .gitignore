@@ -4,8 +4,7 @@ config.py
 *.swp
 *.swo
 data/sensor_data
-.gitignore
-.gitattributes
 .DS_Store
 DCRNN
 data/**/dcrnn_*
+.idea
