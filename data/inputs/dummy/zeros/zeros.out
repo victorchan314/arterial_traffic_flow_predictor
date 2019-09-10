@@ -1,0 +1,122 @@
+2019-07-07 13:54:50,109 - INFO - Log directory: data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/
+2019-07-07 13:54:50,109 - INFO - {'base_dir': 'data/dummy/zeros', 'log_level': 'INFO', 'data': {'batch_size': 64, 'dataset_dir': 'data/dummy/zeros', 'test_batch_size': 64, 'val_batch_size': 64, 'graph_pkl_filename': 'data/model/adjacency_matrix_5083_P2.pkl'}, 'model': {'cl_decay_steps': 2000, 'filter_type': 'dual_random_walk', 'horizon': 12, 'input_dim': 2, 'l1_decay': 0, 'max_diffusion_step': 2, 'num_nodes': 16, 'num_rnn_layers': 2, 'output_dim': 2, 'rnn_units': 64, 'seq_len': 12, 'use_curriculum_learning': True}, 'train': {'base_lr': 0.01, 'dropout': 0, 'epoch': 0, 'epochs': 25, 'epsilon': 0.001, 'global_step': 0, 'lr_decay_ratio': 0.1, 'max_grad_norm': 5, 'max_to_keep': 100, 'min_learning_rate': 2e-06, 'optimizer': 'adam', 'patience': 10, 'steps': [20, 30, 40, 50], 'test_every_n_epochs': 5}}
+2019-07-07 13:54:50,301 - INFO - ('x_train', (3294, 12, 16, 2))
+2019-07-07 13:54:50,301 - INFO - ('y_train', (3294, 12, 16, 2))
+2019-07-07 13:54:50,301 - INFO - ('x_val', (471, 12, 16, 2))
+2019-07-07 13:54:50,301 - INFO - ('y_val', (471, 12, 16, 2))
+2019-07-07 13:54:50,301 - INFO - ('x_test', (941, 12, 16, 2))
+2019-07-07 13:54:50,302 - INFO - ('y_test', (941, 12, 16, 2))
+2019-07-07 13:55:02,162 - INFO - Total number of trainable parameters: 373376
+2019-07-07 13:55:03,049 - INFO - Start training ...
+2019-07-07 13:55:39,537 - INFO - Epoch [0/25] (52) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 36.2s
+2019-07-07 13:55:39,938 - INFO - Val loss decrease from inf to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-52
+2019-07-07 13:56:14,751 - INFO - Epoch [1/25] (104) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 34.8s
+2019-07-07 13:56:14,765 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-104
+2019-07-07 13:56:49,383 - INFO - Epoch [2/25] (156) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 34.6s
+2019-07-07 13:56:49,396 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-156
+2019-07-07 13:57:23,517 - INFO - Epoch [3/25] (208) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 34.1s
+2019-07-07 13:57:23,528 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-208
+2019-07-07 13:57:59,151 - INFO - Epoch [4/25] (260) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 35.6s
+2019-07-07 13:58:04,607 - INFO - Horizon 01, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 13:58:04,610 - INFO - Horizon 02, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 13:58:04,613 - INFO - Horizon 03, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 13:58:04,616 - INFO - Horizon 04, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 13:58:04,619 - INFO - Horizon 05, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 13:58:04,621 - INFO - Horizon 06, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 13:58:04,624 - INFO - Horizon 07, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 13:58:04,626 - INFO - Horizon 08, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 13:58:04,630 - INFO - Horizon 09, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 13:58:04,633 - INFO - Horizon 10, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 13:58:04,636 - INFO - Horizon 11, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 13:58:04,638 - INFO - Horizon 12, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 13:58:04,657 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-260
+2019-07-07 13:58:40,751 - INFO - Epoch [5/25] (312) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 36.1s
+2019-07-07 13:58:40,764 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-312
+2019-07-07 13:59:14,603 - INFO - Epoch [6/25] (364) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 33.8s
+2019-07-07 13:59:14,615 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-364
+2019-07-07 13:59:49,206 - INFO - Epoch [7/25] (416) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 34.6s
+2019-07-07 13:59:49,219 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-416
+2019-07-07 14:00:27,595 - INFO - Epoch [8/25] (468) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 38.4s
+2019-07-07 14:00:27,611 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-468
+2019-07-07 14:01:09,707 - INFO - Epoch [9/25] (520) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 42.1s
+2019-07-07 14:01:15,610 - INFO - Horizon 01, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:01:15,613 - INFO - Horizon 02, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:01:15,616 - INFO - Horizon 03, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:01:15,619 - INFO - Horizon 04, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:01:15,622 - INFO - Horizon 05, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:01:15,625 - INFO - Horizon 06, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:01:15,627 - INFO - Horizon 07, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:01:15,630 - INFO - Horizon 08, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:01:15,633 - INFO - Horizon 09, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:01:15,635 - INFO - Horizon 10, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:01:15,638 - INFO - Horizon 11, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:01:15,641 - INFO - Horizon 12, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:01:15,657 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-520
+2019-07-07 14:02:01,831 - INFO - Epoch [10/25] (572) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 46.2s
+2019-07-07 14:02:01,847 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-572
+2019-07-07 14:02:54,077 - INFO - Epoch [11/25] (624) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 52.2s
+2019-07-07 14:02:54,091 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-624
+2019-07-07 14:03:42,837 - INFO - Epoch [12/25] (676) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 48.7s
+2019-07-07 14:03:42,853 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-676
+2019-07-07 14:04:33,303 - INFO - Epoch [13/25] (728) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 50.4s
+2019-07-07 14:04:33,321 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-728
+2019-07-07 14:05:25,355 - INFO - Epoch [14/25] (780) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 52.0s
+2019-07-07 14:05:32,085 - INFO - Horizon 01, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:05:32,088 - INFO - Horizon 02, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:05:32,091 - INFO - Horizon 03, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:05:32,093 - INFO - Horizon 04, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:05:32,096 - INFO - Horizon 05, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:05:32,099 - INFO - Horizon 06, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:05:32,102 - INFO - Horizon 07, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:05:32,105 - INFO - Horizon 08, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:05:32,109 - INFO - Horizon 09, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:05:32,112 - INFO - Horizon 10, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:05:32,115 - INFO - Horizon 11, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:05:32,118 - INFO - Horizon 12, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:05:32,138 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-780
+2019-07-07 14:06:16,878 - INFO - Epoch [15/25] (832) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 44.7s
+2019-07-07 14:06:16,893 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-832
+2019-07-07 14:07:00,722 - INFO - Epoch [16/25] (884) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 43.8s
+2019-07-07 14:07:00,740 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-884
+2019-07-07 14:07:46,094 - INFO - Epoch [17/25] (936) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 45.4s
+2019-07-07 14:07:46,114 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-936
+2019-07-07 14:08:30,997 - INFO - Epoch [18/25] (988) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 44.9s
+2019-07-07 14:08:31,015 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-988
+2019-07-07 14:09:15,040 - INFO - Epoch [19/25] (1040) train_mae: 0.0000, val_mae: 0.0000 lr:0.010000 44.0s
+2019-07-07 14:09:22,057 - INFO - Horizon 01, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:09:22,062 - INFO - Horizon 02, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:09:22,067 - INFO - Horizon 03, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:09:22,071 - INFO - Horizon 04, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:09:22,074 - INFO - Horizon 05, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:09:22,077 - INFO - Horizon 06, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:09:22,080 - INFO - Horizon 07, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:09:22,084 - INFO - Horizon 08, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:09:22,088 - INFO - Horizon 09, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:09:22,091 - INFO - Horizon 10, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:09:22,095 - INFO - Horizon 11, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:09:22,100 - INFO - Horizon 12, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:09:22,120 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-1040
+2019-07-07 14:10:15,236 - INFO - Epoch [20/25] (1092) train_mae: 0.0000, val_mae: 0.0000 lr:0.001000 53.1s
+2019-07-07 14:10:15,267 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-1092
+2019-07-07 14:11:00,254 - INFO - Epoch [21/25] (1144) train_mae: 0.0000, val_mae: 0.0000 lr:0.001000 45.0s
+2019-07-07 14:11:00,270 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-1144
+2019-07-07 14:11:47,246 - INFO - Epoch [22/25] (1196) train_mae: 0.0000, val_mae: 0.0000 lr:0.001000 47.0s
+2019-07-07 14:11:47,268 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-1196
+2019-07-07 14:12:48,969 - INFO - Epoch [23/25] (1248) train_mae: 0.0000, val_mae: 0.0000 lr:0.001000 61.7s
+2019-07-07 14:12:48,999 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-1248
+2019-07-07 14:13:52,601 - INFO - Epoch [24/25] (1300) train_mae: 0.0000, val_mae: 0.0000 lr:0.001000 63.6s
+2019-07-07 14:14:01,089 - INFO - Horizon 01, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:14:01,095 - INFO - Horizon 02, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:14:01,098 - INFO - Horizon 03, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:14:01,102 - INFO - Horizon 04, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:14:01,107 - INFO - Horizon 05, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:14:01,111 - INFO - Horizon 06, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:14:01,115 - INFO - Horizon 07, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:14:01,118 - INFO - Horizon 08, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:14:01,123 - INFO - Horizon 09, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:14:01,128 - INFO - Horizon 10, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:14:01,132 - INFO - Horizon 11, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:14:01,136 - INFO - Horizon 12, MAE: 0.00, MAPE: 0.0000, RMSE: 0.00
+2019-07-07 14:14:01,161 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-1300
+2019-07-07 14:14:55,080 - INFO - Epoch [25/25] (1352) train_mae: 0.0000, val_mae: 0.0000 lr:0.001000 53.9s
+2019-07-07 14:14:55,102 - INFO - Val loss decrease from 0.0000 to 0.0000, saving to data/dummy/zeros/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0707135450/models-0.0000-1352

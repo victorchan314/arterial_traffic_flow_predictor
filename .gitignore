@@ -8,3 +8,4 @@ data/sensor_data
 .gitattributes
 .DS_Store
 DCRNN
+data/**/dcrnn_*
