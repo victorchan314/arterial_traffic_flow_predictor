@@ -1,13 +1,10 @@
 import sys
 
-import numpy as np
 import pandas as pd
 import datetime as dt
 
-from armax import armax
 from config import config
-import mysql_utils as mysql
-import visualization
+from lib import mysql_utils as mysql
 
 DATA_FREQUENCY = dt.timedelta(minutes=5)
 

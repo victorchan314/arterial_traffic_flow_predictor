@@ -1,11 +1,10 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import datetime as dt
 from statsmodels.tsa.seasonal import seasonal_decompose
 
-import utils
-import visualization
+from lib import utils, visualization
+
 
 def reindex_with_nans(data, data_freq):
     time = data.index.to_pydatetime()

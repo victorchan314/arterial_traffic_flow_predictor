@@ -8,9 +8,7 @@ sys.path.append(parent_dir)
 #import numpy as np
 import pandas as pd
 
-import mysql_utils
-
-
+from lib import mysql_utils
 
 INTERSECTIONS = [5083, 5082, 6081, 5091, 5072]
 

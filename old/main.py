@@ -3,11 +3,8 @@ import sys
 import numpy as np
 import datetime as dt
 
-from armax import armax
 from config import config
-import mysql_utils as mysql
-import visualization
-
+from lib import visualization, mysql_utils as mysql
 
 #DETECTOR_DATA_TABLE = "detector_data_processed_2017_1"
 DETECTOR_DATA_TABLE = "detector_data_processed_2017"

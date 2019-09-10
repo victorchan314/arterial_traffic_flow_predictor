@@ -10,10 +10,7 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 
-import mysql_utils
-import utils
-
-
+from lib import utils, mysql_utils
 
 PHASE_PLANS_PATH = "data/model/phase_plans{}.csv"
 DETECTOR_LIST_PATH = "data/model/sensors_advanced{}.txt"
