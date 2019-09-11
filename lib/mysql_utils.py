@@ -1,7 +1,7 @@
 import sys
 import mysql.connector
 
-from config import config
+from config.config import config
 
 def connect_to_database(user, password, host, database):
     try:

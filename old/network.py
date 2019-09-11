@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import datetime as dt
 
-from config import config
+from config.config import config
 from lib import mysql_utils as mysql
 
 DATA_FREQUENCY = dt.timedelta(minutes=5)

@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import datetime as dt
 
-from config import config
+from config.config import config
 from lib import visualization, mysql_utils as mysql
 
 #DETECTOR_DATA_TABLE = "detector_data_processed_2017_1"

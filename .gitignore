@@ -1,10 +1,19 @@
-__pycache__
-config.py
-.ipynb_checkpoints
+# swap files
 *.swp
 *.swo
-data/sensor_data
-.DS_Store
-DCRNN
-data/**/dcrnn_*
+
+# auto-generated
 .idea
+.ipynb_checkpoints
+.DS_Store
+__pycache__
+
+# data files
+data/sensor_data
+data/**/dcrnn_*
+
+# sub-repository
+DCRNN
+
+# sensitive
+config/config.py
