@@ -26,6 +26,9 @@ class Model(object):
     def _train(self):
         raise NotImplementedError
 
+    def predict(self, x):
+        raise NotImplementedError
+
     def get_predictions(self):
         if not self.is_trained:
             raise ModelNotTrainedException
