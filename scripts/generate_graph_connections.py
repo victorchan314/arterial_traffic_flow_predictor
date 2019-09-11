@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 
-parent_dir = os.path.abspath("/Users/victorchan/Dropbox/UndergradResearch/Victor/Code")
+parent_dir = os.path.abspath("/Users/victorchan/Desktop/UC Berkeley/Research/Code")
 sys.path.append(parent_dir)
 
 #import numpy as np
@@ -106,9 +106,9 @@ if __name__ == "__main__":
     #phase_timings = pd.DataFrame(phase_timings, columns=["IntersectionID", "EndDate", "EndTime", "PhaseTimings"])
     detector_inventory = pd.DataFrame(detector_inventory, columns=["Sensor", "IntersectionID", "SensorID", "Direction", "Movement"])
     detector_inventory.set_index("Sensor", inplace=True)
-    edges = pd.read_csv("data/model/edges{}.csv".format(intersection), header=None)
-    phases = pd.read_csv("data/model/phases.csv")
-    phase_plans = pd.read_csv("data/model/phase_plans{}.csv".format(intersection))
+    edges = pd.read_csv("data/inputs/model/edges{}.csv".format(intersection), header=None)
+    phases = pd.read_csv("data/inputs/model/phases.csv")
+    phase_plans = pd.read_csv("data/inputs/model/phase_plans{}.csv".format(intersection))
 
     if SENSORS_ADVANCED:
         generate_sensors_advanced_file(detector_inventory, "data/model/sensors_advanced{}.txt".format(intersection))

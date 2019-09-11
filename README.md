@@ -2,6 +2,10 @@
 
 This repository contains all of the code that I have been using for my research.
 
+Code to run the training data generation script
+
+`python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --output_dir test --timestamps_dir test -v`
+
 ### Random notes about DCRNN
 
 - Data loading is weird. At first glance, it seems to only run through the data once, replicating the last value if necessary, and if it runs out of data, does not supply any more data. This might be avoided if multiple DataLoaders are created.

@@ -12,10 +12,10 @@ import datetime as dt
 
 from lib import utils, mysql_utils
 
-PHASE_PLANS_PATH = "data/model/phase_plans{}.csv"
-DETECTOR_LIST_PATH = "data/model/sensors_advanced{}.txt"
+PHASE_PLANS_PATH = "data/inputs/model/phase_plans{}.csv"
+DETECTOR_LIST_PATH = "data/inputs/model/sensors_advanced{}.txt"
 
-DETECTOR_DATA_QUERY = "SELECT DetectorID, Year, Month, Day, Time, Volume AS Flow FROM detector_data_processed_2017 WHERE ({})"
+DETECTOR_DATA_QUERY = "SELECT DetectorID, Year, Month, Day, Time, Volume AS Flow, Health FROM detector_data_processed_2017 NATURAL JOIN detector_health WHERE ({}) AND Health = 1"
 DETECTOR_DATA_FREQUENCY = dt.timedelta(minutes=5)
 
 DUMMY_DATA_TYPES = ["zeros", "ones", "linear_integers", "linear_floats"]
@@ -151,20 +151,25 @@ def process_detector_data(detector_data, detector_list, stretch_length, verbose=
 
     return detector_data_array, timestamps, timestamps_array
 
-def generate_splits(detector_data_processed, timestamps_array, x_offset, y_offset, output_path, verbose=0):
+def generate_splits(detector_data_processed, x_offset, y_offset, output_path, timestamps=None, verbose=0):
     x_offsets = np.arange(-x_offset + 1, 1, 1)
     y_offsets = np.arange(1, y_offset + 1, 1)
     x = detector_data_processed[:, :x_offset, ...]
     y = detector_data_processed[:, x_offset:, ...]
-    timestamps_x = timestamps_array[:, :x_offset, ...]
-    timestamps_y = timestamps_array[:, x_offset:, ...]
+
+    if not timestamps is None:
+        timestamps_x = timestamps[:, :x_offset, ...]
+        timestamps_y = timestamps[:, x_offset:, ...]
+
     if verbose:
         print("Detetctor data shape: {}".format(detector_data_processed.shape))
         print("x shape: {}".format(x.shape))
         print("y shape: {}".format(y.shape))
-        print("Timestamps array shape: {}".format(timestamps_array.shape))
-        print("x shape: {}".format(x.shape))
-        print("y shape: {}".format(y.shape))
+
+        if not timestamps is None:
+            print("Timestamps array shape: {}".format(timestamps.shape))
+            print("x shape: {}".format(timestamps_x.shape))
+            print("y shape: {}".format(timestamps_y.shape))
 
     # Write the data into npz file
     # 7/10 training, 1/10 validation, 2/10 test
@@ -177,25 +182,33 @@ def generate_splits(detector_data_processed, timestamps_array, x_offset, y_offse
     x_val, y_val = x[num_train:num_train+num_val], y[num_train:num_train+num_val]
     x_test, y_test = x[-num_test:], y[-num_test:]
 
-    timestamps_x_train, timestamps_y_train = timestamps_x[:num_train], timestamps_y[:num_train]
-    timestamps_x_val, timestamps_y_val = timestamps_x[num_train:num_train+num_val], timestamps_y[num_train:num_train+num_val]
-    timestamps_x_test, timestamps_y_test = timestamps_x[-num_test:], timestamps_y[-num_test:]
+    if not timestamps is None:
+        timestamps_x_train, timestamps_y_train = timestamps_x[:num_train], timestamps_y[:num_train]
+        timestamps_x_val, timestamps_y_val = timestamps_x[num_train:num_train+num_val], timestamps_y[num_train:num_train+num_val]
+        timestamps_x_test, timestamps_y_test = timestamps_x[-num_test:], timestamps_y[-num_test:]
 
     for s in ["train", "val", "test"]:
         _x, _y = locals()["x_" + s], locals()["y_" + s]
-        _timestamps_x, _timestamps_y = locals()["timestamps_x_" + s], locals()["timestamps_y_" + s]
+        if not timestamps is None:
+            _timestamps_x, _timestamps_y = locals()["timestamps_x_" + s], locals()["timestamps_y_" + s]
+
         if verbose:
             print("{} x: {}, y: {}".format(s, _x.shape, _y.shape))
-            print("{} timestamps x: {}, timestamps y: {}".format(s, _timestamps_x.shape, _timestamps_y.shape))
+            if not timestamps is None:
+                print("{} timestamps x: {}, timestamps y: {}".format(s, _timestamps_x.shape, _timestamps_y.shape))
 
         save_dict = {
                 "x": _x,
                 "y": _y,
-                "timestamps_x": _timestamps_x,
-                "timestamps_y": _timestamps_y,
                 "x_offsets": x_offsets.reshape(list(x_offsets.shape) + [1]),
                 "y_offsets": y_offsets.reshape(list(y_offsets.shape) + [1])
                 }
+
+        if not timestamps is None:
+            save_dict.update({
+                "timestamps_x": _timestamps_x,
+                "timestamps_y": _timestamps_y,
+            })
 
         np.savez_compressed(os.path.join(output_path, "{}.npz".format(s)), **save_dict)
 
@@ -217,7 +230,8 @@ def main(args):
         dummy_shape = ast.literal_eval(args.dummy_shape or "(4706, 0, 16, 2)")
         dummy_shape = (dummy_shape[0], x_offset + y_offset, *dummy_shape[2:])
         dummy_data = generate_dummy_data(args.dummy, dummy_shape, verbose=verbose)
-        generate_splits(dummy_data, x_offset, y_offset, output_path, verbose=verbose)
+        if args.output_dir:
+            generate_splits(dummy_data, x_offset, y_offset, args.output_dir, verbose=verbose)
     else:
         intersection = "_{}".format(args.intersection) if args.intersection else ""
         plan_name = args.plan_name
@@ -227,7 +241,7 @@ def main(args):
         detector_data_processed, timestamps, timestamps_array = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
 
         if args.output_dir:
-            generate_splits(detector_data_processed, timestamps_array, x_offset, y_offset, args.output_dir, verbose=verbose)
+            generate_splits(detector_data_processed, x_offset, y_offset, args.output_dir, timestamps=timestamps_array, verbose=verbose)
 
         if args.timestamps_dir:
             save_timestamps(timestamps, args.timestamps_dir)
