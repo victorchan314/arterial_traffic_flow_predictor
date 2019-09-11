@@ -47,6 +47,9 @@ def run_models(data, model_configs, model_order=None, verbose=0):
     model_names = model_order or list(model_configs.keys())
     models = load_models(model_names)
 
+    if verbose:
+        print("Starting to run models...")
+
     if verbose > 2:
         print("Max train_y: {}".format(np.max(train_y)))
         print("Min train_y: {}".format(np.min(train_y)))
@@ -60,7 +63,14 @@ def run_models(data, model_configs, model_order=None, verbose=0):
         model_class = models[i]
         kwargs = model_configs[model_name]
         model = model_class(train_x, train_y, val_x, val_y, test_x, test_y, **kwargs)
+        if verbose:
+            print("Created {} model".format(model_name))
+
         model.train()
+
+        if verbose:
+            print("Trained {} model".format(model_name))
+
         errors = model.get_errors()
 
         if verbose > 1:

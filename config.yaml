@@ -1,4 +1,6 @@
 data_directory: data/inputs/5083_sensor_data
-model_order: ["Constant"]
+model_order: ["Constant", "SeasonalNaive"]
 models:
   Constant: {}
+  SeasonalNaive:
+    seasonality: 252
