@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import datetime as dt
 from statsmodels.tsa.seasonal import seasonal_decompose
 
-from lib import utils, visualization
+from lib import data_utils, visualization
 
 
 def reindex_with_nans(data, data_freq):
@@ -136,9 +136,9 @@ def test_imputation_random(data, data_freq, seasonal_freq, imputation_function, 
     errors = []
 
     if error == "mape":
-        error_function = utils.mape
+        error_function = data_utils.mape
     elif error == "mase":
-        error_function = utils.mase
+        error_function = data_utils.mase
     else:
         raise ValueError("Invalid error type")
 
@@ -203,7 +203,7 @@ def test_imputation_sequential(data, data_freq, seasonal_freq, imputation_functi
     #     raise ValueError("Invalid error type")
 
     # Default error function is MAPE
-    error_function = utils.mape
+    error_function = data_utils.mape
 
     for i in range(k):
         test_index = test_indices[i]

@@ -7,7 +7,7 @@ sys.path.append(parent_dir)
 import numpy as np
 
 from models.model import Model
-from lib import utils
+from lib import data_utils
 
 class Constant(Model):
     """Model that returns a constant value across all axes"""
@@ -17,13 +17,13 @@ class Constant(Model):
     def _train(self):
         self.mean = np.mean(self.train_y)
         self.train_y_pred = self.predict(self.train_x)
-        self.errors["train"] = utils.get_standard_errors(self.train_y, self.train_y_pred)
+        self.errors["train"] = data_utils.get_standard_errors(self.train_y, self.train_y_pred)
 
         self.val_y_pred = self.predict(self.val_x)
-        self.errors["val"] = utils.get_standard_errors(self.val_y, self.val_y_pred)
+        self.errors["val"] = data_utils.get_standard_errors(self.val_y, self.val_y_pred)
 
         self.predictions = self.predict(self.test_x)
-        self.errors["test"] = utils.get_standard_errors(self.test_y, self.predictions)
+        self.errors["test"] = data_utils.get_standard_errors(self.test_y, self.predictions)
 
     def predict(self, x):
         return np.tile(self.mean, x.shape[:-1] + (x.shape[-1] - 1,))

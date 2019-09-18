@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 
-from lib import utils, mysql_utils
+from lib import data_utils, mysql_utils
 
 PHASE_PLANS_PATH = "data/inputs/model/phase_plans{}.csv"
 DETECTOR_LIST_PATH = "data/inputs/model/sensors_advanced{}.txt"
@@ -124,7 +124,7 @@ def create_4d_detector_data_array(detector_data, timestamps, detector_list, stre
     return detector_data_array, timestamps_array
 
 def get_long_enough_stretch_indices(timestamps, stretch_length):
-    stretches = utils.get_stretches(timestamps, DETECTOR_DATA_FREQUENCY)
+    stretches = data_utils.get_stretches(timestamps, DETECTOR_DATA_FREQUENCY)
     long_enough_indices = np.argwhere(stretches[:, 1] - stretches[:, 0] > stretch_length).flatten()
     stretches = stretches[long_enough_indices]
 

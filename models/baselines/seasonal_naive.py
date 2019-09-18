@@ -7,7 +7,7 @@ sys.path.append(parent_dir)
 import numpy as np
 
 from models.model import Model
-from lib import utils
+from lib import data_utils
 
 class SeasonalNaive(Model):
     """Model that predicts value as the last seasonal occurrence of that value"""
@@ -19,13 +19,13 @@ class SeasonalNaive(Model):
     def _train(self):
         self.means = self._get_means(self.train_y)
         self.train_y_pred = self.predict(self.train_x)
-        self.errors["train"] = utils.get_standard_errors(self.train_y, self.train_y_pred)
+        self.errors["train"] = data_utils.get_standard_errors(self.train_y, self.train_y_pred)
 
         self.val_y_pred = self.predict(self.val_x)
-        self.errors["val"] = utils.get_standard_errors(self.val_y, self.val_y_pred)
+        self.errors["val"] = data_utils.get_standard_errors(self.val_y, self.val_y_pred)
 
         self.predictions = self.predict(self.test_x)
-        self.errors["test"] = utils.get_standard_errors(self.test_y, self.predictions)
+        self.errors["test"] = data_utils.get_standard_errors(self.test_y, self.predictions)
 
     def predict(self, x):
         num_data = x.shape[0]

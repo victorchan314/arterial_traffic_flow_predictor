@@ -4,7 +4,7 @@ import numpy as np
 from statsmodels.tsa import arima_model
 import matplotlib.pyplot as plt
 
-from lib import utils
+from lib import data_utils
 
 
 class armax:
@@ -313,7 +313,7 @@ class armax:
             plt.plot(training_data.index[predict_start:predict_end], predictions)
             plt.show()
 
-            current_error = utils.mape(predictions, test_data.values)
+            current_error = data_utils.mape(predictions, test_data.values)
             errors.append(current_error)
 
         return np.mean(errors), np.array(errors)
