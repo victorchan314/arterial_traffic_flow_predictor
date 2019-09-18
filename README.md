@@ -2,17 +2,25 @@
 
 This repository contains all of the code that I have been using for my research.
 
-Code to run the training data generation script
+Command to run the training data generation script
 
-    python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --output_dir test --timestamps_dir test -v
+    python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --output_dir data/inputs/5083_sensor_data -v
 
-Code to run all models to have errors in a central location
+Command to run all models to have errors in a central location
 
     python3 model_runner.py config.yaml -vv
 
-Code to run DCRNN for sensor 5083
+Command to run DCRNN for sensor 5083
 
     python3 DCRNN/dcrnn_train.py --config_filename data/5083/5083.yaml | tee data/5083/5083.out
+
+Command to get predictions
+
+    python3 DCRNN/run_demo.py --config_filename data/5083/dcrnn_DR_2_h_12_64-64_lr_0.01_bs_64_0918120854/config_92.yaml --output_filename data/5083/predictions.npz
+
+Command to plot predictions
+
+    python3 DCRNN/scripts/graph_predictions.py data/5083/predictions.npz data/inputs/5083_sensor_data/test.npz
 
 ### Random notes about DCRNN
 
