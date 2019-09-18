@@ -17,3 +17,6 @@ DCRNN
 
 # sensitive
 config/config.py
+
+# test files
+**/test

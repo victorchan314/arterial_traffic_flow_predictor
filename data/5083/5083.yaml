@@ -3,10 +3,10 @@ base_dir: data/5083
 log_level: INFO
 data:
   batch_size: 64
-  dataset_dir: data/5083_sensor_data
+  dataset_dir: data/inputs/5083_sensor_data
   test_batch_size: 64
   val_batch_size: 64
-  graph_pkl_filename: data/model/adjacency_matrix_5083_P2.pkl
+  graph_pkl_filename: data/inputs/model/adjacency_matrix_5083_P2.pkl
 
 model:
   cl_decay_steps: 2000
@@ -15,7 +15,7 @@ model:
   input_dim: 2
   l1_decay: 0
   max_diffusion_step: 2
-  num_nodes: 16
+  num_nodes: 15
   num_rnn_layers: 2
   output_dim: 2
   rnn_units: 64

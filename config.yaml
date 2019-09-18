@@ -1,6 +1,9 @@
 data_directory: data/inputs/5083_sensor_data
-model_order: ["Constant", "SeasonalNaive"]
+model_order: ["Constant", "SeasonalNaive", "DCRNN"]
 models:
   Constant: {}
   SeasonalNaive:
     seasonality: 252
+  DCRNN:
+    config_filename: "data/test/5083.yaml"
+    output_filename: "data/test/5083.out"
