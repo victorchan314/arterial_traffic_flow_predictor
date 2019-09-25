@@ -10,17 +10,17 @@ class Model(object):
         self.test_x = test_x
         self.test_y = test_y
 
-        self.is_trained = False
+        self._is_trained = False
 
         self.predictions = None
         self.errors = {}
         self.metadata = {}
 
     def is_trained(self):
-        return self.is_trained
+        return self._is_trained
 
     def train(self):
-        self.is_trained = True
+        self._is_trained = True
         self._train()
 
     def _train(self):
@@ -30,7 +30,7 @@ class Model(object):
         raise NotImplementedError
 
     def get_predictions(self):
-        if not self.is_trained:
+        if not self.is_trained():
             raise ModelNotTrainedException
         else:
             return self._get_predictions()
@@ -39,7 +39,7 @@ class Model(object):
         return self.predictions
 
     def get_errors(self):
-        if not self.is_trained:
+        if not self.is_trained():
             raise ModelNotTrainedException
         else:
             return self._get_errors()
@@ -48,7 +48,7 @@ class Model(object):
         return self.errors
 
     def get_metadata(self):
-        if not self.is_trained:
+        if not self.is_trained():
             raise ModelNotTrainedException
         else:
             return self._get_metadata()
