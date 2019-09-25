@@ -1,9 +1,3 @@
-import os
-import sys
-
-parent_dir = os.path.abspath("/Users/victorchan/Desktop/UC Berkeley/Research/Code")
-sys.path.append(parent_dir)
-
 import numpy as np
 
 from models.model import Model

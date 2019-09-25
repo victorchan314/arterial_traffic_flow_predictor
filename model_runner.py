@@ -3,7 +3,7 @@ import os
 import sys
 import yaml
 
-parent_dir = os.path.abspath("/Users/victorchan/Desktop/UC Berkeley/Research/Code")
+parent_dir = os.path.abspath(".")
 sys.path.append(parent_dir)
 
 import numpy as np
