@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 
-from lib import data_utils, mysql_utils
+from lib import data_utils, mysql_utils, utils
 
 PHASE_PLANS_PATH = "data/inputs/model/phase_plans{}.csv"
 DETECTOR_LIST_PATH = "data/inputs/model/sensors_advanced{}.txt"
@@ -210,9 +210,11 @@ def generate_splits(detector_data_processed, x_offset, y_offset, output_path, ti
                 "timestamps_y": _timestamps_y,
             })
 
+        utils.verify_or_create_path(output_path)
         np.savez_compressed(os.path.join(output_path, "{}.npz".format(s)), **save_dict)
 
 def save_timestamps(timestamps, output_path):
+    utils.verify_or_create_path(output_path)
     np.savez_compressed(os.path.join(output_path, "timestamps.npz"), timestamps=timestamps)
 
 

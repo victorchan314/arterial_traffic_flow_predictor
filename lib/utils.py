@@ -1,4 +1,8 @@
+import os
 import sys
+
+def verify_or_create_path(path):
+    os.makedirs(path, exist_ok=True)
 
 class Tee(object):
     def __init__(self, path):
