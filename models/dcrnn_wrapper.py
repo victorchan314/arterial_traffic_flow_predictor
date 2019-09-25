@@ -38,6 +38,7 @@ class DCRNN(Model):
             self.tf_config = tf.ConfigProto(device_count={'GPU': 0})
         self.tf_config.gpu_options.allow_growth = True
         self.supervisor = DCRNNSupervisor(adj_mx=self.adj_mx, **self.supervisor_config)
+        self.session = tf.Session(config=self.tf_config)
 
     def train(self):
         self._train()
@@ -48,23 +49,25 @@ class DCRNN(Model):
             if self.output_filename:
                 tee = Tee(self.output_filename)
 
-            with tf.Session(config=self.tf_config) as sess:
-                self.supervisor.train(sess=sess)
+            self.supervisor.train(sess=self.session)
 
             if self.output_filename:
                 del tee
         else:
-            with tf.Session(config=self.tf_config) as sess:
-                if "train" in self.supervisor_config and "model_filename" in self.supervisor_config["train"]:
-                    self.supervisor.load(sess, self.supervisor_config['train']['model_filename'])
+            if "train" in self.supervisor_config and "model_filename" in self.supervisor_config["train"]:
+                self.supervisor.load(self.session, self.supervisor_config['train']['model_filename'])
 
         self.get_errors_from_log_file()
+        self.predictions = self.predict(None)
+        self.errors["test"] = data_utils.get_standard_errors(np.array(self.predictions["groundtruth"]), np.array(self.predictions["predictions"]))
 
     def predict(self, x):
-        with tf.Session(config=self.tf_config) as sess:
-            outputs = self.supervisor.evaluate(sess)
-            np.savez_compressed(self.predictions_filename, **outputs)
-            print('Predictions saved as {}.'.format(self.predictions_filename))
+        # x is not used in this function. It is assumed that x is the test data from the config file.
+        outputs = self.supervisor.evaluate(self.session)
+        np.savez_compressed(self.predictions_filename, **outputs)
+        print('Predictions saved as {}.'.format(self.predictions_filename))
+
+        return outputs
 
     def get_errors_from_log_file(self):
         if "train" in self.supervisor_config and "log_dir" in self.supervisor_config["train"]:
@@ -90,3 +93,6 @@ class DCRNN(Model):
 
         self.errors["train"] = {"mae": errors["train_mae"]}
         self.errors["val"] = {"mae": errors["val_mae"]}
+
+    def close(self):
+        self.session.close()

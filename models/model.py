@@ -16,6 +16,9 @@ class Model(object):
         self.errors = {}
         self.metadata = {}
 
+    def close(self):
+        pass
+
     def is_trained(self):
         return self._is_trained
 

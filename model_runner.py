@@ -78,6 +78,8 @@ def run_models(data, model_configs, model_order=None, verbose=0):
                 for key, value in errors[category].items():
                     print("{} {}: {}".format(category, key, value))
 
+        model.close()
+
 
 
 def main(args):
