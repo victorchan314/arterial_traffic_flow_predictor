@@ -35,6 +35,7 @@ Command to plot predictions
 - dcrnn_cell:103: Could be (1 - u) * state + u * c; in theory is the same, though
 - Validation loss is used for early stopping regularization
 - `self._test_model` uses the variables from `self._train_model` because they share the same variable scope
+- The constant shifting exhibited in the data is a property of the data; it's graphed correctly, at least
 
 ### Confusions/Weird things
 
@@ -49,9 +50,8 @@ Command to plot predictions
 
 ### TODO
 
-- Plan P1
+- Try with shorter offsets and horizons
 - Add different kinds of errors to output
-- Step through data to debug constant shifting
 - Baseline methods visualization and table
 - Predictions on dummy data that is linear
 - Try predictions for only 1 or 2 detectors with full coverage
