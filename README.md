@@ -33,25 +33,25 @@ Command to plot predictions
 ### Notes about DCRNN
 
 - I think the way the word "epoch" is used is incorrect; not a huge deal, but just misleading
-- dcrnn_cell:103: Could be (1 - u) * state + u * c; in theory is the same, though
+- `dcrnn_cell:103`: Could be `(1 - u) * state + u * c`; in theory is the same, though
 - Validation loss is used for early stopping regularization
 - `self._test_model` uses the variables from `self._train_model` because they share the same variable scope
 - The constant shifting exhibited in the data is a property of the data; it's graphed correctly, at least
 
 ### Bug fixes
 
-- metrics.py:88: In the function `masked_mape_np`, I added an epsilon to prevent blowup of MAPE
+- `metrics.py:88`: In the function `masked_mape_np`, I added an epsilon to prevent blowup of MAPE
+- `utils.py:178`: In `load_dataset`, change time to be first dimension and data to be in other dimensions. Update `dcrnn_supervisor.py` and `generate_training_data.py` as well.
+- `dcrnn_model:39`: Why are the labels using `input_dim` instead of `output_dim`? Changed to `output_dim`
 
 ### Confusions/Weird things
 
 - Data loading is weird. At first glance, it seems to only run through the data once, replicating the last value if necessary, and if it runs out of data, does not supply any more data. This might be avoided if multiple DataLoaders are created.
 - Might want to bootstrap (at least the replications)
-- StandardScaler only scales the first dimension of the input (maybe to leave time unaffected). Might want to change it so that time is the first dimension and everything else is scaled, or time is the second dimension and everything else is scaled.
-- Change DCRNN so that it predicts with the shape (num_data, offsets, num_detectors, num_dimensions) and that time is not included in the output
-- dcrnn_cell:165: Is there an extra 2 times the last extraneous term in the sum?
-- dcrnn_model:49: It looks like the decoding cell is the same cell as the encoding cell, which may not perform as well, according to Sutskever's paper
-- dcrnn_model:39: Why are the labels using input_dim instead of output_dim?
-- dcrnn_model:48-49: Uses the same cell * `num_layers`
+- Change DCRNN so that it predicts with the shape `(num_data, offsets, num_detectors, num_dimensions)` and that time is not included in the output
+- `dcrnn_cell:165`: Is there an extra 2 times the last extraneous term in the sum?
+- `dcrnn_model:49`: It looks like the decoding cell is the same cell as the encoding cell, which may not perform as well, according to Sutskever's paper
+- `dcrnn_model:48-49`: Uses the same cell * `num_layers`
 
 ### TODO
 

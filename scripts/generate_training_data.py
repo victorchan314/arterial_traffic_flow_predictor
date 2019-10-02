@@ -106,9 +106,7 @@ def create_4d_detector_data_array(detector_data, timestamps, detector_list, stre
 
         for i, timestamp in enumerate(time_stretch):
             detector_data_at_timestamp = detector_data_grouped_by_time.get_group(timestamp)
-            #detector_data_array_at_timestamp = detector_data_at_timestamp.set_index("DetectorID").loc[detector_list].iloc[:, 2:].values
-            # Temporary workaround to get DetectorID in the first column
-            detector_data_array_at_timestamp = detector_data_at_timestamp.set_index("DetectorID").loc[detector_list].iloc[:, [3, 2]].values
+            detector_data_array_at_timestamp = detector_data_at_timestamp.set_index("DetectorID").loc[detector_list].iloc[:, 2:].values
             if verbose > 2:
                 print("Working on detector data at timestamp {}".format(timestamp))
 
