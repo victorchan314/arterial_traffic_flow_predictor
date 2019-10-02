@@ -27,6 +27,9 @@ class DCRNN(Model):
         self.predictions_filename = predictions_filename
         self._is_trained = is_trained
 
+        if self.output_filename:
+            self.tee = Tee(self.output_filename)
+
         with open(config_filename) as f:
             self.supervisor_config = yaml.load(f)
 
@@ -46,13 +49,7 @@ class DCRNN(Model):
     def _train(self):
         if not self._is_trained:
             self._is_trained = True
-            if self.output_filename:
-                tee = Tee(self.output_filename)
-
             self.supervisor.train(sess=self.session)
-
-            if self.output_filename:
-                del tee
         else:
             if "train" in self.supervisor_config and "model_filename" in self.supervisor_config["train"]:
                 self.supervisor.load(self.session, self.supervisor_config['train']['model_filename'])
@@ -96,3 +93,5 @@ class DCRNN(Model):
 
     def close(self):
         self.session.close()
+        if self.output_filename:
+            del self.tee
