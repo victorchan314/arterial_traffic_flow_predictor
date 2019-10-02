@@ -17,6 +17,7 @@ class Tee(object):
     def write(self, data):
         self.stdout.write(data)
         self.file.write(data)
+        self.flush()
 
     def flush(self):
         self.file.flush()

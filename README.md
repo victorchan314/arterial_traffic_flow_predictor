@@ -12,6 +12,7 @@ Command to generate distances and adjacency matrix
 Command to run the training data generation script
 
     python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --output_dir data/inputs/5083_sensor_data -v
+    python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --x_offset 12 --y_offset 3 --output_dir data/inputs/5083_P2_o12_h3_sensor_data --timestamps_dir data/inputs/5083_P2_o12_h3_sensor_data -v
 
 Command to run all models to have errors in a central location
 
@@ -36,6 +37,10 @@ Command to plot predictions
 - Validation loss is used for early stopping regularization
 - `self._test_model` uses the variables from `self._train_model` because they share the same variable scope
 - The constant shifting exhibited in the data is a property of the data; it's graphed correctly, at least
+
+### Bug fixes
+
+- metrics.py:88: In the function `masked_mape_np`, I added an epsilon to prevent blowup of MAPE
 
 ### Confusions/Weird things
 

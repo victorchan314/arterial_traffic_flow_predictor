@@ -44,7 +44,7 @@ def run_models(data, model_configs, model_order=None, verbose=0):
     test_x = data["test_x"]
     test_y = data["test_y"]
 
-    model_names = model_order or list(model_configs.keys())
+    model_names = list(model_configs.keys()) if model_order is None else model_order
     models = load_models(model_names)
 
     if verbose:

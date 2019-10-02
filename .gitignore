@@ -9,7 +9,7 @@
 __pycache__
 
 # data files
-data/sensor_data
+data/**/*sensor_data
 data/**/dcrnn_*
 
 # sub-repository
