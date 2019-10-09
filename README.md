@@ -43,19 +43,19 @@ Command to plot predictions
 - `metrics.py:88`: In the function `masked_mape_np`, I added an epsilon to prevent blowup of MAPE
 - `utils.py:178`: In `load_dataset`, change time to be first dimension and data to be in other dimensions. Update `dcrnn_supervisor.py` and `generate_training_data.py` as well.
 - `dcrnn_model:39`: Why are the labels using `input_dim` instead of `output_dim`? Changed to `output_dim`
+- `dcrnn_model:48-49`: Used the same cell * `num_layers`, so changed to a list comprehension to use different cells inside the stacked cell; then reverted this, as it looks like RNNCells do not keep any meaningful state since state is passed into the `__call__` function
+- `dcrnn_model:49`: It looks like the decoding cell is the same cell as the encoding cell, which may not perform as well, according to Sutskever's paper; however, changing this didn't help, for the same reason why `cell * num_layers` wasn't a problem
+- `dcrnn_cell:165`: Is there an extra 2 times the last extraneous term in the sum? I think that because `max_diffusion_step` is 2, that in the end the only differences were with scaling factors, but I changed it so that there is just 1 diffusion term for each step for each support
 
 ### Confusions/Weird things
 
 - Data loading is weird. At first glance, it seems to only run through the data once, replicating the last value if necessary, and if it runs out of data, does not supply any more data. This might be avoided if multiple DataLoaders are created.
 - Might want to bootstrap (at least the replications)
 - Change DCRNN so that it predicts with the shape `(num_data, offsets, num_detectors, num_dimensions)` and that time is not included in the output
-- `dcrnn_cell:165`: Is there an extra 2 times the last extraneous term in the sum?
-- `dcrnn_model:49`: It looks like the decoding cell is the same cell as the encoding cell, which may not perform as well, according to Sutskever's paper
-- `dcrnn_model:48-49`: Uses the same cell * `num_layers`
 
 ### TODO
 
-- Try with shorter offsets and horizons
+- Try predicting one horizon at once (implement in DCRNN)
 - Add different kinds of errors to output
 - Baseline methods visualization and table
 - Predictions on dummy data that is linear
