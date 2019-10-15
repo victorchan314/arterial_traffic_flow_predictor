@@ -1,8 +1,0 @@
-Predictions saved as data/5083_P1/predictions.npz.
-Trained DCRNN model
-train mae: 10.688
-val mae: 13.5753
-test mse: 1534.605071730427
-test rmse: 39.174035683478245
-test mae: 27.877503682824347
-test mape: 13.872692942784028
