@@ -75,3 +75,20 @@ def flatten_circulant_like_matrix_by_stretches(matrix, stretches):
         flattened = np.concatenate((flattened, matrix[start:end, 0, ...], matrix[end - 1, 1:, ...]), axis=0)
 
     return flattened
+
+# Appends filler data to an array until its axis has at least length limit
+def pad_array(array, limit, axis=0, filler="zeros"):
+    padding = limit - array.shape[axis]
+    if padding > 0:
+        filler_shape = array.shape[:axis] + (padding,) + array.shape[(axis + 1):]
+
+        if filler == "zeros":
+            filler_array = np.zeros(filler_shape)
+        else:
+            raise ValueError("filler type {} is invalid".format(filler))
+
+        padded_array = np.concatenate((array, filler_array), axis=axis)
+
+        return padded_array
+    else:
+        return array
