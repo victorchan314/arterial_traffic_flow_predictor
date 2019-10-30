@@ -1,9 +1,9 @@
 ---
-base_dir: data/5083_P1
+base_dir: data/5083_P1_o12_h12
 log_level: INFO
 data:
   batch_size: 64
-  dataset_dir: data/inputs/5083_P1_sensor_data
+  dataset_dir: data/inputs/5083_P1_o12_h12_sensor_data
   test_batch_size: 64
   val_batch_size: 64
   graph_pkl_filename: data/inputs/model/adjacency_matrix_5083_P1.pkl
