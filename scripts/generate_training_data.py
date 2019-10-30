@@ -53,13 +53,15 @@ def get_sensors_list(path):
 
     return sensors_list
 
-def get_detector_data(detector_list, intersection="", plan=None, limit=np.inf, date_limit=dt.date.max):
+def get_detector_data(detector_list, intersection="", plan=None, limit=np.inf, date_limit=dt.date.max, start_time_buffer=0, end_time_buffer=0):
     query = DETECTOR_DATA_QUERY.format(" OR ".join(["DetectorID = {}".format(d) for d in detector_list]))
     if plan:
         phase_plans = pd.read_csv(PHASE_PLANS_PATH.format(intersection))
         relevant_phase_plans = phase_plans[phase_plans["PlanName"] == plan]
         intervals = relevant_phase_plans.loc[:, ["StartTime", "EndTime"]].values * 3600
-        query += " AND ({})".format(" OR ".join(["(Time >= {} AND Time < {})".format(interval[0], interval[1]) for interval in intervals]))
+        buffered_intervals = [[interval[0] - (DETECTOR_DATA_FREQUENCY * start_time_buffer).total_seconds(),
+                               interval[1] + (DETECTOR_DATA_FREQUENCY * end_time_buffer).total_seconds()] for interval in intervals]
+        query += " AND ({})".format(" OR ".join(["(Time >= {} AND Time < {})".format(interval[0], interval[1]) for interval in buffered_intervals]))
 
     query_results = mysql_utils.execute_query(query)
     
@@ -218,8 +220,8 @@ def save_timestamps(timestamps, output_path):
 
 
 def main(args):
-    x_offset = int(args.x_offset or "12")
-    y_offset = int(args.y_offset or "12")
+    x_offset = args.x_offset
+    y_offset = args.y_offset
     verbose = args.verbose or 0
 
     if args.dummy:
@@ -235,9 +237,12 @@ def main(args):
     else:
         intersection = "_{}".format(args.intersection) if args.intersection else ""
         plan_name = args.plan_name
+        start_time_buffer = args.start_time_buffer
+        end_time_buffer = args.end_time_buffer
 
         detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection))]
-        detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name)
+        detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name,
+                                          start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
         detector_data_processed, timestamps, timestamps_array = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
 
         if args.output_dir:
@@ -248,10 +253,12 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--intersection", help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
+    parser.add_argument("--intersection", type=int, help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
     parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3")
-    parser.add_argument("--x_offset", help="number of time steps to use for training")
-    parser.add_argument("--y_offset", help="number of time steps to predict ahead")
+    parser.add_argument("--start_time_buffer", type=int, default=0, help="extra time steps before plan starts to include")
+    parser.add_argument("--end_time_buffer", type=int, default=0, help="extra time steps after plan ends to include")
+    parser.add_argument("--x_offset", type=int, default=12, help="number of time steps to use for training")
+    parser.add_argument("--y_offset", type=int, default=12, help="number of time steps to predict ahead")
     parser.add_argument("--output_dir", help="output directory for npz data files")
     parser.add_argument("--timestamps_dir", help="output directory for npz timestamps")
     parser.add_argument("--dummy", help="overrides other arguments. Generate dummy training data with the specified pattern: {}".format(DUMMY_DATA_TYPES))
