@@ -217,6 +217,17 @@ def save_timestamps(timestamps, output_path):
     utils.verify_or_create_path(output_path)
     np.savez_compressed(os.path.join(output_path, "timestamps.npz"), timestamps=timestamps)
 
+def get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=None, end_time_buffer=None):
+    subdir = "{}_{}_o{}_h{}".format(args.intersection, plan_name, x_offset, y_offset)
+
+    if start_time_buffer != 0:
+        subdir += "_sb{}".format(start_time_buffer)
+    if end_time_buffer != 0:
+        subdir += "_eb{}".format(end_time_buffer)
+
+    subdir += "_sensor_data"
+
+    return subdir
 
 
 def main(args):
@@ -245,11 +256,15 @@ def main(args):
                                           start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
         detector_data_processed, timestamps, timestamps_array = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
 
+        subdir = get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
+
         if args.output_dir:
-            generate_splits(detector_data_processed, x_offset, y_offset, args.output_dir, timestamps=timestamps_array, verbose=verbose)
+            output_dir = os.path.join(args.output_dir, subdir)
+            generate_splits(detector_data_processed, x_offset, y_offset, output_dir, timestamps=timestamps_array, verbose=verbose)
 
         if args.timestamps_dir:
-            save_timestamps(timestamps, args.timestamps_dir)
+            timestamps_dir = os.path.join(args.timestamps_dir, subdir)
+            save_timestamps(timestamps, timestamps_dir)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -11,6 +11,7 @@ All commands must be run from the top-level Code directory.
     # Command to run the training data generation script
     python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --output_dir data/inputs/5083_sensor_data -v
     python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --x_offset 12 --y_offset 3 --output_dir data/inputs/5083_P2_o12_h3_sensor_data --timestamps_dir data/inputs/5083_P2_o12_h3_sensor_data -v
+    python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --x_offset 24 --y_offset 6 --start_time_buffer 24 --output_dir data/inputs/5083_P2_o24_h6_sb24 --timestamps_dir data/inputs/5083_P2_o24_h6_sb24 -v
 
     # Command to run all models to have errors in a central location
     python3 model_runner.py config.yaml -vv
