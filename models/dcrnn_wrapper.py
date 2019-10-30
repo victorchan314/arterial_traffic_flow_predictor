@@ -16,21 +16,28 @@ from DCRNN.model.dcrnn_supervisor import DCRNNSupervisor
 class DCRNN(Model):
     """Wrapper that runs DCRNN and saves the results"""
     def __init__(self, *args, config_filename=None, is_trained=False, output_filename=None, predictions_filename=None,
-                 use_cpu_only=False, **kwargs):
+                 use_cpu_only=False, base_dir=None, **kwargs):
         super(DCRNN, self).__init__(*args, **kwargs)
 
-        if not config_filename:
-            raise ValueError("config_filename is a required argument")
+        if not base_dir is None:
+            base = base_dir.split("/")[-1]
+            self.config_filename = os.path.join(base_dir, "{}.yaml".format(base))
+            self.output_filename = os.path.join(base_dir, "{}.out".format(base))
+            self.predictions_filename = os.path.join(base_dir, "predictions.npz")
+        else:
+            if not config_filename:
+                raise ValueError("config_filename is a required argument")
 
-        self.config_filename = config_filename
-        self.output_filename = output_filename
-        self.predictions_filename = predictions_filename
+            self.config_filename = config_filename
+            self.output_filename = output_filename
+            self.predictions_filename = predictions_filename
+
         self._is_trained = is_trained
 
         if self.output_filename:
             self.tee = Tee(self.output_filename)
 
-        with open(config_filename) as f:
+        with open(self.config_filename) as f:
             self.supervisor_config = yaml.load(f)
 
         graph_pkl_filename = self.supervisor_config['data'].get('graph_pkl_filename')

@@ -61,24 +61,30 @@ def run_models(data, model_configs, model_order=None, verbose=0):
     for i in range(len(models)):
         model_name = model_names[i]
         model_class = models[i]
-        kwargs = model_configs[model_name]
-        model = model_class(train_x, train_y, val_x, val_y, test_x, test_y, **kwargs)
-        if verbose:
-            print("Created {} model".format(model_name))
 
-        model.train()
+        if isinstance(model_configs[model_name], list):
+            model_kwargs = model_configs[model_name]
+        else:
+            model_kwargs = [model_configs[model_name]]
 
-        if verbose:
-            print("Trained {} model".format(model_name))
+        for kwargs in model_kwargs:
+            model = model_class(train_x, train_y, val_x, val_y, test_x, test_y, **kwargs)
+            if verbose:
+                print("Created {} model".format(model_name))
 
-        errors = model.get_errors()
+            model.train()
 
-        if verbose > 1:
-            for category in DATA_CATEGORIES:
-                for key, value in errors[category].items():
-                    print("{} {}: {}".format(category, key, value))
+            if verbose:
+                print("Trained {} model".format(model_name))
 
-        model.close()
+            errors = model.get_errors()
+
+            if verbose > 1:
+                for category in DATA_CATEGORIES:
+                    for key, value in errors[category].items():
+                        print("{} {}: {}".format(category, key, value))
+
+            model.close()
 
 
 
