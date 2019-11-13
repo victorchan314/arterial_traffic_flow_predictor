@@ -58,9 +58,9 @@ def compare_timedeltas(operation, timedelta1, timedelta2):
 
 def get_groundtruth_from_y(y):
     if y.shape[-1] == 2:
-        return np.transpose(y[:, :, :, 0], axes=(1, 0, 2))
+        return np.transpose(y[:, :, :, 1], axes=(1, 0, 2))
     else:
-        return np.transpose(y[:, :, :, :-1], axes=(1, 0, 2, 3))
+        return np.transpose(y[:, :, :, 1:], axes=(1, 0, 2, 3))
 
 def get_stretches(datetimes, frequency):
     break_indices = np.argwhere(compare_timedeltas("!=", datetimes[1:] - datetimes[:-1], frequency)).flatten() + 1
