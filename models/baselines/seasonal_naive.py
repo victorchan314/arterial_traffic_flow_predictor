@@ -11,22 +11,30 @@ class SeasonalNaive(Model):
         self.index = 0
 
     def _train(self):
-        self.means = self._get_means(self.train_y)
+        self.means = np.squeeze(self._get_means(self.train_y[..., 1:]))
+
+        self.train_y_groundtruth = data_utils.get_groundtruth_from_y(self.train_y)
+        self.val_y_groundtruth = data_utils.get_groundtruth_from_y(self.val_y)
+        self.test_y_groundtruth = data_utils.get_groundtruth_from_y(self.test_y)
+
         self.train_y_pred = self.predict(self.train_x)
-        self.errors["train"] = data_utils.get_standard_errors(self.train_y, self.train_y_pred)
+        self.errors["train"] = data_utils.get_standard_errors(self.train_y_groundtruth, self.train_y_pred)
 
         self.val_y_pred = self.predict(self.val_x)
-        self.errors["val"] = data_utils.get_standard_errors(self.val_y, self.val_y_pred)
+        self.errors["val"] = data_utils.get_standard_errors(self.val_y_groundtruth, self.val_y_pred)
 
         self.predictions = self.predict(self.test_x)
-        self.errors["test"] = data_utils.get_standard_errors(self.test_y, self.predictions)
+        self.errors["test"] = data_utils.get_standard_errors(self.test_y_groundtruth, self.predictions)
 
     def predict(self, x):
         num_data = x.shape[0]
         indices = self._get_indices(num_data)
         self.index = (self.index + num_data) % self.seasonality
 
-        return self.means[indices, ...]
+        predictions = self.means[indices, ...]
+        reshaped_predictions = np.transpose(predictions, axes=(1, 0) + tuple(range(2, predictions.ndim)))
+
+        return reshaped_predictions
 
     def _get_means(self, train_y):
         return np.stack([np.mean(train_y[i::self.seasonality, ...], axis=0) for i in range(self.seasonality)], axis=0)
@@ -40,3 +48,9 @@ class SeasonalNaive(Model):
         indices = start + base * num_reps + end
 
         return indices
+
+    def save_predictions(self, path):
+        np.savez_compressed(path,
+                            groundtruth=self.test_y_groundtruth,
+                            predictions=self.predictions
+                            )

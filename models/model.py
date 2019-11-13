@@ -2,7 +2,7 @@ class ModelNotTrainedException(Exception):
     pass
 
 class Model(object):
-    def __init__(self, train_x, train_y, val_x, val_y, test_x, test_y):
+    def __init__(self, train_x, train_y, val_x, val_y, test_x, test_y, **kwargs):
         self.train_x = train_x
         self.train_y = train_y
         self.val_x = val_x
