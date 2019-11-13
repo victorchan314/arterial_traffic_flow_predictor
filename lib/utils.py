@@ -1,6 +1,18 @@
 import os
 import sys
 
+import numpy as np
+
+
+
+def load_predictions(path):
+    predictions_file = np.load(path)
+    groundtruth = predictions_file["groundtruth"]
+    predictions = predictions_file["predictions"]
+
+    return groundtruth, predictions
+
+
 def verify_or_create_path(path):
     os.makedirs(path, exist_ok=True)
 
