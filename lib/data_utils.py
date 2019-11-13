@@ -10,18 +10,15 @@ def rmse(y, y_hat):
 def mae(y, y_hat):
     return np.mean(np.abs(y - y_hat))
 
-def mape(y, y_hat, replace_zeros=True, epsilon=0.01):
-    if replace_zeros:
-        y[y == 0] = epsilon
+def mape(y, y_hat, replace_zeros=False, masked=True, epsilon=1e-8):
+    if masked:
+        mask = np.abs(y) < epsilon
+        y_hat = y_hat[~mask]
+        y = y[~mask]
+    elif replace_zeros:
+        y[np.abs(y) < epsilon] = epsilon
 
     return np.mean(np.abs(y - y_hat) / y)
-
-#def mape(data, test, replace_zeros=True, epsilon=0.01):
-#    if replace_zeros:
-#        data[data == 0] = epsilon
-#
-#    ape = np.sum(np.abs(data - test) / data)
-#    return 1 / data.shape[0] * ape
 
 def mase(data, test, seasonal_freq=1):
     s = seasonal_freq
