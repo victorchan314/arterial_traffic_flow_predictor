@@ -9,6 +9,7 @@ sys.path.append(parent_dir)
 import numpy as np
 
 from models import models
+from lib import utils
 
 DATA_CATEGORIES = ["train", "val", "test"]
 
@@ -30,6 +31,10 @@ def load_data(data_directory, verbose=0):
             npz = np.load(f)
             data["{}_{}".format(category, "x")] = npz["x"]
             data["{}_{}".format(category, "y")] = npz["y"]
+
+            if verbose > 2:
+                print("{}_{} shape: {}".format(category, "x", npz["x"].shape))
+                print("{}_{} shape: {}".format(category, "y", npz["y"].shape))
 
     return data
 
@@ -83,6 +88,12 @@ def run_models(data, model_configs, model_order=None, verbose=0):
                 for category in DATA_CATEGORIES:
                     for key, value in errors[category].items():
                         print("{} {}: {}".format(category, key, value))
+
+            base_dir = kwargs.get("base_dir", None)
+            if not base_dir is None:
+                utils.verify_or_create_path(base_dir)
+                path = os.path.join(base_dir, "predictions.npz")
+                model.save_predictions(path)
 
             model.close()
 

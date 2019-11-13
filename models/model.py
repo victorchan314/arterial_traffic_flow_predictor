@@ -41,6 +41,9 @@ class Model(object):
     def _get_predictions(self):
         return self.predictions
 
+    def save_predictions(self, path):
+        raise NotImplementedError
+
     def get_errors(self):
         if not self.is_trained():
             raise ModelNotTrainedException

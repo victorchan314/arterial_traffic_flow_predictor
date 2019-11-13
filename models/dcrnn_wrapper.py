@@ -67,11 +67,11 @@ class DCRNN(Model):
 
     def predict(self, x):
         # x is not used in this function. It is assumed that x is the test data from the config file.
-        outputs = self.supervisor.evaluate(self.session)
-        np.savez_compressed(self.predictions_filename, **outputs)
-        print('Predictions saved as {}.'.format(self.predictions_filename))
+        return self.supervisor.evaluate(self.session)
 
-        return outputs
+    def save_predictions(self, path):
+        np.savez_compressed(self.predictions_filename, **self.predictions)
+        print('Predictions saved as {}.'.format(self.predictions_filename))
 
     def get_errors_from_log_file(self):
         if "train" in self.supervisor_config and "log_dir" in self.supervisor_config["train"]:
