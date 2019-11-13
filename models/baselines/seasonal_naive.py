@@ -11,7 +11,7 @@ class SeasonalNaive(Model):
         self.index = 0
 
     def _train(self):
-        self.means = np.squeeze(self._get_means(self.train_y[..., 1:]))
+        self.means = self._get_means(self.train_y[..., 1:])
 
         self.train_y_groundtruth = data_utils.get_groundtruth_from_y(self.train_y)
         self.val_y_groundtruth = data_utils.get_groundtruth_from_y(self.val_y)
@@ -37,7 +37,9 @@ class SeasonalNaive(Model):
         return reshaped_predictions
 
     def _get_means(self, train_y):
-        return np.stack([np.mean(train_y[i::self.seasonality, ...], axis=0) for i in range(self.seasonality)], axis=0)
+        means = np.stack([np.mean(train_y[i::self.seasonality, ...], axis=0) for i in range(self.seasonality)], axis=0)
+
+        return np.squeeze(means)
 
     def _get_indices(self, n):
         base = list(range(self.seasonality))

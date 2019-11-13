@@ -66,10 +66,13 @@ def print_errors_latex(logdir, horizons, precision):
             prediction_errors = data_utils.get_standard_errors(groundtruth[h-1, ...], predictions[h-1, ...])
 
             for k, v in prediction_errors.items():
-                if k == "mape":
+                if error >= 1000:
+                    error = int(error)
+                elif k == "mape":
                     error = round(100 * v, precision)
                 else:
                     error = round(v, precision)
+
                 errors[plan][k][offset][h] = error
 
     for plan in sorted(errors.keys()):

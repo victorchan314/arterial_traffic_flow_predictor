@@ -25,7 +25,7 @@ class Constant(Model):
         self.errors["test"] = data_utils.get_standard_errors(self.test_y_groundtruth, self.predictions)
 
     def predict(self, x):
-        predictions = np.tile(self.mean, (x.shape[0],) + (1,) * (x.ndim - self.mean.ndim))
+        predictions = np.tile(self.mean, (x.shape[0],) + (1,) * self.mean.ndim)
         reshaped_predictions = np.transpose(predictions, axes=(1, 0)  + tuple(range(2, predictions.ndim)))
 
         return reshaped_predictions

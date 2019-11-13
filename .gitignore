@@ -11,6 +11,7 @@ __pycache__
 # data files
 data/**/*sensor_data
 data/**/dcrnn_*
+config.yaml
 
 # sub-repository
 DCRNN
