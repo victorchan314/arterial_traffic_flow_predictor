@@ -123,6 +123,35 @@ def create_4d_detector_data_array(detector_data, timestamps, detector_list, stre
 
     return detector_data_array, timestamps_array
 
+def create_3d_detector_data_array(detector_data, timestamps, detector_list, stretch_length, verbose=0):
+    stretches = get_long_enough_stretch_indices(timestamps, stretch_length)
+    detector_data_grouped_by_time = detector_data.groupby("Time")
+
+    detector_datum_shape = (len(detector_list), detector_data.shape[1] - 3)
+    detector_data_array = np.zeros((0, *detector_datum_shape))
+    filtered_timestamps = np.array([], dtype=timestamps.dtype)
+
+    for start, end in stretches:
+        if verbose > 1:
+            print("Working on stretch ({}, {})".format(start, end))
+
+        time_stretch = timestamps[start:end]
+        filtered_timestamps = np.concatenate((filtered_timestamps, time_stretch))
+        detector_datum = np.empty((end - start, *detector_datum_shape))
+
+        for i, timestamp in enumerate(time_stretch):
+            detector_data_at_timestamp = detector_data_grouped_by_time.get_group(timestamp)
+            detector_data_array_at_timestamp = detector_data_at_timestamp.set_index("DetectorID").loc[detector_list].iloc[:, 2:].values
+            if verbose > 2:
+                print("Working on detector data at timestamp {}".format(timestamp))
+
+            # Populate the diagonal corresponding to the current timestamp to take care of offsets
+            detector_datum[i, :, :] = np.array(detector_data_array_at_timestamp)
+
+        detector_data_array = np.vstack((detector_data_array, detector_datum))
+
+    return detector_data_array, filtered_timestamps
+
 def get_long_enough_stretch_indices(timestamps, stretch_length):
     stretches = data_utils.get_stretches(timestamps, DETECTOR_DATA_FREQUENCY)
     long_enough_indices = np.argwhere(stretches[:, 1] - stretches[:, 0] > stretch_length).flatten()
@@ -130,7 +159,7 @@ def get_long_enough_stretch_indices(timestamps, stretch_length):
 
     return stretches
 
-def process_detector_data(detector_data, detector_list, stretch_length, verbose=0):
+def process_detector_data(detector_data, detector_list, verbose=0):
     if verbose:
         print("Detector data original shape: {}".format(detector_data.shape))
 
@@ -144,6 +173,21 @@ def process_detector_data(detector_data, detector_list, stretch_length, verbose=
         print("Filtered detector data shape: {}".format(detector_data_filtered_by_num_detectors.shape))
         print("Number of timestamps: {}".format(len(timestamps)))
 
+    return detector_data_filtered_by_num_detectors, timestamps
+
+def process_timeseries_detector_data(detector_data, detector_list, stretch_length, verbose=0):
+    detector_data_filtered_by_num_detectors, timestamps = process_detector_data(detector_data, detector_list, verbose=verbose)
+
+    detector_data_array, filtered_timestamps = create_3d_detector_data_array(detector_data_filtered_by_num_detectors, timestamps, detector_list, stretch_length, verbose=verbose)
+    if verbose:
+        print("Processed detector data shape: {}".format(detector_data_array.shape))
+
+    return detector_data_array, filtered_timestamps
+
+
+def process_array_detector_data(detector_data, detector_list, stretch_length, verbose=0):
+    detector_data_filtered_by_num_detectors, timestamps = process_detector_data(detector_data, detector_list, verbose=verbose)
+
     detector_data_array, timestamps_array = create_4d_detector_data_array(detector_data_filtered_by_num_detectors, timestamps, detector_list, stretch_length, verbose=verbose)
     if verbose:
         print("Processed detector data shape: {}".format(detector_data_array.shape))
@@ -151,7 +195,7 @@ def process_detector_data(detector_data, detector_list, stretch_length, verbose=
 
     return detector_data_array, timestamps, timestamps_array
 
-def generate_splits(detector_data_processed, x_offset, y_offset, output_path, timestamps=None, verbose=0):
+def generate_array_splits(detector_data_processed, x_offset, y_offset, output_path, timestamps=None, verbose=0):
     x_offsets = np.arange(-x_offset + 1, 1, 1)
     y_offsets = np.arange(1, y_offset + 1, 1)
     x = detector_data_processed[:, :x_offset, ...]
@@ -162,7 +206,7 @@ def generate_splits(detector_data_processed, x_offset, y_offset, output_path, ti
         timestamps_y = timestamps[:, x_offset:, ...]
 
     if verbose:
-        print("Detetctor data shape: {}".format(detector_data_processed.shape))
+        print("Detector data shape: {}".format(detector_data_processed.shape))
         print("x shape: {}".format(x.shape))
         print("y shape: {}".format(y.shape))
 
@@ -211,14 +255,67 @@ def generate_splits(detector_data_processed, x_offset, y_offset, output_path, ti
             })
 
         utils.verify_or_create_path(output_path)
-        np.savez_compressed(os.path.join(output_path, "{}.npz".format(s)), **save_dict)
+        file_name = "{}.npz".format(s)
+        np.savez_compressed(os.path.join(output_path, file_name), **save_dict)
 
-def save_timestamps(timestamps, output_path):
+        if verbose:
+            print("Saved {} to {}".format(file_name, output_path))
+
+def generate_timeseries_splits(detector_data_processed, output_path, timestamps=None, verbose=0):
+    if verbose:
+        print("Detector data shape: {}".format(detector_data_processed.shape))
+        if not timestamps is None:
+            print("Timestamps array shape: {}".format(timestamps.shape))
+
+    # Write the data into npz file
+    # 7/10 training, 1/10 validation, 2/10 test
+    num_samples = detector_data_processed.shape[0]
+    num_test = round(num_samples * 0.2)
+    num_train = round(num_samples * 0.7)
+    num_val = num_samples - num_test - num_train
+
+    train = detector_data_processed[:num_train]
+    val = detector_data_processed[num_train:num_train+num_val]
+    test = detector_data_processed[-num_test:]
+
+    if not timestamps is None:
+        timestamps_train = timestamps[:num_train]
+        timestamps_val = timestamps[num_train:num_train+num_val]
+        timestamps_test = timestamps[-num_test:]
+
+    for s in ["train", "val", "test"]:
+        _detector_data = locals()[s]
+        if not timestamps is None:
+            _timestamps = locals()["timestamps_" + s]
+
+        if verbose:
+            print("{}: {}".format(s, _detector_data.shape))
+            if not timestamps is None:
+                print("{} timestamps: {}".format(s, _timestamps.shape))
+
+        save_dict = {"data": _detector_data}
+
+        if not timestamps is None:
+            save_dict.update({"timestamps": _timestamps})
+
+        utils.verify_or_create_path(output_path)
+        file_name = "{}_ts.npz".format(s)
+        np.savez_compressed(os.path.join(output_path, file_name), **save_dict)
+
+        if verbose:
+            print("Saved {} to {}".format(file_name, output_path))
+
+def save_timestamps(timestamps, output_path, timeseries=False):
     utils.verify_or_create_path(output_path)
-    np.savez_compressed(os.path.join(output_path, "timestamps.npz"), timestamps=timestamps)
+    if timeseries:
+        file_name = "timestamps_ts.npz"
+    else:
+        file_name = "timestamps.npz"
 
-def get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=None, end_time_buffer=None):
-    subdir = "{}_{}_o{}_h{}".format(args.intersection, plan_name, x_offset, y_offset)
+    np.savez_compressed(os.path.join(output_path, file_name), timestamps=timestamps)
+
+def get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=0, end_time_buffer=0):
+    subdir = "{}_{}_o{}_h{}".format(intersection, plan_name, x_offset, y_offset)
 
     if start_time_buffer != 0:
         subdir += "_sb{}".format(start_time_buffer)
@@ -244,23 +341,43 @@ def main(args):
         dummy_shape = (dummy_shape[0], x_offset + y_offset, *dummy_shape[2:])
         dummy_data = generate_dummy_data(args.dummy, dummy_shape, verbose=verbose)
         if args.output_dir:
-            generate_splits(dummy_data, x_offset, y_offset, args.output_dir, verbose=verbose)
+            generate_array_splits(dummy_data, x_offset, y_offset, args.output_dir, verbose=verbose)
+    elif args.timeseries:
+        intersection = args.intersection
+        plan_name = args.plan_name
+        stretch_length = x_offset + y_offset
+
+        intersection_string = "_{}".format(intersection) if intersection else ""
+        detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection_string))]
+        detector_data = get_detector_data(detector_list, intersection=intersection_string, plan=plan_name)
+        detector_data_processed, timestamps = process_timeseries_detector_data(detector_data, detector_list, stretch_length, verbose=verbose)
+
+        subdir = get_subdir(intersection, plan_name, x_offset, y_offset)
+
+        if args.output_dir:
+            output_dir = os.path.join(args.output_dir, subdir)
+            generate_timeseries_splits(detector_data_processed, output_dir, timestamps=timestamps, verbose=verbose)
+
+        if args.timestamps_dir:
+            timestamps_dir = os.path.join(args.timestamps_dir, subdir)
+            save_timestamps(timestamps, timestamps_dir, timeseries=True)
     else:
-        intersection = "_{}".format(args.intersection) if args.intersection else ""
+        intersection = args.intersection
         plan_name = args.plan_name
         start_time_buffer = args.start_time_buffer
         end_time_buffer = args.end_time_buffer
 
-        detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection))]
-        detector_data = get_detector_data(detector_list, intersection=intersection, plan=plan_name,
+        intersection_string = "_{}".format(intersection) if intersection else ""
+        detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection_string))]
+        detector_data = get_detector_data(detector_list, intersection=intersection_string, plan=plan_name,
                                           start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
-        detector_data_processed, timestamps, timestamps_array = process_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
+        detector_data_processed, timestamps, timestamps_array = process_array_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
 
         subdir = get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
 
         if args.output_dir:
             output_dir = os.path.join(args.output_dir, subdir)
-            generate_splits(detector_data_processed, x_offset, y_offset, output_dir, timestamps=timestamps_array, verbose=verbose)
+            generate_array_splits(detector_data_processed, x_offset, y_offset, output_dir, timestamps=timestamps_array, verbose=verbose)
 
         if args.timestamps_dir:
             timestamps_dir = os.path.join(args.timestamps_dir, subdir)
@@ -268,7 +385,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--intersection", type=int, help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
+    parser.add_argument("--intersection", type=int, default=0, help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
     parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3")
     parser.add_argument("--start_time_buffer", type=int, default=0, help="extra time steps before plan starts to include")
     parser.add_argument("--end_time_buffer", type=int, default=0, help="extra time steps after plan ends to include")
@@ -276,6 +393,7 @@ if __name__ == "__main__":
     parser.add_argument("--y_offset", type=int, default=12, help="number of time steps to predict ahead")
     parser.add_argument("--output_dir", help="output directory for npz data files")
     parser.add_argument("--timestamps_dir", help="output directory for npz timestamps")
+    parser.add_argument("--timeseries", action="store_true", help="output data as time series instead of arrays. If specified, buffers are ignored, but x_offset and y_offset are used to get stretch length.")
     parser.add_argument("--dummy", help="overrides other arguments. Generate dummy training data with the specified pattern: {}".format(DUMMY_DATA_TYPES))
     parser.add_argument("--dummy_shape", help="the shape of generated dummy data, if dummy is specified. Second value is 0, since it will be replaced by x_offset and y_offset.".format(DUMMY_DATA_TYPES))
     parser.add_argument("-v", "--verbose", action="count", help="verbosity of script")

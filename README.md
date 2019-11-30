@@ -9,9 +9,10 @@ All commands must be run from the top-level Code directory.
     python3 DCRNN/scripts/gen_adj_mx.py --sensor_ids_filename data/inputs/model/sensors_advanced_5083.txt --distances data/inputs/model/distances_5083_P1.csv --output_pkl_filename data/inputs/model/adjacency_matrix_5083_P1.pkl
 
     # Command to run the training data generation script
-    python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --output_dir data/inputs/5083_sensor_data -v
-    python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --x_offset 12 --y_offset 3 --output_dir data/inputs/5083_P2_o12_h3_sensor_data --timestamps_dir data/inputs/5083_P2_o12_h3_sensor_data -v
-    python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --x_offset 24 --y_offset 6 --start_time_buffer 24 --output_dir data/inputs/5083_P2_o24_h6_sb24 --timestamps_dir data/inputs/5083_P2_o24_h6_sb24 -v
+    python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --output_dir data/inputs -v
+    python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --x_offset 12 --y_offset 3 --output_dir data/inputs --timestamps_dir data/inputs -v
+    python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --x_offset 24 --y_offset 6 --start_time_buffer 24 --output_dir data/inputs --timestamps_dir data/inputs -v
+    python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --x_offset 3 --y_offset 6 --output_dir data/inputs --timestamps_dir data/inputs --timeseries -v
 
     # Command to run all models to have errors in a central location
     python3 model_runner.py config.yaml -vv
