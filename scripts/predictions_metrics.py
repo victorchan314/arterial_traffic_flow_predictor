@@ -66,7 +66,7 @@ def print_errors_latex(logdir, horizons, precision):
             prediction_errors = data_utils.get_standard_errors(groundtruth[h-1, ...], predictions[h-1, ...])
 
             for k, v in prediction_errors.items():
-                if error >= 1000:
+                if v >= 1000:
                     error = int(error)
                 elif k == "mape":
                     error = round(100 * v, precision)

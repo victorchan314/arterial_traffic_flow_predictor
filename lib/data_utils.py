@@ -95,3 +95,16 @@ def pad_array(array, limit, axis=0, filler="zeros"):
         return padded_array
     else:
         return array
+
+def convert_to_fourier_day(x, num_fourier_terms=1):
+    days = pd.Series(x).dt.dayofweek / 7
+    terms = []
+
+    for i in range(1, num_fourier_terms + 1):
+        angles = 2 * i * np.pi * days
+        terms.append(np.sin(angles))
+        terms.append(np.cos(angles))
+
+    fourier_terms = np.column_stack(terms)
+
+    return fourier_terms
