@@ -73,7 +73,8 @@ def run_models(data, model_configs, model_order=None, verbose=0):
             model_kwargs = [model_configs[model_name]]
 
         for kwargs in model_kwargs:
-            model = model_class(train_x, train_y, val_x, val_y, test_x, test_y, **kwargs)
+            model = model_class(train_x, train_y, val_x, val_y, test_x, test_y,
+                                verbose=verbose, **kwargs)
             if verbose:
                 print("Created {} model".format(model_name))
 
