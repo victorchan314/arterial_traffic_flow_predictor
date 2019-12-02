@@ -12,13 +12,15 @@ class SARIMAX(Model):
     """Model that uses SARIMAX to predict future values of training data per sensor"""
     def __init__(self, *args, order=(1, 0, 0), seasonal_order=(0, 0, 0, 0), use_exog=True, online=False,
                  is_trained=False, base_dir=None, train_file=None, ts_dir=None, num_fourier_terms=2,
-                 verbose=0, **kwargs):
+                 calculate_train_error=False, calculate_val_error=False, verbose=0, **kwargs):
         super(SARIMAX, self).__init__(*args, **kwargs)
         self.order = order
         self.seasonal_order = seasonal_order
         self.use_exog = use_exog
         self.online = online
         self._is_trained = is_trained
+        self.calculate_train_error = calculate_train_error
+        self.calculate_val_error = calculate_val_error
         self.verbose = verbose
 
         train_npz = np.load(train_file)
@@ -116,16 +118,17 @@ class SARIMAX(Model):
                 if self.verbose:
                     print("Models saved to {}".format(self.models_pkl_file))
 
-        self.train_y_groundtruth = data_utils.get_groundtruth_from_y(self.train_y)
-        self.val_y_groundtruth = data_utils.get_groundtruth_from_y(self.val_y)
+        if self.calculate_train_error:
+            self.train_y_groundtruth = data_utils.get_groundtruth_from_y(self.train_y)
+            self.train_y_pred = self.predict(self.train_x, ts_x=self.train_ts_x, ts_y=self.train_ts_y)
+            self.errors["train"] = data_utils.get_standard_errors(self.train_y_groundtruth, self.train_y_pred)
+
+        if self.calculate_val_error:
+            self.val_y_groundtruth = data_utils.get_groundtruth_from_y(self.val_y)
+            self.val_y_pred = self.predict(self.val_x, ts_x=self.val_ts_x, ts_y=self.val_ts_y)
+            self.errors["val"] = data_utils.get_standard_errors(self.val_y_groundtruth, self.val_y_pred)
+
         self.test_y_groundtruth = data_utils.get_groundtruth_from_y(self.test_y)
-
-        self.train_y_pred = self.predict(self.train_x, ts_x=self.train_ts_x, ts_y=self.train_ts_y)
-        self.errors["train"] = data_utils.get_standard_errors(self.train_y_groundtruth, self.train_y_pred)
-
-        self.val_y_pred = self.predict(self.val_x, ts_x=self.val_ts_x, ts_y=self.val_ts_y)
-        self.errors["val"] = data_utils.get_standard_errors(self.val_y_groundtruth, self.val_y_pred)
-
         self.predictions = self.predict(self.test_x, ts_x=self.test_ts_x, ts_y=self.test_ts_y)
         self.errors["test"] = data_utils.get_standard_errors(self.test_y_groundtruth, self.predictions)
 
@@ -137,14 +140,14 @@ class SARIMAX(Model):
                 print("Working on detector {} predictions".format(d))
             detector_predictions = []
 
-            for s in range(self.num_sensors):
+            for s in range(1, self.num_sensors + 1):
                 if self.verbose > 2:
                     print("Working on sensor {} predictions".format(s + 1))
 
                 if self.online:
                     pred = self._predict_online_armax(x[:, :, d, s], ts_x=ts_x, ts_y=ts_y)
                 else:
-                    pred = self._predict_sarimax(x[:, :, d, s], self.params[d][s], ts_x=ts_x, ts_y=ts_y)
+                    pred = self._predict_sarimax(x[:, :, d, s], self.params[d][s-1], ts_x=ts_x, ts_y=ts_y)
 
                 detector_predictions.append(pred)
 
@@ -201,3 +204,9 @@ class SARIMAX(Model):
     def _load_models(self):
         with open(self.models_pkl_file, "rb") as f:
             self.models, self.results, self.params = pickle.load(f)
+
+    def save_predictions(self, path):
+        np.savez_compressed(path,
+                            groundtruth=self.test_y_groundtruth,
+                            predictions=self.predictions
+                            )

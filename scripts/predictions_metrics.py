@@ -67,7 +67,7 @@ def print_errors_latex(logdir, horizons, precision):
 
             for k, v in prediction_errors.items():
                 if v >= 1000:
-                    error = int(error)
+                    error = int(v)
                 elif k == "mape":
                     error = round(100 * v, precision)
                 else:

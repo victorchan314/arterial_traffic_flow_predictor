@@ -87,8 +87,9 @@ def run_models(data, model_configs, model_order=None, verbose=0):
 
             if verbose > 1:
                 for category in DATA_CATEGORIES:
-                    for key, value in errors[category].items():
-                        print("{} {}: {}".format(category, key, value))
+                    if category in errors:
+                        for key, value in errors[category].items():
+                            print("{} {}: {}".format(category, key, value))
 
             base_dir = kwargs.get("base_dir", None)
             if not base_dir is None:
