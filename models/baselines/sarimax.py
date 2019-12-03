@@ -7,6 +7,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX as sarimax
 
 from models.model import Model
 from lib import data_utils
+from lib import utils
 
 class SARIMAX(Model):
     """Model that uses SARIMAX to predict future values of training data per sensor"""
@@ -60,9 +61,9 @@ class SARIMAX(Model):
 
         # Logging and model saving
         if base_dir is None:
-            self.models_pkl_file = None
+            self.params_pkl_file = None
         else:
-            self.models_pkl_file = os.path.join(base_dir, "models.pkl")
+            self.params_pkl_file = os.path.join(base_dir, "params.pkl")
 
     def train(self):
         self._train()
@@ -74,7 +75,7 @@ class SARIMAX(Model):
         if self.online:
             pass
         elif self.is_trained:
-            self._load_models()
+            self._load_params()
         else:
             self._is_trained = True
             if self.use_exog:
@@ -84,13 +85,9 @@ class SARIMAX(Model):
             else:
                 self.exog_train = None
 
-            self.models = []
-            self.results = []
             self.params = []
 
             for d in range(self.num_detectors):
-                models = []
-                results = []
                 params =[]
 
                 for s in range(1, self.num_sensors + 1):
@@ -99,24 +96,24 @@ class SARIMAX(Model):
                     model_results = model.fit(disp=2*self.verbose)
                     model_params = model_results.params
 
-                    models.append(model)
-                    results.append(model_results)
+                    # Done to conserve memory, since we have 2GB * num_detectors * num_sensors worth of models
+                    del model
+                    del model_results
+
                     params.append(model_params)
 
                     if self.verbose > 2:
                         print("Sensor {} model created and trained".format(s))
 
-                self.models.append(models)
-                self.results.append(results)
                 self.params.append(params)
 
                 if self.verbose:
                     print("Detector {} models created and trained".format(d))
 
-            if not self.models_pkl_file is None:
-                self._log(self.models_pkl_file, [self.models, self.results, self.params])
+            if not self.params_pkl_file is None:
+                self._log(self.params_pkl_file, self.params)
                 if self.verbose:
-                    print("Models saved to {}".format(self.models_pkl_file))
+                    print("Params saved to {}".format(self.params_pkl_file))
 
         if self.calculate_train_error:
             self.train_y_groundtruth = data_utils.get_groundtruth_from_y(self.train_y)
@@ -185,6 +182,10 @@ class SARIMAX(Model):
 
             predictions[i, :] = results.forecast(horizon, exog=exog_y)
 
+            # Memory conservation
+            del model
+            del results
+
         return predictions
 
     def _predict_sarimax(self, x, params, ts_x=None, ts_y=None):
@@ -196,14 +197,14 @@ class SARIMAX(Model):
 
     def _log(self, filename, data):
         dir = os.path.dirname(filename)
-        os.makedirs(dir)
+        utils.verify_or_create_path(dir)
 
         with open(filename, "wb") as f:
             pickle.dump(data, f, protocol=pickle.DEFAULT_PROTOCOL)
 
-    def _load_models(self):
-        with open(self.models_pkl_file, "rb") as f:
-            self.models, self.results, self.params = pickle.load(f)
+    def _load_params(self):
+        with open(self.params_pkl_file, "rb") as f:
+            self.params = pickle.load(f)
 
     def save_predictions(self, path):
         np.savez_compressed(path,
