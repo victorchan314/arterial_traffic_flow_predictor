@@ -1,8 +1,10 @@
 import os
 import pickle
+import warnings
 
 import numpy as np
 
+from statsmodels.tools.sm_exceptions import ConvergenceWarning
 from statsmodels.tsa.statespace.sarimax import SARIMAX as sarimax
 
 from models.model import Model
@@ -177,8 +179,24 @@ class SARIMAX(Model):
                 model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
                 results = model.smooth(params)
             else:
-                model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
-                results = model.fit(disp=self.verbose // 4)
+                try:
+                    model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
+                    results = model.fit(disp=self.verbose // 4)
+                except ConvergenceWarning:
+                    if self.verbose > 1:
+                        print("Model for data at index {} did not converge".format(i))
+
+                    warnings.filterwarnings("default")
+                    model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
+                    results = model.fit(disp=self.verbose // 4, maxiter=200)
+                    warnings.filterwarnings("error")
+                except np.linalg.linalg.LinAlgError:
+                    if self.verbose > 1:
+                        print("Model for data at index {} produced non-positive-definite covariance matrix, simple_differencing set to True".format(i))
+
+                    model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order,
+                                    simple_differencing=True)
+                    results = model.fit(disp=self.verbose // 4)
 
             predictions[i, :] = results.forecast(horizon, exog=exog_y)
 
@@ -193,7 +211,11 @@ class SARIMAX(Model):
                                              order=self.order, seasonal_order=self.seasonal_order)
 
     def _predict_online_armax(self, x, ts_x=None, ts_y=None):
-        return self._predict_general_sarimax(x, ts_x=ts_x, ts_y=ts_y, order=self.order)
+        warnings.filterwarnings("error")
+        predictions = self._predict_general_sarimax(x, ts_x=ts_x, ts_y=ts_y, order=self.order)
+        warnings.filterwarnings("default")
+
+        return predictions
 
     def _log(self, filename, data):
         dir = os.path.dirname(filename)
