@@ -73,7 +73,7 @@ class SARIMAX(Model):
             print("Beginning ARMAX training")
 
         if self.online:
-            pass
+            self._is_trained = True
         elif self.is_trained:
             self._load_params()
         else:
@@ -177,8 +177,8 @@ class SARIMAX(Model):
                 model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
                 results = model.smooth(params)
             else:
-                model = sarimax(x[i, :], exog=exog_x, order=order)
-                results = model.fit()
+                model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
+                results = model.fit(disp=self.verbose // 4)
 
             predictions[i, :] = results.forecast(horizon, exog=exog_y)
 
