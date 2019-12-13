@@ -362,6 +362,7 @@ def main(args):
     else:
         intersection = args.intersection
         plan_name = args.plan_name
+        split_by_day = args.split_by_day
         start_time_buffer = args.start_time_buffer
         end_time_buffer = args.end_time_buffer
 
@@ -369,17 +370,26 @@ def main(args):
         detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection_string))]
         detector_data = get_detector_data(detector_list, intersection=intersection_string, plan=plan_name,
                                           start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
-        detector_data_processed, timestamps, timestamps_array = process_array_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
 
-        subdir = utils.get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
+        if split_by_day:
+            detector_data_array = [detector_data[detector_data["Time"].dt.dayofweek == i] for i in range(7)]
+            weekdays = range(7)
+        else:
+            detector_data_array = [detector_data]
+            weekdays = [None]
 
-        if args.output_dir:
-            output_dir = os.path.join(args.output_dir, subdir)
-            generate_array_splits(detector_data_processed, x_offset, y_offset, output_dir, timestamps=timestamps_array, verbose=verbose)
+        for i in range(len(detector_data_array)):
+            detector_data_processed, timestamps, timestamps_array = process_array_detector_data(detector_data_array[i], detector_list, x_offset + y_offset, verbose=verbose)
 
-        if args.timestamps_dir:
-            timestamps_dir = os.path.join(args.timestamps_dir, subdir)
-            save_timestamps(timestamps, timestamps_dir)
+            subdir = utils.get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer, weekday=weekdays[i])
+
+            if args.output_dir:
+                output_dir = os.path.join(args.output_dir, subdir)
+                generate_array_splits(detector_data_processed, x_offset, y_offset, output_dir, timestamps=timestamps_array, verbose=verbose)
+
+            if args.timestamps_dir:
+                timestamps_dir = os.path.join(args.timestamps_dir, subdir)
+                save_timestamps(timestamps, timestamps_dir)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
