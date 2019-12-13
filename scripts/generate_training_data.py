@@ -17,7 +17,6 @@ DETECTOR_LIST_PATH = "data/inputs/model/sensors_advanced{}.txt"
 
 DETECTOR_DATA_QUERY = "SELECT DetectorID, Year, Month, Day, Time, Volume AS Flow, Health FROM detector_data_processed_2017 NATURAL JOIN detector_health WHERE ({}) AND Health = 1"
 DETECTOR_DATA_FREQUENCY = dt.timedelta(minutes=5)
-WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 DUMMY_DATA_TYPES = ["zeros", "ones", "linear_integers", "linear_floats"]
 
@@ -315,23 +314,6 @@ def save_timestamps(timestamps, output_path, timeseries=False):
 
     np.savez_compressed(os.path.join(output_path, file_name), timestamps=timestamps)
 
-def get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=0, end_time_buffer=0, weekday=None):
-    subdir = "{}_{}".format(intersection, plan_name)
-
-    if weekday is not None:
-        subdir += "_{}".format(WEEKDAYS[weekday])
-
-    subdir += "_o{}_h{}".format(x_offset, y_offset)
-
-    if start_time_buffer != 0:
-        subdir += "_sb{}".format(start_time_buffer)
-    if end_time_buffer != 0:
-        subdir += "_eb{}".format(end_time_buffer)
-
-    subdir += "_sensor_data"
-
-    return subdir
-
 
 def main(args):
     x_offset = args.x_offset
@@ -368,7 +350,7 @@ def main(args):
         for i in range(len(detector_data_array)):
             detector_data_processed, timestamps = process_timeseries_detector_data(detector_data_array[i], detector_list, stretch_length, verbose=verbose)
 
-            subdir = get_subdir(intersection, plan_name, x_offset, y_offset, weekday=weekdays[i])
+            subdir = utils.get_subdir(intersection, plan_name, x_offset, y_offset, weekday=weekdays[i])
 
             if args.output_dir:
                 output_dir = os.path.join(args.output_dir, subdir)
@@ -389,7 +371,7 @@ def main(args):
                                           start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
         detector_data_processed, timestamps, timestamps_array = process_array_detector_data(detector_data, detector_list, x_offset + y_offset, verbose=verbose)
 
-        subdir = get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
+        subdir = utils.get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
 
         if args.output_dir:
             output_dir = os.path.join(args.output_dir, subdir)

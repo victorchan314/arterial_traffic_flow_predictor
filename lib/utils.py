@@ -5,13 +5,31 @@ import numpy as np
 
 
 
+WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+def get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=0, end_time_buffer=0, weekday=None):
+    subdir = "{}_{}".format(intersection, plan_name)
+
+    if weekday is not None:
+        subdir += "_{}".format(WEEKDAYS[weekday])
+
+    subdir += "_o{}_h{}".format(x_offset, y_offset)
+
+    if start_time_buffer != 0:
+        subdir += "_sb{}".format(start_time_buffer)
+    if end_time_buffer != 0:
+        subdir += "_eb{}".format(end_time_buffer)
+
+    subdir += "_sensor_data"
+
+    return subdir
+
 def load_predictions(path):
     predictions_file = np.load(path)
     groundtruth = predictions_file["groundtruth"]
     predictions = predictions_file["predictions"]
 
     return groundtruth, predictions
-
 
 def verify_or_create_path(path):
     os.makedirs(path, exist_ok=True)
