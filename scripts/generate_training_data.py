@@ -17,6 +17,7 @@ DETECTOR_LIST_PATH = "data/inputs/model/sensors_advanced{}.txt"
 
 DETECTOR_DATA_QUERY = "SELECT DetectorID, Year, Month, Day, Time, Volume AS Flow, Health FROM detector_data_processed_2017 NATURAL JOIN detector_health WHERE ({}) AND Health = 1"
 DETECTOR_DATA_FREQUENCY = dt.timedelta(minutes=5)
+WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 DUMMY_DATA_TYPES = ["zeros", "ones", "linear_integers", "linear_floats"]
 
@@ -314,8 +315,13 @@ def save_timestamps(timestamps, output_path, timeseries=False):
 
     np.savez_compressed(os.path.join(output_path, file_name), timestamps=timestamps)
 
-def get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=0, end_time_buffer=0):
-    subdir = "{}_{}_o{}_h{}".format(intersection, plan_name, x_offset, y_offset)
+def get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=0, end_time_buffer=0, weekday=None):
+    subdir = "{}_{}".format(intersection, plan_name)
+
+    if weekday is not None:
+        subdir += "_{}".format(WEEKDAYS[weekday])
+
+    subdir += "_o{}_h{}".format(x_offset, y_offset)
 
     if start_time_buffer != 0:
         subdir += "_sb{}".format(start_time_buffer)
@@ -345,22 +351,32 @@ def main(args):
     elif args.timeseries:
         intersection = args.intersection
         plan_name = args.plan_name
+        split_by_day = args.split_by_day
         stretch_length = x_offset + y_offset
 
         intersection_string = "_{}".format(intersection) if intersection else ""
         detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection_string))]
         detector_data = get_detector_data(detector_list, intersection=intersection_string, plan=plan_name)
-        detector_data_processed, timestamps = process_timeseries_detector_data(detector_data, detector_list, stretch_length, verbose=verbose)
 
-        subdir = get_subdir(intersection, plan_name, x_offset, y_offset)
+        if split_by_day:
+            detector_data_array = [detector_data[detector_data["Time"].dt.dayofweek == i] for i in range(7)]
+            weekdays = range(7)
+        else:
+            detector_data_array = [detector_data]
+            weekdays = [None]
 
-        if args.output_dir:
-            output_dir = os.path.join(args.output_dir, subdir)
-            generate_timeseries_splits(detector_data_processed, output_dir, timestamps=timestamps, verbose=verbose)
+        for i in range(len(detector_data_array)):
+            detector_data_processed, timestamps = process_timeseries_detector_data(detector_data_array[i], detector_list, stretch_length, verbose=verbose)
 
-        if args.timestamps_dir:
-            timestamps_dir = os.path.join(args.timestamps_dir, subdir)
-            save_timestamps(timestamps, timestamps_dir, timeseries=True)
+            subdir = get_subdir(intersection, plan_name, x_offset, y_offset, weekday=weekdays[i])
+
+            if args.output_dir:
+                output_dir = os.path.join(args.output_dir, subdir)
+                generate_timeseries_splits(detector_data_processed, output_dir, timestamps=timestamps, verbose=verbose)
+
+            if args.timestamps_dir:
+                timestamps_dir = os.path.join(args.timestamps_dir, subdir)
+                save_timestamps(timestamps, timestamps_dir, timeseries=True)
     else:
         intersection = args.intersection
         plan_name = args.plan_name
@@ -387,6 +403,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--intersection", type=int, default=0, help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
     parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3")
+    parser.add_argument("--split_by_day", action="store_true", help="split by day of the week")
     parser.add_argument("--start_time_buffer", type=int, default=0, help="extra time steps before plan starts to include")
     parser.add_argument("--end_time_buffer", type=int, default=0, help="extra time steps after plan ends to include")
     parser.add_argument("--x_offset", type=int, default=12, help="number of time steps to use for training")
