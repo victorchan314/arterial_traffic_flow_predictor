@@ -402,7 +402,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--intersection", type=int, default=0, help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
-    parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3")
+    parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3; or each to loop over all plans")
     parser.add_argument("--split_by_day", action="store_true", help="split by day of the week")
     parser.add_argument("--start_time_buffer", type=int, default=0, help="extra time steps before plan starts to include")
     parser.add_argument("--end_time_buffer", type=int, default=0, help="extra time steps after plan ends to include")
@@ -416,4 +416,8 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action="count", help="verbosity of script")
     args = parser.parse_args()
 
-    main(args)
+    plan_names = [args.plan_name] if args.plan_name != "each" else ["P1", "P2", "P3", "E"]
+
+    for plan_name in plan_names:
+        args.plan_name = plan_name
+        main(args)
