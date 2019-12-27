@@ -54,26 +54,44 @@ def print_errors_latex(logdir, horizons, precision):
             errors[plan] = {e: {} for e in error_types}
 
         for v in errors[plan].values():
-            v[offset] = {}
+            if not offset in v:
+                v[offset] = {}
 
         predictions_path = os.path.join(logdir, dir, PREDICTIONS_FILENAME)
         groundtruth, predictions = utils.load_predictions(predictions_path)
 
         horizon = predictions.shape[0]
         horizons = range(1, horizon + 1) if horizons is None else sorted([int(h) for h in horizons])
+        batch_size = predictions.shape[1]
 
         for h in horizons:
             prediction_errors = data_utils.get_standard_errors(groundtruth[h-1, ...], predictions[h-1, ...])
 
             for k, v in prediction_errors.items():
-                if v >= 1000:
-                    error = int(v)
-                elif k == "mape":
-                    error = round(100 * v, precision)
-                else:
-                    error = round(v, precision)
+                error = v
+                if h in errors[plan][k][offset]:
+                    previous_error = errors[plan][k][offset][h][0]
+                    previous_batch_size = errors[plan][k][offset][h][1]
+                    total_batch_size = batch_size + previous_batch_size
+                    average_error = (error * batch_size + previous_error * previous_batch_size) / total_batch_size
 
-                errors[plan][k][offset][h] = error
+                    errors[plan][k][offset][h] = [average_error, total_batch_size]
+                else:
+                    errors[plan][k][offset][h] = [error, batch_size]
+
+    for plan, v1 in errors.items():
+        for error_type, v2 in v1.items():
+            for offset, v3 in v2.items():
+                for horizon, v4 in v3.items():
+                    v = v4[0]
+                    if v >= 1000:
+                        error = int(v)
+                    elif error_type == "mape":
+                        error = round(100 * v, precision)
+                    else:
+                        error = round(v, precision)
+
+                    errors[plan][error_type][offset][horizon] = error
 
     for plan in sorted(errors.keys()):
         print(plan)
@@ -84,6 +102,9 @@ def print_errors_latex(logdir, horizons, precision):
             for offset in sorted(table_line_errors.keys()):
                 for horizon in sorted(table_line_errors[offset].keys()):
                     error = table_line_errors[offset][horizon]
+                    if len(str(error)) > precision + 5:
+                        error = ("{:." + str(precision) + "E}").format(error)
+
                     if error_type == "mape":
                         table_line += " & {}\\%".format(error)
                     else:
