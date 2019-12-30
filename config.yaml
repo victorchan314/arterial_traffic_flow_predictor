@@ -1,14 +1,12 @@
-data_directory: data/inputs/5083_P2_o6_h3_sensor_data
-model_order: ["DCRNN"]
+#data_directory: data/inputs/5083/5083_{}_{}_o{}_h{}_sb{}_sensor_data
+loop: True
+model_order: ["SARIMAX"]
 models:
-  Constant: {}
-  SeasonalNaive:
-    seasonality: 252
-  DCRNN:
-    config_filename: "data/test/test.yaml"
-    output_filename: "data/test/test.out"
-    predictions_filename: "data/test/predictions.npz"
-#  DCRNN:
-#    config_filename: "data/5083_P1/5083_P1.yaml"
-#    output_filename: "data/5083_P1/5083_P1.out"
-#    predictions_filename: "data/5083_P1/predictions.npz"
+  SARIMAX:
+    #base_dir: data/baselines/arimax_2_0_1/5083_{}_{}_o{}_h{}_sb{}
+    order: [2, 1, 0]
+    seasonal_order: [0, 0, 0, 0]
+    use_exog: True
+    online: False
+    #train_file: data/inputs/5083/5083_P2_o3_h6_sensor_data/train_ts.npz
+    #ts_dir: data/inputs/5083/5083_P2_o3_h6_sb3_sensor_data

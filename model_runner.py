@@ -101,16 +101,39 @@ def run_models(data, model_configs, model_order=None, verbose=0):
 
 
 
-def main(args):
-    verbose = args.verbose
-    config = load_config(args.config)
-
+def run_config(config, verbose=0):
     data_directory = config["data_directory"]
     data = load_data(data_directory, verbose=verbose)
     model_configs = config["models"]
     model_order = config.get("model_order")
 
     run_models(data, model_configs, model_order=model_order, verbose=verbose)
+
+def main(args):
+    verbose = args.verbose
+    config = load_config(args.config)
+
+    loop = config.get("loop", False)
+    plan = "P1"
+
+    if loop:
+        #for plan in ["P1", "P2", "P3"]:
+        for offset in [3, 6, 12, 24]:
+            data_directory = "data/inputs/5083/5083_{}_o{}_h6_sb{}_sensor_data".format(plan, offset, offset)
+            data = load_data(data_directory, verbose=verbose)
+            model_configs = config["models"]
+            model_order = config.get("model_order")
+
+            model_configs["SARIMAX"]["base_dir"] = "data/baselines/arimax_2_1_0_testing/5083_{}_o{}_h6_sb{}"\
+                .format(plan, offset, offset)
+            model_configs["SARIMAX"]["train_file"] = "data/inputs/5083/5083_{}_o{}_h6_sensor_data/train_ts.npz"\
+                .format(plan, offset)
+            model_configs["SARIMAX"]["ts_dir"] = "data/inputs/5083/5083_{}_o{}_h6_sb{}_sensor_data"\
+                .format(plan, offset, offset)
+
+            run_models(data, model_configs, model_order=model_order, verbose=verbose)
+    else:
+        run_config(config, verbose=verbose)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
