@@ -40,8 +40,11 @@ class DCRNN(Model):
         with open(self.config_filename) as f:
             self.supervisor_config = yaml.load(f)
 
-        graph_pkl_filename = self.supervisor_config['data'].get('graph_pkl_filename')
-        sensor_ids, sensor_id_to_ind, self.adj_mx = load_graph_data(graph_pkl_filename)
+        graph_pkl_filename = self.supervisor_config['data'].get('graph_pkl_filename', None)
+        if graph_pkl_filename is None:
+            self.adj_mx = None
+        else:
+            sensor_ids, sensor_id_to_ind, self.adj_mx = load_graph_data(graph_pkl_filename)
 
         self.tf_config = tf.ConfigProto()
         if use_cpu_only:

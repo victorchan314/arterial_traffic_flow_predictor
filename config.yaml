@@ -1,12 +1,6 @@
 #data_directory: data/inputs/5083/5083_{}_{}_o{}_h{}_sb{}_sensor_data
 loop: True
-model_order: ["SARIMAX"]
+model_order: ["DCRNN"]
 models:
-  SARIMAX:
-    #base_dir: data/baselines/arimax_2_0_1/5083_{}_{}_o{}_h{}_sb{}
-    order: [2, 1, 0]
-    seasonal_order: [0, 0, 0, 0]
-    use_exog: True
-    online: False
-    #train_file: data/inputs/5083/5083_P2_o3_h6_sensor_data/train_ts.npz
-    #ts_dir: data/inputs/5083/5083_P2_o3_h6_sb3_sensor_data
+  DCRNN:
+    base_dir: data/baselines/rnn/5083_{}_o{}_h{}_sb{}

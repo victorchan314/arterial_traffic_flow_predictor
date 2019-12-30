@@ -114,7 +114,7 @@ def main(args):
     config = load_config(args.config)
 
     loop = config.get("loop", False)
-    plan = "P1"
+    plan = "P3"
 
     if loop:
         #for plan in ["P1", "P2", "P3"]:
@@ -124,11 +124,7 @@ def main(args):
             model_configs = config["models"]
             model_order = config.get("model_order")
 
-            model_configs["SARIMAX"]["base_dir"] = "data/baselines/arimax_2_1_0_testing/5083_{}_o{}_h6_sb{}"\
-                .format(plan, offset, offset)
-            model_configs["SARIMAX"]["train_file"] = "data/inputs/5083/5083_{}_o{}_h6_sensor_data/train_ts.npz"\
-                .format(plan, offset)
-            model_configs["SARIMAX"]["ts_dir"] = "data/inputs/5083/5083_{}_o{}_h6_sb{}_sensor_data"\
+            model_configs["DCRNN"]["base_dir"] = "data/baselines/rnn/5083_{}_o{}_h6_sb{}"\
                 .format(plan, offset, offset)
 
             run_models(data, model_configs, model_order=model_order, verbose=verbose)
