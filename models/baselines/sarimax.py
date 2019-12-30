@@ -14,7 +14,7 @@ from lib import utils
 class SARIMAX(Model):
     """Model that uses SARIMAX to predict future values of training data per sensor"""
     def __init__(self, *args, order=(1, 0, 0), seasonal_order=(0, 0, 0, 0), use_exog=True, online=False,
-                 is_trained=False, base_dir=None, train_file=None, ts_dir=None, num_fourier_terms=2,
+                 is_trained=False, base_dir=None, train_file=None, ts_dir=None, num_fourier_terms=1,
                  calculate_train_error=False, calculate_val_error=False, verbose=0, **kwargs):
         super(SARIMAX, self).__init__(*args, **kwargs)
         self.order = order
@@ -197,6 +197,11 @@ class SARIMAX(Model):
                     model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order,
                                     simple_differencing=True)
                     results = model.fit(disp=self.verbose // 4)
+                except Warning:
+                    warnings.filterwarnings("default")
+                    model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
+                    results = model.fit(disp=self.verbose // 4)
+                    warnings.filterwarnings("error")
 
             predictions[i, :] = results.forecast(horizon, exog=exog_y)
 
