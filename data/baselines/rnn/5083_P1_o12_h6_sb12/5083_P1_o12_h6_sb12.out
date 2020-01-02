@@ -1,0 +1,595 @@
+2019-12-30 15:27:55,143 - INFO - Log directory: data/baselines/rnn/5083_P1_o12_h6_sb12/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230152755/
+2019-12-30 15:27:55,145 - INFO - {'base_dir': 'data/baselines/rnn/5083_P1_o12_h6_sb12', 'log_level': 'INFO', 'data': {'batch_size': 64, 'dataset_dir': 'data/inputs/5083/5083_P1_o12_h6_sb12_sensor_data', 'test_batch_size': 64, 'val_batch_size': 64}, 'model': {'cl_decay_steps': 2000, 'horizon': 6, 'input_dim': 2, 'l1_decay': 0, 'num_nodes': 15, 'num_rnn_layers': 2, 'output_dim': 2, 'rnn_units': 64, 'seq_len': 12, 'use_curriculum_learning': True, 'use_gc_for_ru': False}, 'train': {'base_lr': 0.01, 'dropout': 0, 'epoch': 0, 'epochs': 100, 'epsilon': 0.001, 'global_step': 0, 'lr_decay_ratio': 0.1, 'max_grad_norm': 5, 'max_to_keep': 100, 'min_learning_rate': 2e-06, 'optimizer': 'adam', 'patience': 50, 'steps': [20, 30, 40, 50], 'test_every_n_epochs': 10}}
+2019-12-30 15:27:56,225 - INFO - ('x_train', (19320, 12, 15, 2))
+2019-12-30 15:27:56,226 - INFO - ('y_train', (19320, 6, 15, 2))
+2019-12-30 15:27:56,226 - INFO - ('x_val', (2760, 12, 15, 2))
+2019-12-30 15:27:56,227 - INFO - ('y_val', (2760, 6, 15, 2))
+2019-12-30 15:27:56,227 - INFO - ('x_test', (5520, 12, 15, 2))
+2019-12-30 15:27:56,227 - INFO - ('y_test', (5520, 6, 15, 2))
+2019-12-30 15:28:07,049 - INFO - Total number of trainable parameters: 75392
+Created DCRNN model
+2019-12-30 15:28:07,578 - INFO - Start training ...
+2019-12-30 15:29:02,511 - INFO - Epoch [0/100] (301) train_mae: 9.3106, val_mae: 17.7980 lr:0.010000 54.8s
+2019-12-30 15:29:02,720 - INFO - Val loss decrease from inf to 17.7980, saving to data/baselines/rnn/5083_P1_o12_h6_sb12/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230152755/models-17.7980-301
+2019-12-30 15:29:59,308 - INFO - Epoch [1/100] (602) train_mae: 7.1998, val_mae: 18.3086 lr:0.010000 56.6s
+2019-12-30 15:30:56,629 - INFO - Epoch [2/100] (903) train_mae: 7.0013, val_mae: 14.5889 lr:0.010000 57.3s
+2019-12-30 15:30:56,644 - INFO - Val loss decrease from 17.7980 to 14.5889, saving to data/baselines/rnn/5083_P1_o12_h6_sb12/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230152755/models-14.5889-903
+2019-12-30 15:31:51,763 - INFO - Epoch [3/100] (1204) train_mae: 6.8902, val_mae: 15.6604 lr:0.010000 55.1s
+2019-12-30 15:32:44,059 - INFO - Epoch [4/100] (1505) train_mae: 6.5930, val_mae: 19.8271 lr:0.010000 52.3s
+2019-12-30 15:33:37,729 - INFO - Epoch [5/100] (1806) train_mae: 6.7293, val_mae: 15.3379 lr:0.010000 53.7s
+2019-12-30 15:34:35,390 - INFO - Epoch [6/100] (2107) train_mae: 6.5926, val_mae: 13.9598 lr:0.010000 57.7s
+2019-12-30 15:34:35,408 - INFO - Val loss decrease from 14.5889 to 13.9598, saving to data/baselines/rnn/5083_P1_o12_h6_sb12/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230152755/models-13.9598-2107
+2019-12-30 15:35:30,586 - INFO - Epoch [7/100] (2408) train_mae: 6.4351, val_mae: 13.3837 lr:0.010000 55.2s
+2019-12-30 15:35:30,605 - INFO - Val loss decrease from 13.9598 to 13.3837, saving to data/baselines/rnn/5083_P1_o12_h6_sb12/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230152755/models-13.3837-2408
+2019-12-30 15:36:27,664 - INFO - Epoch [8/100] (2709) train_mae: 6.4566, val_mae: 13.5927 lr:0.010000 57.1s
+2019-12-30 15:37:23,404 - INFO - Epoch [9/100] (3010) train_mae: 6.4819, val_mae: 14.6313 lr:0.010000 55.7s
+2019-12-30 15:37:30,017 - INFO - Horizon 01, MAE: 12.05, MAPE: 0.0398, RMSE: 15.46
+2019-12-30 15:37:30,023 - INFO - Horizon 02, MAE: 18.92, MAPE: 0.0645, RMSE: 24.21
+2019-12-30 15:37:30,029 - INFO - Horizon 03, MAE: 25.29, MAPE: 0.0888, RMSE: 32.27
+2019-12-30 15:37:30,035 - INFO - Horizon 04, MAE: 31.30, MAPE: 0.1116, RMSE: 39.85
+2019-12-30 15:37:30,041 - INFO - Horizon 05, MAE: 37.56, MAPE: 0.1359, RMSE: 47.67
+2019-12-30 15:37:30,047 - INFO - Horizon 06, MAE: 40.23, MAPE: 0.1473, RMSE: 50.92
+2019-12-30 15:38:28,434 - INFO - Epoch [10/100] (3311) train_mae: 6.4247, val_mae: 13.7833 lr:0.010000 58.4s
+2019-12-30 15:39:23,494 - INFO - Epoch [11/100] (3612) train_mae: 6.3729, val_mae: 15.4356 lr:0.010000 55.1s
+2019-12-30 15:40:22,480 - INFO - Epoch [12/100] (3913) train_mae: 6.3685, val_mae: 13.4517 lr:0.010000 59.0s
+2019-12-30 15:41:14,865 - INFO - Epoch [13/100] (4214) train_mae: 6.3525, val_mae: 14.5355 lr:0.010000 52.4s
+2019-12-30 15:42:09,128 - INFO - Epoch [14/100] (4515) train_mae: 6.3849, val_mae: 14.8946 lr:0.010000 54.3s
+2019-12-30 15:43:04,371 - INFO - Epoch [15/100] (4816) train_mae: 6.3483, val_mae: 13.4192 lr:0.010000 55.2s
+2019-12-30 15:44:04,874 - INFO - Epoch [16/100] (5117) train_mae: 6.3040, val_mae: 13.8371 lr:0.010000 60.5s
+2019-12-30 15:45:00,044 - INFO - Epoch [17/100] (5418) train_mae: 6.1583, val_mae: 14.2342 lr:0.010000 55.2s
+2019-12-30 15:46:00,711 - INFO - Epoch [18/100] (5719) train_mae: 6.2963, val_mae: 12.9816 lr:0.010000 60.7s
+2019-12-30 15:46:00,728 - INFO - Val loss decrease from 13.3837 to 12.9816, saving to data/baselines/rnn/5083_P1_o12_h6_sb12/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230152755/models-12.9816-5719
+2019-12-30 15:46:57,253 - INFO - Epoch [19/100] (6020) train_mae: 6.2226, val_mae: 13.3720 lr:0.010000 56.5s
+2019-12-30 15:47:03,672 - INFO - Horizon 01, MAE: 11.91, MAPE: 0.0382, RMSE: 15.39
+2019-12-30 15:47:03,678 - INFO - Horizon 02, MAE: 17.74, MAPE: 0.0565, RMSE: 23.14
+2019-12-30 15:47:03,683 - INFO - Horizon 03, MAE: 23.31, MAPE: 0.0737, RMSE: 30.75
+2019-12-30 15:47:03,688 - INFO - Horizon 04, MAE: 28.46, MAPE: 0.0893, RMSE: 37.83
+2019-12-30 15:47:03,693 - INFO - Horizon 05, MAE: 33.57, MAPE: 0.1051, RMSE: 44.71
+2019-12-30 15:47:03,698 - INFO - Horizon 06, MAE: 35.49, MAPE: 0.1103, RMSE: 47.44
+2019-12-30 15:48:00,687 - INFO - Epoch [20/100] (6321) train_mae: 5.8447, val_mae: 12.4193 lr:0.001000 57.0s
+2019-12-30 15:48:00,704 - INFO - Val loss decrease from 12.9816 to 12.4193, saving to data/baselines/rnn/5083_P1_o12_h6_sb12/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230152755/models-12.4193-6321
+2019-12-30 15:48:57,377 - INFO - Epoch [21/100] (6622) train_mae: 5.8102, val_mae: 12.5075 lr:0.001000 56.7s
+2019-12-30 15:49:58,436 - INFO - Epoch [22/100] (6923) train_mae: 5.8341, val_mae: 12.5118 lr:0.001000 61.1s
+2019-12-30 15:50:54,336 - INFO - Epoch [23/100] (7224) train_mae: 5.8461, val_mae: 12.4975 lr:0.001000 55.9s
+2019-12-30 15:51:53,612 - INFO - Epoch [24/100] (7525) train_mae: 5.8721, val_mae: 12.3642 lr:0.001000 59.3s
+2019-12-30 15:51:53,631 - INFO - Val loss decrease from 12.4193 to 12.3642, saving to data/baselines/rnn/5083_P1_o12_h6_sb12/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230152755/models-12.3642-7525
+2019-12-30 15:52:50,691 - INFO - Epoch [25/100] (7826) train_mae: 5.8185, val_mae: 12.4917 lr:0.001000 57.1s
+2019-12-30 15:53:48,666 - INFO - Epoch [26/100] (8127) train_mae: 5.8690, val_mae: 12.4482 lr:0.001000 58.0s
+2019-12-30 15:54:44,671 - INFO - Epoch [27/100] (8428) train_mae: 5.8627, val_mae: 12.4278 lr:0.001000 56.0s
+2019-12-30 15:55:45,065 - INFO - Epoch [28/100] (8729) train_mae: 5.9023, val_mae: 12.4198 lr:0.001000 60.4s
+2019-12-30 15:56:43,192 - INFO - Epoch [29/100] (9030) train_mae: 5.8875, val_mae: 12.5305 lr:0.001000 58.1s
+2019-12-30 15:56:48,163 - INFO - Horizon 01, MAE: 11.64, MAPE: 0.0377, RMSE: 14.97
+2019-12-30 15:56:48,169 - INFO - Horizon 02, MAE: 17.55, MAPE: 0.0567, RMSE: 22.82
+2019-12-30 15:56:48,174 - INFO - Horizon 03, MAE: 22.86, MAPE: 0.0739, RMSE: 30.05
+2019-12-30 15:56:48,180 - INFO - Horizon 04, MAE: 27.71, MAPE: 0.0898, RMSE: 36.70
+2019-12-30 15:56:48,185 - INFO - Horizon 05, MAE: 32.76, MAPE: 0.1066, RMSE: 43.52
+2019-12-30 15:56:48,191 - INFO - Horizon 06, MAE: 34.14, MAPE: 0.1113, RMSE: 45.59
+2019-12-30 15:57:46,351 - INFO - Epoch [30/100] (9331) train_mae: 5.8794, val_mae: 12.3332 lr:0.000100 58.2s
+2019-12-30 15:57:46,371 - INFO - Val loss decrease from 12.3642 to 12.3332, saving to data/baselines/rnn/5083_P1_o12_h6_sb12/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230152755/models-12.3332-9331
+2019-12-30 15:58:43,778 - INFO - Epoch [31/100] (9632) train_mae: 5.8698, val_mae: 12.2743 lr:0.000100 57.4s
+2019-12-30 15:58:43,792 - INFO - Val loss decrease from 12.3332 to 12.2743, saving to data/baselines/rnn/5083_P1_o12_h6_sb12/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230152755/models-12.2743-9632
+2019-12-30 15:59:42,891 - INFO - Epoch [32/100] (9933) train_mae: 5.9097, val_mae: 12.2971 lr:0.000100 59.1s
+2019-12-30 16:00:39,423 - INFO - Epoch [33/100] (10234) train_mae: 5.8918, val_mae: 12.2777 lr:0.000100 56.5s
+2019-12-30 16:01:38,954 - INFO - Epoch [34/100] (10535) train_mae: 5.9673, val_mae: 12.2822 lr:0.000100 59.5s
+2019-12-30 16:02:39,001 - INFO - Epoch [35/100] (10836) train_mae: 6.0014, val_mae: 12.2809 lr:0.000100 60.0s
+2019-12-30 16:03:36,405 - INFO - Epoch [36/100] (11137) train_mae: 6.0830, val_mae: 12.3041 lr:0.000100 57.4s
+2019-12-30 16:04:34,840 - INFO - Epoch [37/100] (11438) train_mae: 6.0802, val_mae: 12.2575 lr:0.000100 58.4s
+2019-12-30 16:04:34,860 - INFO - Val loss decrease from 12.2743 to 12.2575, saving to data/baselines/rnn/5083_P1_o12_h6_sb12/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230152755/models-12.2575-11438
+2019-12-30 16:05:33,288 - INFO - Epoch [38/100] (11739) train_mae: 6.1719, val_mae: 12.2813 lr:0.000100 58.4s
+2019-12-30 16:06:33,728 - INFO - Epoch [39/100] (12040) train_mae: 6.1735, val_mae: 12.2876 lr:0.000100 60.4s
+2019-12-30 16:06:38,384 - INFO - Horizon 01, MAE: 11.60, MAPE: 0.0374, RMSE: 14.91
+2019-12-30 16:06:38,389 - INFO - Horizon 02, MAE: 17.41, MAPE: 0.0562, RMSE: 22.63
+2019-12-30 16:06:38,394 - INFO - Horizon 03, MAE: 22.67, MAPE: 0.0732, RMSE: 29.78
+2019-12-30 16:06:38,400 - INFO - Horizon 04, MAE: 27.45, MAPE: 0.0886, RMSE: 36.37
+2019-12-30 16:06:38,405 - INFO - Horizon 05, MAE: 32.44, MAPE: 0.1047, RMSE: 43.14
+2019-12-30 16:06:38,410 - INFO - Horizon 06, MAE: 33.80, MAPE: 0.1087, RMSE: 45.23
+2019-12-30 16:07:38,445 - INFO - Epoch [40/100] (12341) train_mae: 6.2737, val_mae: 12.2554 lr:0.000010 60.0s
+2019-12-30 16:07:38,468 - INFO - Val loss decrease from 12.2575 to 12.2554, saving to data/baselines/rnn/5083_P1_o12_h6_sb12/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230152755/models-12.2554-12341
+2019-12-30 16:08:39,240 - INFO - Epoch [41/100] (12642) train_mae: 6.3161, val_mae: 12.2645 lr:0.000010 60.8s
+2019-12-30 16:09:37,401 - INFO - Epoch [42/100] (12943) train_mae: 6.4692, val_mae: 12.2681 lr:0.000010 58.2s
+2019-12-30 16:10:37,424 - INFO - Epoch [43/100] (13244) train_mae: 6.5551, val_mae: 12.2614 lr:0.000010 60.0s
+2019-12-30 16:11:36,237 - INFO - Epoch [44/100] (13545) train_mae: 6.6767, val_mae: 12.2682 lr:0.000010 58.8s
+2019-12-30 16:12:37,991 - INFO - Epoch [45/100] (13846) train_mae: 6.8721, val_mae: 12.2653 lr:0.000010 61.8s
+2019-12-30 16:13:37,260 - INFO - Epoch [46/100] (14147) train_mae: 6.9033, val_mae: 12.2673 lr:0.000010 59.3s
+2019-12-30 16:14:39,438 - INFO - Epoch [47/100] (14448) train_mae: 7.1689, val_mae: 12.2699 lr:0.000010 62.2s
+2019-12-30 16:15:38,810 - INFO - Epoch [48/100] (14749) train_mae: 7.2242, val_mae: 12.2583 lr:0.000010 59.4s
+2019-12-30 16:16:38,911 - INFO - Epoch [49/100] (15050) train_mae: 7.3699, val_mae: 12.2691 lr:0.000010 60.1s
+2019-12-30 16:16:43,903 - INFO - Horizon 01, MAE: 11.59, MAPE: 0.0374, RMSE: 14.89
+2019-12-30 16:16:43,908 - INFO - Horizon 02, MAE: 17.41, MAPE: 0.0561, RMSE: 22.63
+2019-12-30 16:16:43,913 - INFO - Horizon 03, MAE: 22.64, MAPE: 0.0730, RMSE: 29.75
+2019-12-30 16:16:43,918 - INFO - Horizon 04, MAE: 27.41, MAPE: 0.0885, RMSE: 36.30
+2019-12-30 16:16:43,923 - INFO - Horizon 05, MAE: 32.38, MAPE: 0.1048, RMSE: 43.02
+2019-12-30 16:16:43,929 - INFO - Horizon 06, MAE: 33.71, MAPE: 0.1088, RMSE: 45.05
+2019-12-30 16:17:47,607 - INFO - Epoch [50/100] (15351) train_mae: 7.6252, val_mae: 12.2657 lr:0.000002 63.7s
+2019-12-30 16:18:45,997 - INFO - Epoch [51/100] (15652) train_mae: 7.8767, val_mae: 12.2678 lr:0.000002 58.4s
+2019-12-30 16:19:48,740 - INFO - Epoch [52/100] (15953) train_mae: 7.9984, val_mae: 12.2656 lr:0.000002 62.7s
+2019-12-30 16:20:49,203 - INFO - Epoch [53/100] (16254) train_mae: 8.2279, val_mae: 12.2710 lr:0.000002 60.5s
+2019-12-30 16:21:50,248 - INFO - Epoch [54/100] (16555) train_mae: 8.6722, val_mae: 12.2698 lr:0.000002 61.0s
+2019-12-30 16:22:51,915 - INFO - Epoch [55/100] (16856) train_mae: 8.9716, val_mae: 12.2690 lr:0.000002 61.7s
+2019-12-30 16:23:56,436 - INFO - Epoch [56/100] (17157) train_mae: 9.2179, val_mae: 12.2652 lr:0.000002 64.5s
+2019-12-30 16:24:57,130 - INFO - Epoch [57/100] (17458) train_mae: 9.4296, val_mae: 12.2694 lr:0.000002 60.7s
+2019-12-30 16:26:02,496 - INFO - Epoch [58/100] (17759) train_mae: 9.4840, val_mae: 12.2719 lr:0.000002 65.4s
+2019-12-30 16:27:02,707 - INFO - Epoch [59/100] (18060) train_mae: 9.9325, val_mae: 12.2687 lr:0.000002 60.2s
+2019-12-30 16:27:07,875 - INFO - Horizon 01, MAE: 11.58, MAPE: 0.0374, RMSE: 14.88
+2019-12-30 16:27:07,884 - INFO - Horizon 02, MAE: 17.40, MAPE: 0.0561, RMSE: 22.61
+2019-12-30 16:27:07,893 - INFO - Horizon 03, MAE: 22.63, MAPE: 0.0731, RMSE: 29.72
+2019-12-30 16:27:07,902 - INFO - Horizon 04, MAE: 27.39, MAPE: 0.0886, RMSE: 36.26
+2019-12-30 16:27:07,912 - INFO - Horizon 05, MAE: 32.36, MAPE: 0.1048, RMSE: 42.97
+2019-12-30 16:27:07,923 - INFO - Horizon 06, MAE: 33.69, MAPE: 0.1089, RMSE: 44.99
+2019-12-30 16:28:09,901 - INFO - Epoch [60/100] (18361) train_mae: 9.9759, val_mae: 12.2720 lr:0.000002 62.0s
+2019-12-30 16:29:14,304 - INFO - Epoch [61/100] (18662) train_mae: 10.1505, val_mae: 12.2690 lr:0.000002 64.4s
+2019-12-30 16:30:16,224 - INFO - Epoch [62/100] (18963) train_mae: 10.5632, val_mae: 12.2734 lr:0.000002 61.9s
+2019-12-30 16:31:21,955 - INFO - Epoch [63/100] (19264) train_mae: 10.5152, val_mae: 12.2720 lr:0.000002 65.7s
+2019-12-30 16:32:23,729 - INFO - Epoch [64/100] (19565) train_mae: 10.8753, val_mae: 12.2709 lr:0.000002 61.8s
+2019-12-30 16:33:29,847 - INFO - Epoch [65/100] (19866) train_mae: 11.0361, val_mae: 12.2760 lr:0.000002 66.1s
+2019-12-30 16:34:32,980 - INFO - Epoch [66/100] (20167) train_mae: 11.1242, val_mae: 12.2686 lr:0.000002 63.1s
+2019-12-30 16:35:34,588 - INFO - Epoch [67/100] (20468) train_mae: 11.2108, val_mae: 12.2753 lr:0.000002 61.6s
+2019-12-30 16:36:40,363 - INFO - Epoch [68/100] (20769) train_mae: 11.1914, val_mae: 12.2711 lr:0.000002 65.8s
+2019-12-30 16:37:42,208 - INFO - Epoch [69/100] (21070) train_mae: 11.2777, val_mae: 12.2724 lr:0.000002 61.8s
+2019-12-30 16:37:48,359 - INFO - Horizon 01, MAE: 11.58, MAPE: 0.0374, RMSE: 14.88
+2019-12-30 16:37:48,366 - INFO - Horizon 02, MAE: 17.40, MAPE: 0.0562, RMSE: 22.61
+2019-12-30 16:37:48,373 - INFO - Horizon 03, MAE: 22.64, MAPE: 0.0732, RMSE: 29.72
+2019-12-30 16:37:48,379 - INFO - Horizon 04, MAE: 27.41, MAPE: 0.0888, RMSE: 36.27
+2019-12-30 16:37:48,387 - INFO - Horizon 05, MAE: 32.37, MAPE: 0.1050, RMSE: 42.97
+2019-12-30 16:37:48,396 - INFO - Horizon 06, MAE: 33.70, MAPE: 0.1092, RMSE: 44.98
+2019-12-30 16:38:54,846 - INFO - Epoch [70/100] (21371) train_mae: 11.6285, val_mae: 12.2671 lr:0.000002 66.4s
+2019-12-30 16:39:44,344 - INFO - Epoch [71/100] (21672) train_mae: 11.7067, val_mae: 12.2713 lr:0.000002 49.5s
+2019-12-30 16:40:33,094 - INFO - Epoch [72/100] (21973) train_mae: 11.7378, val_mae: 12.2689 lr:0.000002 48.7s
+2019-12-30 16:41:21,531 - INFO - Epoch [73/100] (22274) train_mae: 11.7588, val_mae: 12.2703 lr:0.000002 48.4s
+2019-12-30 16:42:08,456 - INFO - Epoch [74/100] (22575) train_mae: 11.8032, val_mae: 12.2675 lr:0.000002 46.9s
+2019-12-30 16:42:57,616 - INFO - Epoch [75/100] (22876) train_mae: 11.8031, val_mae: 12.2668 lr:0.000002 49.2s
+2019-12-30 16:43:44,962 - INFO - Epoch [76/100] (23177) train_mae: 11.8755, val_mae: 12.2729 lr:0.000002 47.3s
+2019-12-30 16:44:34,289 - INFO - Epoch [77/100] (23478) train_mae: 11.9198, val_mae: 12.2653 lr:0.000002 49.3s
+2019-12-30 16:45:23,587 - INFO - Epoch [78/100] (23779) train_mae: 11.9075, val_mae: 12.2672 lr:0.000002 49.3s
+2019-12-30 16:46:12,090 - INFO - Epoch [79/100] (24080) train_mae: 11.8946, val_mae: 12.2661 lr:0.000002 48.5s
+2019-12-30 16:46:16,943 - INFO - Horizon 01, MAE: 11.58, MAPE: 0.0374, RMSE: 14.88
+2019-12-30 16:46:16,949 - INFO - Horizon 02, MAE: 17.40, MAPE: 0.0561, RMSE: 22.61
+2019-12-30 16:46:16,955 - INFO - Horizon 03, MAE: 22.63, MAPE: 0.0731, RMSE: 29.72
+2019-12-30 16:46:16,962 - INFO - Horizon 04, MAE: 27.40, MAPE: 0.0887, RMSE: 36.27
+2019-12-30 16:46:16,967 - INFO - Horizon 05, MAE: 32.36, MAPE: 0.1049, RMSE: 42.97
+2019-12-30 16:46:16,974 - INFO - Horizon 06, MAE: 33.69, MAPE: 0.1091, RMSE: 44.98
+2019-12-30 16:47:06,779 - INFO - Epoch [80/100] (24381) train_mae: 12.0271, val_mae: 12.2665 lr:0.000002 49.8s
+2019-12-30 16:47:54,770 - INFO - Epoch [81/100] (24682) train_mae: 11.9145, val_mae: 12.2634 lr:0.000002 48.0s
+2019-12-30 16:48:45,339 - INFO - Epoch [82/100] (24983) train_mae: 12.0069, val_mae: 12.2619 lr:0.000002 50.6s
+2019-12-30 16:49:35,174 - INFO - Epoch [83/100] (25284) train_mae: 11.9996, val_mae: 12.2631 lr:0.000002 49.8s
+2019-12-30 16:50:24,272 - INFO - Epoch [84/100] (25585) train_mae: 12.0326, val_mae: 12.2702 lr:0.000002 49.1s
+2019-12-30 16:51:15,073 - INFO - Epoch [85/100] (25886) train_mae: 12.0491, val_mae: 12.2676 lr:0.000002 50.8s
+2019-12-30 16:52:03,151 - INFO - Epoch [86/100] (26187) train_mae: 12.0294, val_mae: 12.2630 lr:0.000002 48.1s
+2019-12-30 16:52:53,374 - INFO - Epoch [87/100] (26488) train_mae: 12.0192, val_mae: 12.2559 lr:0.000002 50.2s
+2019-12-30 16:53:35,807 - INFO - Epoch [88/100] (26789) train_mae: 12.0864, val_mae: 12.2609 lr:0.000002 42.4s
+2019-12-30 16:54:10,565 - INFO - Epoch [89/100] (27090) train_mae: 12.1446, val_mae: 12.2585 lr:0.000002 34.8s
+2019-12-30 16:54:13,421 - INFO - Horizon 01, MAE: 11.58, MAPE: 0.0374, RMSE: 14.88
+2019-12-30 16:54:13,425 - INFO - Horizon 02, MAE: 17.40, MAPE: 0.0561, RMSE: 22.61
+2019-12-30 16:54:13,428 - INFO - Horizon 03, MAE: 22.63, MAPE: 0.0730, RMSE: 29.72
+2019-12-30 16:54:13,432 - INFO - Horizon 04, MAE: 27.39, MAPE: 0.0886, RMSE: 36.26
+2019-12-30 16:54:13,436 - INFO - Horizon 05, MAE: 32.34, MAPE: 0.1048, RMSE: 42.96
+2019-12-30 16:54:13,440 - INFO - Horizon 06, MAE: 33.68, MAPE: 0.1090, RMSE: 44.97
+2019-12-30 16:54:48,095 - INFO - Epoch [90/100] (27391) train_mae: 12.1258, val_mae: 12.2617 lr:0.000002 34.7s
+2019-12-30 16:55:22,610 - INFO - Epoch [91/100] (27692) train_mae: 12.0840, val_mae: 12.2585 lr:0.000002 34.5s
+2019-12-30 16:55:22,611 - WARNING - Early stopping at epoch: 91
+2019-12-30 16:55:25,472 - INFO - Horizon 01, MAE: 11.58, MAPE: 0.0374, RMSE: 14.88
+2019-12-30 16:55:25,476 - INFO - Horizon 02, MAE: 17.40, MAPE: 0.0561, RMSE: 22.61
+2019-12-30 16:55:25,479 - INFO - Horizon 03, MAE: 22.63, MAPE: 0.0730, RMSE: 29.72
+2019-12-30 16:55:25,483 - INFO - Horizon 04, MAE: 27.39, MAPE: 0.0885, RMSE: 36.26
+2019-12-30 16:55:25,487 - INFO - Horizon 05, MAE: 32.35, MAPE: 0.1048, RMSE: 42.97
+2019-12-30 16:55:25,491 - INFO - Horizon 06, MAE: 33.69, MAPE: 0.1090, RMSE: 44.99
+Trained DCRNN model
+train mae: 12.084
+val mae: 12.2585
+test mse: 1145.6211383200089
+test rmse: 33.84702554612456
+test mae: 24.256451409018943
+test mape: 0.07811730943674822
+Predictions saved as data/baselines/rnn/5083_P1_o12_h6_sb12/predictions.npz.
+Loading data from directory data/inputs/5083/5083_P1_o24_h6_sb24_sensor_data
+Loading datafile at path data/inputs/5083/5083_P1_o24_h6_sb24_sensor_data/train.npz
+Loading datafile at path data/inputs/5083/5083_P1_o24_h6_sb24_sensor_data/val.npz
+Loading datafile at path data/inputs/5083/5083_P1_o24_h6_sb24_sensor_data/test.npz
+Starting to run models...
+2019-12-30 16:55:28,991 - INFO - Log directory: data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/
+2019-12-30 16:55:28,991 - INFO - Log directory: data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/
+2019-12-30 16:55:28,992 - INFO - {'base_dir': 'data/baselines/rnn/5083_P1_o24_h6_sb24', 'log_level': 'INFO', 'data': {'batch_size': 64, 'dataset_dir': 'data/inputs/5083/5083_P1_o24_h6_sb24_sensor_data', 'test_batch_size': 64, 'val_batch_size': 64}, 'model': {'cl_decay_steps': 2000, 'horizon': 6, 'input_dim': 2, 'l1_decay': 0, 'num_nodes': 15, 'num_rnn_layers': 2, 'output_dim': 2, 'rnn_units': 64, 'seq_len': 24, 'use_curriculum_learning': True, 'use_gc_for_ru': False}, 'train': {'base_lr': 0.01, 'dropout': 0, 'epoch': 0, 'epochs': 100, 'epsilon': 0.001, 'global_step': 0, 'lr_decay_ratio': 0.1, 'max_grad_norm': 5, 'max_to_keep': 100, 'min_learning_rate': 2e-06, 'optimizer': 'adam', 'patience': 50, 'steps': [20, 30, 40, 50], 'test_every_n_epochs': 10}}
+2019-12-30 16:55:28,992 - INFO - {'base_dir': 'data/baselines/rnn/5083_P1_o24_h6_sb24', 'log_level': 'INFO', 'data': {'batch_size': 64, 'dataset_dir': 'data/inputs/5083/5083_P1_o24_h6_sb24_sensor_data', 'test_batch_size': 64, 'val_batch_size': 64}, 'model': {'cl_decay_steps': 2000, 'horizon': 6, 'input_dim': 2, 'l1_decay': 0, 'num_nodes': 15, 'num_rnn_layers': 2, 'output_dim': 2, 'rnn_units': 64, 'seq_len': 24, 'use_curriculum_learning': True, 'use_gc_for_ru': False}, 'train': {'base_lr': 0.01, 'dropout': 0, 'epoch': 0, 'epochs': 100, 'epsilon': 0.001, 'global_step': 0, 'lr_decay_ratio': 0.1, 'max_grad_norm': 5, 'max_to_keep': 100, 'min_learning_rate': 2e-06, 'optimizer': 'adam', 'patience': 50, 'steps': [20, 30, 40, 50], 'test_every_n_epochs': 10}}
+2019-12-30 16:55:29,559 - INFO - ('x_train', (19320, 24, 15, 2))
+2019-12-30 16:55:29,559 - INFO - ('x_train', (19320, 24, 15, 2))
+2019-12-30 16:55:29,559 - INFO - ('y_train', (19320, 6, 15, 2))
+2019-12-30 16:55:29,559 - INFO - ('y_train', (19320, 6, 15, 2))
+2019-12-30 16:55:29,560 - INFO - ('x_val', (2760, 24, 15, 2))
+2019-12-30 16:55:29,560 - INFO - ('x_val', (2760, 24, 15, 2))
+2019-12-30 16:55:29,560 - INFO - ('y_val', (2760, 6, 15, 2))
+2019-12-30 16:55:29,560 - INFO - ('y_val', (2760, 6, 15, 2))
+2019-12-30 16:55:29,560 - INFO - ('x_test', (5520, 24, 15, 2))
+2019-12-30 16:55:29,560 - INFO - ('x_test', (5520, 24, 15, 2))
+2019-12-30 16:55:29,560 - INFO - ('y_test', (5520, 6, 15, 2))
+2019-12-30 16:55:29,560 - INFO - ('y_test', (5520, 6, 15, 2))
+2019-12-30 16:55:35,001 - INFO - Total number of trainable parameters: 75392
+2019-12-30 16:55:35,001 - INFO - Total number of trainable parameters: 75392
+Created DCRNN model
+2019-12-30 16:55:35,318 - INFO - Start training ...
+2019-12-30 16:55:35,318 - INFO - Start training ...
+2019-12-30 16:56:26,076 - INFO - Epoch [0/100] (301) train_mae: 9.5675, val_mae: 20.7114 lr:0.010000 50.7s
+2019-12-30 16:56:26,076 - INFO - Epoch [0/100] (301) train_mae: 9.5675, val_mae: 20.7114 lr:0.010000 50.7s
+2019-12-30 16:56:26,226 - INFO - Val loss decrease from inf to 20.7114, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-20.7114-301
+2019-12-30 16:56:26,226 - INFO - Val loss decrease from inf to 20.7114, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-20.7114-301
+2019-12-30 16:57:16,920 - INFO - Epoch [1/100] (602) train_mae: 7.0604, val_mae: 17.6809 lr:0.010000 50.7s
+2019-12-30 16:57:16,920 - INFO - Epoch [1/100] (602) train_mae: 7.0604, val_mae: 17.6809 lr:0.010000 50.7s
+2019-12-30 16:57:16,931 - INFO - Val loss decrease from 20.7114 to 17.6809, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-17.6809-602
+2019-12-30 16:57:16,931 - INFO - Val loss decrease from 20.7114 to 17.6809, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-17.6809-602
+2019-12-30 16:58:07,463 - INFO - Epoch [2/100] (903) train_mae: 6.9720, val_mae: 15.4580 lr:0.010000 50.5s
+2019-12-30 16:58:07,463 - INFO - Epoch [2/100] (903) train_mae: 6.9720, val_mae: 15.4580 lr:0.010000 50.5s
+2019-12-30 16:58:07,474 - INFO - Val loss decrease from 17.6809 to 15.4580, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-15.4580-903
+2019-12-30 16:58:07,474 - INFO - Val loss decrease from 17.6809 to 15.4580, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-15.4580-903
+2019-12-30 16:58:57,857 - INFO - Epoch [3/100] (1204) train_mae: 6.7353, val_mae: 15.4768 lr:0.010000 50.4s
+2019-12-30 16:58:57,857 - INFO - Epoch [3/100] (1204) train_mae: 6.7353, val_mae: 15.4768 lr:0.010000 50.4s
+2019-12-30 16:59:48,610 - INFO - Epoch [4/100] (1505) train_mae: 6.6232, val_mae: 15.3882 lr:0.010000 50.8s
+2019-12-30 16:59:48,610 - INFO - Epoch [4/100] (1505) train_mae: 6.6232, val_mae: 15.3882 lr:0.010000 50.8s
+2019-12-30 16:59:48,621 - INFO - Val loss decrease from 15.4580 to 15.3882, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-15.3882-1505
+2019-12-30 16:59:48,621 - INFO - Val loss decrease from 15.4580 to 15.3882, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-15.3882-1505
+2019-12-30 17:00:39,171 - INFO - Epoch [5/100] (1806) train_mae: 6.8134, val_mae: 15.5018 lr:0.010000 50.5s
+2019-12-30 17:00:39,171 - INFO - Epoch [5/100] (1806) train_mae: 6.8134, val_mae: 15.5018 lr:0.010000 50.5s
+2019-12-30 17:01:29,832 - INFO - Epoch [6/100] (2107) train_mae: 6.4397, val_mae: 15.8492 lr:0.010000 50.7s
+2019-12-30 17:01:29,832 - INFO - Epoch [6/100] (2107) train_mae: 6.4397, val_mae: 15.8492 lr:0.010000 50.7s
+2019-12-30 17:02:20,352 - INFO - Epoch [7/100] (2408) train_mae: 6.3826, val_mae: 15.0833 lr:0.010000 50.5s
+2019-12-30 17:02:20,352 - INFO - Epoch [7/100] (2408) train_mae: 6.3826, val_mae: 15.0833 lr:0.010000 50.5s
+2019-12-30 17:02:20,364 - INFO - Val loss decrease from 15.3882 to 15.0833, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-15.0833-2408
+2019-12-30 17:02:20,364 - INFO - Val loss decrease from 15.3882 to 15.0833, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-15.0833-2408
+2019-12-30 17:03:11,038 - INFO - Epoch [8/100] (2709) train_mae: 6.3480, val_mae: 15.6029 lr:0.010000 50.7s
+2019-12-30 17:03:11,038 - INFO - Epoch [8/100] (2709) train_mae: 6.3480, val_mae: 15.6029 lr:0.010000 50.7s
+2019-12-30 17:04:01,805 - INFO - Epoch [9/100] (3010) train_mae: 6.2875, val_mae: 13.6269 lr:0.010000 50.8s
+2019-12-30 17:04:01,805 - INFO - Epoch [9/100] (3010) train_mae: 6.2875, val_mae: 13.6269 lr:0.010000 50.8s
+2019-12-30 17:04:06,224 - INFO - Horizon 01, MAE: 11.35, MAPE: 0.0367, RMSE: 14.61
+2019-12-30 17:04:06,224 - INFO - Horizon 01, MAE: 11.35, MAPE: 0.0367, RMSE: 14.61
+2019-12-30 17:04:06,228 - INFO - Horizon 02, MAE: 17.35, MAPE: 0.0558, RMSE: 22.56
+2019-12-30 17:04:06,228 - INFO - Horizon 02, MAE: 17.35, MAPE: 0.0558, RMSE: 22.56
+2019-12-30 17:04:06,232 - INFO - Horizon 03, MAE: 23.20, MAPE: 0.0737, RMSE: 30.51
+2019-12-30 17:04:06,232 - INFO - Horizon 03, MAE: 23.20, MAPE: 0.0737, RMSE: 30.51
+2019-12-30 17:04:06,236 - INFO - Horizon 04, MAE: 28.72, MAPE: 0.0908, RMSE: 38.09
+2019-12-30 17:04:06,236 - INFO - Horizon 04, MAE: 28.72, MAPE: 0.0908, RMSE: 38.09
+2019-12-30 17:04:06,240 - INFO - Horizon 05, MAE: 34.10, MAPE: 0.1074, RMSE: 45.45
+2019-12-30 17:04:06,240 - INFO - Horizon 05, MAE: 34.10, MAPE: 0.1074, RMSE: 45.45
+2019-12-30 17:04:06,244 - INFO - Horizon 06, MAE: 36.20, MAPE: 0.1128, RMSE: 48.45
+2019-12-30 17:04:06,244 - INFO - Horizon 06, MAE: 36.20, MAPE: 0.1128, RMSE: 48.45
+2019-12-30 17:04:06,256 - INFO - Val loss decrease from 15.0833 to 13.6269, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-13.6269-3010
+2019-12-30 17:04:06,256 - INFO - Val loss decrease from 15.0833 to 13.6269, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-13.6269-3010
+2019-12-30 17:04:57,042 - INFO - Epoch [10/100] (3311) train_mae: 6.1687, val_mae: 13.7829 lr:0.010000 50.8s
+2019-12-30 17:04:57,042 - INFO - Epoch [10/100] (3311) train_mae: 6.1687, val_mae: 13.7829 lr:0.010000 50.8s
+2019-12-30 17:05:47,608 - INFO - Epoch [11/100] (3612) train_mae: 6.1131, val_mae: 13.7218 lr:0.010000 50.6s
+2019-12-30 17:05:47,608 - INFO - Epoch [11/100] (3612) train_mae: 6.1131, val_mae: 13.7218 lr:0.010000 50.6s
+2019-12-30 17:06:38,209 - INFO - Epoch [12/100] (3913) train_mae: 6.1856, val_mae: 13.3153 lr:0.010000 50.6s
+2019-12-30 17:06:38,209 - INFO - Epoch [12/100] (3913) train_mae: 6.1856, val_mae: 13.3153 lr:0.010000 50.6s
+2019-12-30 17:06:38,220 - INFO - Val loss decrease from 13.6269 to 13.3153, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-13.3153-3913
+2019-12-30 17:06:38,220 - INFO - Val loss decrease from 13.6269 to 13.3153, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-13.3153-3913
+2019-12-30 17:07:28,792 - INFO - Epoch [13/100] (4214) train_mae: 6.1930, val_mae: 14.3110 lr:0.010000 50.6s
+2019-12-30 17:07:28,792 - INFO - Epoch [13/100] (4214) train_mae: 6.1930, val_mae: 14.3110 lr:0.010000 50.6s
+2019-12-30 17:08:19,475 - INFO - Epoch [14/100] (4515) train_mae: 6.2713, val_mae: 14.2871 lr:0.010000 50.7s
+2019-12-30 17:08:19,475 - INFO - Epoch [14/100] (4515) train_mae: 6.2713, val_mae: 14.2871 lr:0.010000 50.7s
+2019-12-30 17:09:10,259 - INFO - Epoch [15/100] (4816) train_mae: 6.2143, val_mae: 14.5531 lr:0.010000 50.8s
+2019-12-30 17:09:10,259 - INFO - Epoch [15/100] (4816) train_mae: 6.2143, val_mae: 14.5531 lr:0.010000 50.8s
+2019-12-30 17:10:01,220 - INFO - Epoch [16/100] (5117) train_mae: 6.2444, val_mae: 13.6794 lr:0.010000 51.0s
+2019-12-30 17:10:01,220 - INFO - Epoch [16/100] (5117) train_mae: 6.2444, val_mae: 13.6794 lr:0.010000 51.0s
+2019-12-30 17:10:51,916 - INFO - Epoch [17/100] (5418) train_mae: 6.1729, val_mae: 13.8223 lr:0.010000 50.7s
+2019-12-30 17:10:51,916 - INFO - Epoch [17/100] (5418) train_mae: 6.1729, val_mae: 13.8223 lr:0.010000 50.7s
+2019-12-30 17:11:42,653 - INFO - Epoch [18/100] (5719) train_mae: 6.1140, val_mae: 13.7105 lr:0.010000 50.7s
+2019-12-30 17:11:42,653 - INFO - Epoch [18/100] (5719) train_mae: 6.1140, val_mae: 13.7105 lr:0.010000 50.7s
+2019-12-30 17:12:33,413 - INFO - Epoch [19/100] (6020) train_mae: 5.9633, val_mae: 14.4875 lr:0.010000 50.8s
+2019-12-30 17:12:33,413 - INFO - Epoch [19/100] (6020) train_mae: 5.9633, val_mae: 14.4875 lr:0.010000 50.8s
+2019-12-30 17:12:37,930 - INFO - Horizon 01, MAE: 11.19, MAPE: 0.0365, RMSE: 14.36
+2019-12-30 17:12:37,930 - INFO - Horizon 01, MAE: 11.19, MAPE: 0.0365, RMSE: 14.36
+2019-12-30 17:12:37,934 - INFO - Horizon 02, MAE: 17.20, MAPE: 0.0564, RMSE: 22.28
+2019-12-30 17:12:37,934 - INFO - Horizon 02, MAE: 17.20, MAPE: 0.0564, RMSE: 22.28
+2019-12-30 17:12:37,938 - INFO - Horizon 03, MAE: 22.64, MAPE: 0.0741, RMSE: 29.61
+2019-12-30 17:12:37,938 - INFO - Horizon 03, MAE: 22.64, MAPE: 0.0741, RMSE: 29.61
+2019-12-30 17:12:37,942 - INFO - Horizon 04, MAE: 28.20, MAPE: 0.0933, RMSE: 37.06
+2019-12-30 17:12:37,942 - INFO - Horizon 04, MAE: 28.20, MAPE: 0.0933, RMSE: 37.06
+2019-12-30 17:12:37,945 - INFO - Horizon 05, MAE: 33.91, MAPE: 0.1128, RMSE: 44.65
+2019-12-30 17:12:37,945 - INFO - Horizon 05, MAE: 33.91, MAPE: 0.1128, RMSE: 44.65
+2019-12-30 17:12:37,949 - INFO - Horizon 06, MAE: 35.76, MAPE: 0.1191, RMSE: 47.27
+2019-12-30 17:12:37,949 - INFO - Horizon 06, MAE: 35.76, MAPE: 0.1191, RMSE: 47.27
+2019-12-30 17:13:28,653 - INFO - Epoch [20/100] (6321) train_mae: 5.6038, val_mae: 12.2746 lr:0.001000 50.7s
+2019-12-30 17:13:28,653 - INFO - Epoch [20/100] (6321) train_mae: 5.6038, val_mae: 12.2746 lr:0.001000 50.7s
+2019-12-30 17:13:28,664 - INFO - Val loss decrease from 13.3153 to 12.2746, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.2746-6321
+2019-12-30 17:13:28,664 - INFO - Val loss decrease from 13.3153 to 12.2746, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.2746-6321
+2019-12-30 17:14:19,563 - INFO - Epoch [21/100] (6622) train_mae: 5.5853, val_mae: 12.2364 lr:0.001000 50.9s
+2019-12-30 17:14:19,563 - INFO - Epoch [21/100] (6622) train_mae: 5.5853, val_mae: 12.2364 lr:0.001000 50.9s
+2019-12-30 17:14:19,575 - INFO - Val loss decrease from 12.2746 to 12.2364, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.2364-6622
+2019-12-30 17:14:19,575 - INFO - Val loss decrease from 12.2746 to 12.2364, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.2364-6622
+2019-12-30 17:15:10,592 - INFO - Epoch [22/100] (6923) train_mae: 5.5770, val_mae: 12.1417 lr:0.001000 51.0s
+2019-12-30 17:15:10,592 - INFO - Epoch [22/100] (6923) train_mae: 5.5770, val_mae: 12.1417 lr:0.001000 51.0s
+2019-12-30 17:15:10,603 - INFO - Val loss decrease from 12.2364 to 12.1417, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.1417-6923
+2019-12-30 17:15:10,603 - INFO - Val loss decrease from 12.2364 to 12.1417, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.1417-6923
+2019-12-30 17:16:01,429 - INFO - Epoch [23/100] (7224) train_mae: 5.5855, val_mae: 12.1541 lr:0.001000 50.8s
+2019-12-30 17:16:01,429 - INFO - Epoch [23/100] (7224) train_mae: 5.5855, val_mae: 12.1541 lr:0.001000 50.8s
+2019-12-30 17:16:52,398 - INFO - Epoch [24/100] (7525) train_mae: 5.5855, val_mae: 12.1531 lr:0.001000 51.0s
+2019-12-30 17:16:52,398 - INFO - Epoch [24/100] (7525) train_mae: 5.5855, val_mae: 12.1531 lr:0.001000 51.0s
+2019-12-30 17:17:43,343 - INFO - Epoch [25/100] (7826) train_mae: 5.5874, val_mae: 12.1756 lr:0.001000 50.9s
+2019-12-30 17:17:43,343 - INFO - Epoch [25/100] (7826) train_mae: 5.5874, val_mae: 12.1756 lr:0.001000 50.9s
+2019-12-30 17:18:34,530 - INFO - Epoch [26/100] (8127) train_mae: 5.6124, val_mae: 12.0748 lr:0.001000 51.2s
+2019-12-30 17:18:34,530 - INFO - Epoch [26/100] (8127) train_mae: 5.6124, val_mae: 12.0748 lr:0.001000 51.2s
+2019-12-30 17:18:34,542 - INFO - Val loss decrease from 12.1417 to 12.0748, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0748-8127
+2019-12-30 17:18:34,542 - INFO - Val loss decrease from 12.1417 to 12.0748, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0748-8127
+2019-12-30 17:19:26,487 - INFO - Epoch [27/100] (8428) train_mae: 5.6275, val_mae: 12.1312 lr:0.001000 51.9s
+2019-12-30 17:19:26,487 - INFO - Epoch [27/100] (8428) train_mae: 5.6275, val_mae: 12.1312 lr:0.001000 51.9s
+2019-12-30 17:20:18,553 - INFO - Epoch [28/100] (8729) train_mae: 5.6482, val_mae: 12.1088 lr:0.001000 52.1s
+2019-12-30 17:20:18,553 - INFO - Epoch [28/100] (8729) train_mae: 5.6482, val_mae: 12.1088 lr:0.001000 52.1s
+2019-12-30 17:21:11,075 - INFO - Epoch [29/100] (9030) train_mae: 5.6680, val_mae: 12.1005 lr:0.001000 52.5s
+2019-12-30 17:21:11,075 - INFO - Epoch [29/100] (9030) train_mae: 5.6680, val_mae: 12.1005 lr:0.001000 52.5s
+2019-12-30 17:21:15,580 - INFO - Horizon 01, MAE: 11.01, MAPE: 0.0355, RMSE: 14.14
+2019-12-30 17:21:15,580 - INFO - Horizon 01, MAE: 11.01, MAPE: 0.0355, RMSE: 14.14
+2019-12-30 17:21:15,585 - INFO - Horizon 02, MAE: 16.73, MAPE: 0.0538, RMSE: 21.75
+2019-12-30 17:21:15,585 - INFO - Horizon 02, MAE: 16.73, MAPE: 0.0538, RMSE: 21.75
+2019-12-30 17:21:15,589 - INFO - Horizon 03, MAE: 22.01, MAPE: 0.0706, RMSE: 28.92
+2019-12-30 17:21:15,589 - INFO - Horizon 03, MAE: 22.01, MAPE: 0.0706, RMSE: 28.92
+2019-12-30 17:21:15,593 - INFO - Horizon 04, MAE: 27.11, MAPE: 0.0868, RMSE: 35.92
+2019-12-30 17:21:15,593 - INFO - Horizon 04, MAE: 27.11, MAPE: 0.0868, RMSE: 35.92
+2019-12-30 17:21:15,597 - INFO - Horizon 05, MAE: 32.24, MAPE: 0.1032, RMSE: 42.92
+2019-12-30 17:21:15,597 - INFO - Horizon 05, MAE: 32.24, MAPE: 0.1032, RMSE: 42.92
+2019-12-30 17:21:15,601 - INFO - Horizon 06, MAE: 33.60, MAPE: 0.1072, RMSE: 45.02
+2019-12-30 17:21:15,601 - INFO - Horizon 06, MAE: 33.60, MAPE: 0.1072, RMSE: 45.02
+2019-12-30 17:22:07,938 - INFO - Epoch [30/100] (9331) train_mae: 5.5957, val_mae: 12.0552 lr:0.000100 52.3s
+2019-12-30 17:22:07,938 - INFO - Epoch [30/100] (9331) train_mae: 5.5957, val_mae: 12.0552 lr:0.000100 52.3s
+2019-12-30 17:22:07,949 - INFO - Val loss decrease from 12.0748 to 12.0552, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0552-9331
+2019-12-30 17:22:07,949 - INFO - Val loss decrease from 12.0748 to 12.0552, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0552-9331
+2019-12-30 17:23:00,354 - INFO - Epoch [31/100] (9632) train_mae: 5.5896, val_mae: 12.0500 lr:0.000100 52.4s
+2019-12-30 17:23:00,354 - INFO - Epoch [31/100] (9632) train_mae: 5.5896, val_mae: 12.0500 lr:0.000100 52.4s
+2019-12-30 17:23:00,365 - INFO - Val loss decrease from 12.0552 to 12.0500, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0500-9632
+2019-12-30 17:23:00,365 - INFO - Val loss decrease from 12.0552 to 12.0500, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0500-9632
+2019-12-30 17:23:52,793 - INFO - Epoch [32/100] (9933) train_mae: 5.6792, val_mae: 12.0288 lr:0.000100 52.4s
+2019-12-30 17:23:52,793 - INFO - Epoch [32/100] (9933) train_mae: 5.6792, val_mae: 12.0288 lr:0.000100 52.4s
+2019-12-30 17:23:52,804 - INFO - Val loss decrease from 12.0500 to 12.0288, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0288-9933
+2019-12-30 17:23:52,804 - INFO - Val loss decrease from 12.0500 to 12.0288, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0288-9933
+2019-12-30 17:24:45,385 - INFO - Epoch [33/100] (10234) train_mae: 5.6942, val_mae: 12.0282 lr:0.000100 52.6s
+2019-12-30 17:24:45,385 - INFO - Epoch [33/100] (10234) train_mae: 5.6942, val_mae: 12.0282 lr:0.000100 52.6s
+2019-12-30 17:24:45,396 - INFO - Val loss decrease from 12.0288 to 12.0282, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0282-10234
+2019-12-30 17:24:45,396 - INFO - Val loss decrease from 12.0288 to 12.0282, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0282-10234
+2019-12-30 17:25:37,949 - INFO - Epoch [34/100] (10535) train_mae: 5.6958, val_mae: 12.0322 lr:0.000100 52.6s
+2019-12-30 17:25:37,949 - INFO - Epoch [34/100] (10535) train_mae: 5.6958, val_mae: 12.0322 lr:0.000100 52.6s
+2019-12-30 17:26:30,639 - INFO - Epoch [35/100] (10836) train_mae: 5.7239, val_mae: 12.0300 lr:0.000100 52.7s
+2019-12-30 17:26:30,639 - INFO - Epoch [35/100] (10836) train_mae: 5.7239, val_mae: 12.0300 lr:0.000100 52.7s
+2019-12-30 17:27:23,396 - INFO - Epoch [36/100] (11137) train_mae: 5.7772, val_mae: 12.0202 lr:0.000100 52.8s
+2019-12-30 17:27:23,396 - INFO - Epoch [36/100] (11137) train_mae: 5.7772, val_mae: 12.0202 lr:0.000100 52.8s
+2019-12-30 17:27:23,408 - INFO - Val loss decrease from 12.0282 to 12.0202, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0202-11137
+2019-12-30 17:27:23,408 - INFO - Val loss decrease from 12.0282 to 12.0202, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0202-11137
+2019-12-30 17:28:16,181 - INFO - Epoch [37/100] (11438) train_mae: 5.8698, val_mae: 12.0541 lr:0.000100 52.8s
+2019-12-30 17:28:16,181 - INFO - Epoch [37/100] (11438) train_mae: 5.8698, val_mae: 12.0541 lr:0.000100 52.8s
+2019-12-30 17:29:09,187 - INFO - Epoch [38/100] (11739) train_mae: 5.9451, val_mae: 12.0365 lr:0.000100 53.0s
+2019-12-30 17:29:09,187 - INFO - Epoch [38/100] (11739) train_mae: 5.9451, val_mae: 12.0365 lr:0.000100 53.0s
+2019-12-30 17:30:02,367 - INFO - Epoch [39/100] (12040) train_mae: 5.9734, val_mae: 12.0455 lr:0.000100 53.2s
+2019-12-30 17:30:02,367 - INFO - Epoch [39/100] (12040) train_mae: 5.9734, val_mae: 12.0455 lr:0.000100 53.2s
+2019-12-30 17:30:06,852 - INFO - Horizon 01, MAE: 11.03, MAPE: 0.0356, RMSE: 14.17
+2019-12-30 17:30:06,852 - INFO - Horizon 01, MAE: 11.03, MAPE: 0.0356, RMSE: 14.17
+2019-12-30 17:30:06,856 - INFO - Horizon 02, MAE: 16.72, MAPE: 0.0538, RMSE: 21.76
+2019-12-30 17:30:06,856 - INFO - Horizon 02, MAE: 16.72, MAPE: 0.0538, RMSE: 21.76
+2019-12-30 17:30:06,860 - INFO - Horizon 03, MAE: 22.04, MAPE: 0.0708, RMSE: 28.96
+2019-12-30 17:30:06,860 - INFO - Horizon 03, MAE: 22.04, MAPE: 0.0708, RMSE: 28.96
+2019-12-30 17:30:06,864 - INFO - Horizon 04, MAE: 27.11, MAPE: 0.0870, RMSE: 35.94
+2019-12-30 17:30:06,864 - INFO - Horizon 04, MAE: 27.11, MAPE: 0.0870, RMSE: 35.94
+2019-12-30 17:30:06,868 - INFO - Horizon 05, MAE: 32.23, MAPE: 0.1035, RMSE: 42.93
+2019-12-30 17:30:06,868 - INFO - Horizon 05, MAE: 32.23, MAPE: 0.1035, RMSE: 42.93
+2019-12-30 17:30:06,872 - INFO - Horizon 06, MAE: 33.56, MAPE: 0.1075, RMSE: 44.99
+2019-12-30 17:30:06,872 - INFO - Horizon 06, MAE: 33.56, MAPE: 0.1075, RMSE: 44.99
+2019-12-30 17:31:00,088 - INFO - Epoch [40/100] (12341) train_mae: 6.0745, val_mae: 12.0278 lr:0.000010 53.2s
+2019-12-30 17:31:00,088 - INFO - Epoch [40/100] (12341) train_mae: 6.0745, val_mae: 12.0278 lr:0.000010 53.2s
+2019-12-30 17:31:53,431 - INFO - Epoch [41/100] (12642) train_mae: 6.1485, val_mae: 12.0155 lr:0.000010 53.3s
+2019-12-30 17:31:53,431 - INFO - Epoch [41/100] (12642) train_mae: 6.1485, val_mae: 12.0155 lr:0.000010 53.3s
+2019-12-30 17:31:53,443 - INFO - Val loss decrease from 12.0202 to 12.0155, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0155-12642
+2019-12-30 17:31:53,443 - INFO - Val loss decrease from 12.0202 to 12.0155, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0155-12642
+2019-12-30 17:32:46,721 - INFO - Epoch [42/100] (12943) train_mae: 6.2293, val_mae: 12.0242 lr:0.000010 53.3s
+2019-12-30 17:32:46,721 - INFO - Epoch [42/100] (12943) train_mae: 6.2293, val_mae: 12.0242 lr:0.000010 53.3s
+2019-12-30 17:33:40,366 - INFO - Epoch [43/100] (13244) train_mae: 6.3849, val_mae: 12.0099 lr:0.000010 53.6s
+2019-12-30 17:33:40,366 - INFO - Epoch [43/100] (13244) train_mae: 6.3849, val_mae: 12.0099 lr:0.000010 53.6s
+2019-12-30 17:33:40,378 - INFO - Val loss decrease from 12.0155 to 12.0099, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0099-13244
+2019-12-30 17:33:40,378 - INFO - Val loss decrease from 12.0155 to 12.0099, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0099-13244
+2019-12-30 17:34:34,095 - INFO - Epoch [44/100] (13545) train_mae: 6.3741, val_mae: 12.0130 lr:0.000010 53.7s
+2019-12-30 17:34:34,095 - INFO - Epoch [44/100] (13545) train_mae: 6.3741, val_mae: 12.0130 lr:0.000010 53.7s
+2019-12-30 17:35:27,857 - INFO - Epoch [45/100] (13846) train_mae: 6.5533, val_mae: 12.0135 lr:0.000010 53.8s
+2019-12-30 17:35:27,857 - INFO - Epoch [45/100] (13846) train_mae: 6.5533, val_mae: 12.0135 lr:0.000010 53.8s
+2019-12-30 17:36:21,842 - INFO - Epoch [46/100] (14147) train_mae: 6.6985, val_mae: 12.0189 lr:0.000010 54.0s
+2019-12-30 17:36:21,842 - INFO - Epoch [46/100] (14147) train_mae: 6.6985, val_mae: 12.0189 lr:0.000010 54.0s
+2019-12-30 17:37:16,209 - INFO - Epoch [47/100] (14448) train_mae: 6.9497, val_mae: 12.0151 lr:0.000010 54.4s
+2019-12-30 17:37:16,209 - INFO - Epoch [47/100] (14448) train_mae: 6.9497, val_mae: 12.0151 lr:0.000010 54.4s
+2019-12-30 17:38:10,303 - INFO - Epoch [48/100] (14749) train_mae: 7.0900, val_mae: 12.0208 lr:0.000010 54.1s
+2019-12-30 17:38:10,303 - INFO - Epoch [48/100] (14749) train_mae: 7.0900, val_mae: 12.0208 lr:0.000010 54.1s
+2019-12-30 17:39:04,693 - INFO - Epoch [49/100] (15050) train_mae: 7.1605, val_mae: 12.0176 lr:0.000010 54.4s
+2019-12-30 17:39:04,693 - INFO - Epoch [49/100] (15050) train_mae: 7.1605, val_mae: 12.0176 lr:0.000010 54.4s
+2019-12-30 17:39:09,220 - INFO - Horizon 01, MAE: 11.02, MAPE: 0.0356, RMSE: 14.16
+2019-12-30 17:39:09,220 - INFO - Horizon 01, MAE: 11.02, MAPE: 0.0356, RMSE: 14.16
+2019-12-30 17:39:09,224 - INFO - Horizon 02, MAE: 16.70, MAPE: 0.0538, RMSE: 21.72
+2019-12-30 17:39:09,224 - INFO - Horizon 02, MAE: 16.70, MAPE: 0.0538, RMSE: 21.72
+2019-12-30 17:39:09,228 - INFO - Horizon 03, MAE: 21.96, MAPE: 0.0708, RMSE: 28.85
+2019-12-30 17:39:09,228 - INFO - Horizon 03, MAE: 21.96, MAPE: 0.0708, RMSE: 28.85
+2019-12-30 17:39:09,232 - INFO - Horizon 04, MAE: 27.02, MAPE: 0.0870, RMSE: 35.79
+2019-12-30 17:39:09,232 - INFO - Horizon 04, MAE: 27.02, MAPE: 0.0870, RMSE: 35.79
+2019-12-30 17:39:09,236 - INFO - Horizon 05, MAE: 32.11, MAPE: 0.1035, RMSE: 42.73
+2019-12-30 17:39:09,236 - INFO - Horizon 05, MAE: 32.11, MAPE: 0.1035, RMSE: 42.73
+2019-12-30 17:39:09,240 - INFO - Horizon 06, MAE: 33.44, MAPE: 0.1075, RMSE: 44.76
+2019-12-30 17:39:09,240 - INFO - Horizon 06, MAE: 33.44, MAPE: 0.1075, RMSE: 44.76
+2019-12-30 17:40:03,719 - INFO - Epoch [50/100] (15351) train_mae: 7.4304, val_mae: 12.0173 lr:0.000002 54.5s
+2019-12-30 17:40:03,719 - INFO - Epoch [50/100] (15351) train_mae: 7.4304, val_mae: 12.0173 lr:0.000002 54.5s
+2019-12-30 17:40:58,435 - INFO - Epoch [51/100] (15652) train_mae: 7.7293, val_mae: 12.0124 lr:0.000002 54.7s
+2019-12-30 17:40:58,435 - INFO - Epoch [51/100] (15652) train_mae: 7.7293, val_mae: 12.0124 lr:0.000002 54.7s
+2019-12-30 17:41:53,057 - INFO - Epoch [52/100] (15953) train_mae: 7.8016, val_mae: 12.0146 lr:0.000002 54.6s
+2019-12-30 17:41:53,057 - INFO - Epoch [52/100] (15953) train_mae: 7.8016, val_mae: 12.0146 lr:0.000002 54.6s
+2019-12-30 17:42:47,792 - INFO - Epoch [53/100] (16254) train_mae: 8.0199, val_mae: 12.0207 lr:0.000002 54.7s
+2019-12-30 17:42:47,792 - INFO - Epoch [53/100] (16254) train_mae: 8.0199, val_mae: 12.0207 lr:0.000002 54.7s
+2019-12-30 17:43:42,784 - INFO - Epoch [54/100] (16555) train_mae: 8.4014, val_mae: 12.0182 lr:0.000002 55.0s
+2019-12-30 17:43:42,784 - INFO - Epoch [54/100] (16555) train_mae: 8.4014, val_mae: 12.0182 lr:0.000002 55.0s
+2019-12-30 17:44:37,917 - INFO - Epoch [55/100] (16856) train_mae: 8.6812, val_mae: 12.0161 lr:0.000002 55.1s
+2019-12-30 17:44:37,917 - INFO - Epoch [55/100] (16856) train_mae: 8.6812, val_mae: 12.0161 lr:0.000002 55.1s
+2019-12-30 17:45:33,114 - INFO - Epoch [56/100] (17157) train_mae: 8.9000, val_mae: 12.0121 lr:0.000002 55.2s
+2019-12-30 17:45:33,114 - INFO - Epoch [56/100] (17157) train_mae: 8.9000, val_mae: 12.0121 lr:0.000002 55.2s
+2019-12-30 17:46:28,269 - INFO - Epoch [57/100] (17458) train_mae: 9.1771, val_mae: 12.0153 lr:0.000002 55.2s
+2019-12-30 17:46:28,269 - INFO - Epoch [57/100] (17458) train_mae: 9.1771, val_mae: 12.0153 lr:0.000002 55.2s
+2019-12-30 17:47:23,426 - INFO - Epoch [58/100] (17759) train_mae: 9.4167, val_mae: 12.0213 lr:0.000002 55.2s
+2019-12-30 17:47:23,426 - INFO - Epoch [58/100] (17759) train_mae: 9.4167, val_mae: 12.0213 lr:0.000002 55.2s
+2019-12-30 17:48:18,856 - INFO - Epoch [59/100] (18060) train_mae: 9.6909, val_mae: 12.0200 lr:0.000002 55.4s
+2019-12-30 17:48:18,856 - INFO - Epoch [59/100] (18060) train_mae: 9.6909, val_mae: 12.0200 lr:0.000002 55.4s
+2019-12-30 17:48:23,336 - INFO - Horizon 01, MAE: 11.01, MAPE: 0.0355, RMSE: 14.16
+2019-12-30 17:48:23,336 - INFO - Horizon 01, MAE: 11.01, MAPE: 0.0355, RMSE: 14.16
+2019-12-30 17:48:23,340 - INFO - Horizon 02, MAE: 16.69, MAPE: 0.0538, RMSE: 21.72
+2019-12-30 17:48:23,340 - INFO - Horizon 02, MAE: 16.69, MAPE: 0.0538, RMSE: 21.72
+2019-12-30 17:48:23,344 - INFO - Horizon 03, MAE: 21.96, MAPE: 0.0707, RMSE: 28.86
+2019-12-30 17:48:23,344 - INFO - Horizon 03, MAE: 21.96, MAPE: 0.0707, RMSE: 28.86
+2019-12-30 17:48:23,348 - INFO - Horizon 04, MAE: 27.03, MAPE: 0.0870, RMSE: 35.81
+2019-12-30 17:48:23,348 - INFO - Horizon 04, MAE: 27.03, MAPE: 0.0870, RMSE: 35.81
+2019-12-30 17:48:23,352 - INFO - Horizon 05, MAE: 32.12, MAPE: 0.1035, RMSE: 42.77
+2019-12-30 17:48:23,352 - INFO - Horizon 05, MAE: 32.12, MAPE: 0.1035, RMSE: 42.77
+2019-12-30 17:48:23,356 - INFO - Horizon 06, MAE: 33.46, MAPE: 0.1075, RMSE: 44.81
+2019-12-30 17:48:23,356 - INFO - Horizon 06, MAE: 33.46, MAPE: 0.1075, RMSE: 44.81
+2019-12-30 17:49:18,831 - INFO - Epoch [60/100] (18361) train_mae: 9.8782, val_mae: 12.0171 lr:0.000002 55.5s
+2019-12-30 17:49:18,831 - INFO - Epoch [60/100] (18361) train_mae: 9.8782, val_mae: 12.0171 lr:0.000002 55.5s
+2019-12-30 17:50:14,238 - INFO - Epoch [61/100] (18662) train_mae: 10.0701, val_mae: 12.0210 lr:0.000002 55.4s
+2019-12-30 17:50:14,238 - INFO - Epoch [61/100] (18662) train_mae: 10.0701, val_mae: 12.0210 lr:0.000002 55.4s
+2019-12-30 17:51:09,854 - INFO - Epoch [62/100] (18963) train_mae: 10.2382, val_mae: 12.0167 lr:0.000002 55.6s
+2019-12-30 17:51:09,854 - INFO - Epoch [62/100] (18963) train_mae: 10.2382, val_mae: 12.0167 lr:0.000002 55.6s
+2019-12-30 17:52:05,766 - INFO - Epoch [63/100] (19264) train_mae: 10.6455, val_mae: 12.0160 lr:0.000002 55.9s
+2019-12-30 17:52:05,766 - INFO - Epoch [63/100] (19264) train_mae: 10.6455, val_mae: 12.0160 lr:0.000002 55.9s
+2019-12-30 17:53:01,661 - INFO - Epoch [64/100] (19565) train_mae: 10.6380, val_mae: 12.0153 lr:0.000002 55.9s
+2019-12-30 17:53:01,661 - INFO - Epoch [64/100] (19565) train_mae: 10.6380, val_mae: 12.0153 lr:0.000002 55.9s
+2019-12-30 17:53:57,580 - INFO - Epoch [65/100] (19866) train_mae: 10.6687, val_mae: 12.0195 lr:0.000002 55.9s
+2019-12-30 17:53:57,580 - INFO - Epoch [65/100] (19866) train_mae: 10.6687, val_mae: 12.0195 lr:0.000002 55.9s
+2019-12-30 17:54:53,791 - INFO - Epoch [66/100] (20167) train_mae: 10.9264, val_mae: 12.0226 lr:0.000002 56.2s
+2019-12-30 17:54:53,791 - INFO - Epoch [66/100] (20167) train_mae: 10.9264, val_mae: 12.0226 lr:0.000002 56.2s
+2019-12-30 17:55:49,765 - INFO - Epoch [67/100] (20468) train_mae: 10.9173, val_mae: 12.0186 lr:0.000002 56.0s
+2019-12-30 17:55:49,765 - INFO - Epoch [67/100] (20468) train_mae: 10.9173, val_mae: 12.0186 lr:0.000002 56.0s
+2019-12-30 17:56:45,824 - INFO - Epoch [68/100] (20769) train_mae: 11.0255, val_mae: 12.0163 lr:0.000002 56.1s
+2019-12-30 17:56:45,824 - INFO - Epoch [68/100] (20769) train_mae: 11.0255, val_mae: 12.0163 lr:0.000002 56.1s
+2019-12-30 17:57:42,053 - INFO - Epoch [69/100] (21070) train_mae: 11.1680, val_mae: 12.0160 lr:0.000002 56.2s
+2019-12-30 17:57:42,053 - INFO - Epoch [69/100] (21070) train_mae: 11.1680, val_mae: 12.0160 lr:0.000002 56.2s
+2019-12-30 17:57:46,640 - INFO - Horizon 01, MAE: 11.02, MAPE: 0.0355, RMSE: 14.16
+2019-12-30 17:57:46,640 - INFO - Horizon 01, MAE: 11.02, MAPE: 0.0355, RMSE: 14.16
+2019-12-30 17:57:46,644 - INFO - Horizon 02, MAE: 16.69, MAPE: 0.0538, RMSE: 21.71
+2019-12-30 17:57:46,644 - INFO - Horizon 02, MAE: 16.69, MAPE: 0.0538, RMSE: 21.71
+2019-12-30 17:57:46,648 - INFO - Horizon 03, MAE: 21.95, MAPE: 0.0707, RMSE: 28.84
+2019-12-30 17:57:46,648 - INFO - Horizon 03, MAE: 21.95, MAPE: 0.0707, RMSE: 28.84
+2019-12-30 17:57:46,652 - INFO - Horizon 04, MAE: 27.01, MAPE: 0.0871, RMSE: 35.77
+2019-12-30 17:57:46,652 - INFO - Horizon 04, MAE: 27.01, MAPE: 0.0871, RMSE: 35.77
+2019-12-30 17:57:46,656 - INFO - Horizon 05, MAE: 32.09, MAPE: 0.1036, RMSE: 42.71
+2019-12-30 17:57:46,656 - INFO - Horizon 05, MAE: 32.09, MAPE: 0.1036, RMSE: 42.71
+2019-12-30 17:57:46,660 - INFO - Horizon 06, MAE: 33.42, MAPE: 0.1077, RMSE: 44.74
+2019-12-30 17:57:46,660 - INFO - Horizon 06, MAE: 33.42, MAPE: 0.1077, RMSE: 44.74
+2019-12-30 17:58:42,765 - INFO - Epoch [70/100] (21371) train_mae: 11.2858, val_mae: 12.0144 lr:0.000002 56.1s
+2019-12-30 17:58:42,765 - INFO - Epoch [70/100] (21371) train_mae: 11.2858, val_mae: 12.0144 lr:0.000002 56.1s
+2019-12-30 17:59:39,073 - INFO - Epoch [71/100] (21672) train_mae: 11.3343, val_mae: 12.0195 lr:0.000002 56.3s
+2019-12-30 17:59:39,073 - INFO - Epoch [71/100] (21672) train_mae: 11.3343, val_mae: 12.0195 lr:0.000002 56.3s
+2019-12-30 18:00:35,309 - INFO - Epoch [72/100] (21973) train_mae: 11.4143, val_mae: 12.0150 lr:0.000002 56.2s
+2019-12-30 18:00:35,309 - INFO - Epoch [72/100] (21973) train_mae: 11.4143, val_mae: 12.0150 lr:0.000002 56.2s
+2019-12-30 18:01:31,650 - INFO - Epoch [73/100] (22274) train_mae: 11.5135, val_mae: 12.0200 lr:0.000002 56.3s
+2019-12-30 18:01:31,650 - INFO - Epoch [73/100] (22274) train_mae: 11.5135, val_mae: 12.0200 lr:0.000002 56.3s
+2019-12-30 18:02:28,124 - INFO - Epoch [74/100] (22575) train_mae: 11.5055, val_mae: 12.0189 lr:0.000002 56.5s
+2019-12-30 18:02:28,124 - INFO - Epoch [74/100] (22575) train_mae: 11.5055, val_mae: 12.0189 lr:0.000002 56.5s
+2019-12-30 18:03:24,458 - INFO - Epoch [75/100] (22876) train_mae: 11.6390, val_mae: 12.0156 lr:0.000002 56.3s
+2019-12-30 18:03:24,458 - INFO - Epoch [75/100] (22876) train_mae: 11.6390, val_mae: 12.0156 lr:0.000002 56.3s
+2019-12-30 18:04:20,855 - INFO - Epoch [76/100] (23177) train_mae: 11.6404, val_mae: 12.0188 lr:0.000002 56.4s
+2019-12-30 18:04:20,855 - INFO - Epoch [76/100] (23177) train_mae: 11.6404, val_mae: 12.0188 lr:0.000002 56.4s
+2019-12-30 18:05:17,361 - INFO - Epoch [77/100] (23478) train_mae: 11.6722, val_mae: 12.0154 lr:0.000002 56.5s
+2019-12-30 18:05:17,361 - INFO - Epoch [77/100] (23478) train_mae: 11.6722, val_mae: 12.0154 lr:0.000002 56.5s
+2019-12-30 18:06:13,971 - INFO - Epoch [78/100] (23779) train_mae: 11.6776, val_mae: 12.0166 lr:0.000002 56.6s
+2019-12-30 18:06:13,971 - INFO - Epoch [78/100] (23779) train_mae: 11.6776, val_mae: 12.0166 lr:0.000002 56.6s
+2019-12-30 18:07:10,352 - INFO - Epoch [79/100] (24080) train_mae: 11.7577, val_mae: 12.0118 lr:0.000002 56.4s
+2019-12-30 18:07:10,352 - INFO - Epoch [79/100] (24080) train_mae: 11.7577, val_mae: 12.0118 lr:0.000002 56.4s
+2019-12-30 18:07:14,857 - INFO - Horizon 01, MAE: 11.02, MAPE: 0.0355, RMSE: 14.16
+2019-12-30 18:07:14,857 - INFO - Horizon 01, MAE: 11.02, MAPE: 0.0355, RMSE: 14.16
+2019-12-30 18:07:14,861 - INFO - Horizon 02, MAE: 16.69, MAPE: 0.0538, RMSE: 21.71
+2019-12-30 18:07:14,861 - INFO - Horizon 02, MAE: 16.69, MAPE: 0.0538, RMSE: 21.71
+2019-12-30 18:07:14,865 - INFO - Horizon 03, MAE: 21.94, MAPE: 0.0707, RMSE: 28.83
+2019-12-30 18:07:14,865 - INFO - Horizon 03, MAE: 21.94, MAPE: 0.0707, RMSE: 28.83
+2019-12-30 18:07:14,869 - INFO - Horizon 04, MAE: 27.00, MAPE: 0.0870, RMSE: 35.77
+2019-12-30 18:07:14,869 - INFO - Horizon 04, MAE: 27.00, MAPE: 0.0870, RMSE: 35.77
+2019-12-30 18:07:14,873 - INFO - Horizon 05, MAE: 32.09, MAPE: 0.1035, RMSE: 42.70
+2019-12-30 18:07:14,873 - INFO - Horizon 05, MAE: 32.09, MAPE: 0.1035, RMSE: 42.70
+2019-12-30 18:07:14,877 - INFO - Horizon 06, MAE: 33.41, MAPE: 0.1076, RMSE: 44.72
+2019-12-30 18:07:14,877 - INFO - Horizon 06, MAE: 33.41, MAPE: 0.1076, RMSE: 44.72
+2019-12-30 18:08:11,304 - INFO - Epoch [80/100] (24381) train_mae: 11.7354, val_mae: 12.0178 lr:0.000002 56.4s
+2019-12-30 18:08:11,304 - INFO - Epoch [80/100] (24381) train_mae: 11.7354, val_mae: 12.0178 lr:0.000002 56.4s
+2019-12-30 18:09:08,050 - INFO - Epoch [81/100] (24682) train_mae: 11.7899, val_mae: 12.0133 lr:0.000002 56.7s
+2019-12-30 18:09:08,050 - INFO - Epoch [81/100] (24682) train_mae: 11.7899, val_mae: 12.0133 lr:0.000002 56.7s
+2019-12-30 18:10:04,591 - INFO - Epoch [82/100] (24983) train_mae: 11.8067, val_mae: 12.0132 lr:0.000002 56.5s
+2019-12-30 18:10:04,591 - INFO - Epoch [82/100] (24983) train_mae: 11.8067, val_mae: 12.0132 lr:0.000002 56.5s
+2019-12-30 18:11:01,318 - INFO - Epoch [83/100] (25284) train_mae: 11.7908, val_mae: 12.0119 lr:0.000002 56.7s
+2019-12-30 18:11:01,318 - INFO - Epoch [83/100] (25284) train_mae: 11.7908, val_mae: 12.0119 lr:0.000002 56.7s
+2019-12-30 18:11:58,032 - INFO - Epoch [84/100] (25585) train_mae: 11.8222, val_mae: 12.0094 lr:0.000002 56.7s
+2019-12-30 18:11:58,032 - INFO - Epoch [84/100] (25585) train_mae: 11.8222, val_mae: 12.0094 lr:0.000002 56.7s
+2019-12-30 18:11:58,043 - INFO - Val loss decrease from 12.0099 to 12.0094, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0094-25585
+2019-12-30 18:11:58,043 - INFO - Val loss decrease from 12.0099 to 12.0094, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0094-25585
+2019-12-30 18:12:54,733 - INFO - Epoch [85/100] (25886) train_mae: 11.8487, val_mae: 12.0141 lr:0.000002 56.7s
+2019-12-30 18:12:54,733 - INFO - Epoch [85/100] (25886) train_mae: 11.8487, val_mae: 12.0141 lr:0.000002 56.7s
+2019-12-30 18:13:51,758 - INFO - Epoch [86/100] (26187) train_mae: 11.8712, val_mae: 12.0134 lr:0.000002 57.0s
+2019-12-30 18:13:51,758 - INFO - Epoch [86/100] (26187) train_mae: 11.8712, val_mae: 12.0134 lr:0.000002 57.0s
+2019-12-30 18:14:48,690 - INFO - Epoch [87/100] (26488) train_mae: 11.8406, val_mae: 12.0086 lr:0.000002 56.9s
+2019-12-30 18:14:48,690 - INFO - Epoch [87/100] (26488) train_mae: 11.8406, val_mae: 12.0086 lr:0.000002 56.9s
+2019-12-30 18:14:48,702 - INFO - Val loss decrease from 12.0094 to 12.0086, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0086-26488
+2019-12-30 18:14:48,702 - INFO - Val loss decrease from 12.0094 to 12.0086, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0086-26488
+2019-12-30 18:15:45,583 - INFO - Epoch [88/100] (26789) train_mae: 11.8030, val_mae: 12.0123 lr:0.000002 56.9s
+2019-12-30 18:15:45,583 - INFO - Epoch [88/100] (26789) train_mae: 11.8030, val_mae: 12.0123 lr:0.000002 56.9s
+2019-12-30 18:16:42,513 - INFO - Epoch [89/100] (27090) train_mae: 11.8558, val_mae: 12.0167 lr:0.000002 56.9s
+2019-12-30 18:16:42,513 - INFO - Epoch [89/100] (27090) train_mae: 11.8558, val_mae: 12.0167 lr:0.000002 56.9s
+2019-12-30 18:16:47,147 - INFO - Horizon 01, MAE: 11.01, MAPE: 0.0355, RMSE: 14.16
+2019-12-30 18:16:47,147 - INFO - Horizon 01, MAE: 11.01, MAPE: 0.0355, RMSE: 14.16
+2019-12-30 18:16:47,151 - INFO - Horizon 02, MAE: 16.69, MAPE: 0.0538, RMSE: 21.71
+2019-12-30 18:16:47,151 - INFO - Horizon 02, MAE: 16.69, MAPE: 0.0538, RMSE: 21.71
+2019-12-30 18:16:47,155 - INFO - Horizon 03, MAE: 21.95, MAPE: 0.0707, RMSE: 28.84
+2019-12-30 18:16:47,155 - INFO - Horizon 03, MAE: 21.95, MAPE: 0.0707, RMSE: 28.84
+2019-12-30 18:16:47,159 - INFO - Horizon 04, MAE: 27.01, MAPE: 0.0871, RMSE: 35.77
+2019-12-30 18:16:47,159 - INFO - Horizon 04, MAE: 27.01, MAPE: 0.0871, RMSE: 35.77
+2019-12-30 18:16:47,163 - INFO - Horizon 05, MAE: 32.10, MAPE: 0.1037, RMSE: 42.70
+2019-12-30 18:16:47,163 - INFO - Horizon 05, MAE: 32.10, MAPE: 0.1037, RMSE: 42.70
+2019-12-30 18:16:47,167 - INFO - Horizon 06, MAE: 33.43, MAPE: 0.1078, RMSE: 44.73
+2019-12-30 18:16:47,167 - INFO - Horizon 06, MAE: 33.43, MAPE: 0.1078, RMSE: 44.73
+2019-12-30 18:17:43,976 - INFO - Epoch [90/100] (27391) train_mae: 11.8588, val_mae: 12.0159 lr:0.000002 56.8s
+2019-12-30 18:17:43,976 - INFO - Epoch [90/100] (27391) train_mae: 11.8588, val_mae: 12.0159 lr:0.000002 56.8s
+2019-12-30 18:18:40,851 - INFO - Epoch [91/100] (27692) train_mae: 11.8146, val_mae: 12.0107 lr:0.000002 56.9s
+2019-12-30 18:18:40,851 - INFO - Epoch [91/100] (27692) train_mae: 11.8146, val_mae: 12.0107 lr:0.000002 56.9s
+2019-12-30 18:19:37,844 - INFO - Epoch [92/100] (27993) train_mae: 11.8841, val_mae: 12.0128 lr:0.000002 57.0s
+2019-12-30 18:19:37,844 - INFO - Epoch [92/100] (27993) train_mae: 11.8841, val_mae: 12.0128 lr:0.000002 57.0s
+2019-12-30 18:20:34,703 - INFO - Epoch [93/100] (28294) train_mae: 11.8255, val_mae: 12.0119 lr:0.000002 56.9s
+2019-12-30 18:20:34,703 - INFO - Epoch [93/100] (28294) train_mae: 11.8255, val_mae: 12.0119 lr:0.000002 56.9s
+2019-12-30 18:21:31,837 - INFO - Epoch [94/100] (28595) train_mae: 11.8483, val_mae: 12.0108 lr:0.000002 57.1s
+2019-12-30 18:21:31,837 - INFO - Epoch [94/100] (28595) train_mae: 11.8483, val_mae: 12.0108 lr:0.000002 57.1s
+2019-12-30 18:22:29,024 - INFO - Epoch [95/100] (28896) train_mae: 11.8445, val_mae: 12.0113 lr:0.000002 57.2s
+2019-12-30 18:22:29,024 - INFO - Epoch [95/100] (28896) train_mae: 11.8445, val_mae: 12.0113 lr:0.000002 57.2s
+2019-12-30 18:23:26,377 - INFO - Epoch [96/100] (29197) train_mae: 11.8504, val_mae: 12.0120 lr:0.000002 57.4s
+2019-12-30 18:23:26,377 - INFO - Epoch [96/100] (29197) train_mae: 11.8504, val_mae: 12.0120 lr:0.000002 57.4s
+2019-12-30 18:24:23,822 - INFO - Epoch [97/100] (29498) train_mae: 11.8931, val_mae: 12.0215 lr:0.000002 57.4s
+2019-12-30 18:24:23,822 - INFO - Epoch [97/100] (29498) train_mae: 11.8931, val_mae: 12.0215 lr:0.000002 57.4s
+2019-12-30 18:25:21,042 - INFO - Epoch [98/100] (29799) train_mae: 11.8663, val_mae: 12.0073 lr:0.000002 57.2s
+2019-12-30 18:25:21,042 - INFO - Epoch [98/100] (29799) train_mae: 11.8663, val_mae: 12.0073 lr:0.000002 57.2s
+2019-12-30 18:25:21,055 - INFO - Val loss decrease from 12.0086 to 12.0073, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0073-29799
+2019-12-30 18:25:21,055 - INFO - Val loss decrease from 12.0086 to 12.0073, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0073-29799
+2019-12-30 18:26:18,232 - INFO - Epoch [99/100] (30100) train_mae: 11.8636, val_mae: 12.0096 lr:0.000002 57.2s
+2019-12-30 18:26:18,232 - INFO - Epoch [99/100] (30100) train_mae: 11.8636, val_mae: 12.0096 lr:0.000002 57.2s
+2019-12-30 18:26:22,794 - INFO - Horizon 01, MAE: 11.02, MAPE: 0.0355, RMSE: 14.16
+2019-12-30 18:26:22,794 - INFO - Horizon 01, MAE: 11.02, MAPE: 0.0355, RMSE: 14.16
+2019-12-30 18:26:22,798 - INFO - Horizon 02, MAE: 16.69, MAPE: 0.0537, RMSE: 21.71
+2019-12-30 18:26:22,798 - INFO - Horizon 02, MAE: 16.69, MAPE: 0.0537, RMSE: 21.71
+2019-12-30 18:26:22,802 - INFO - Horizon 03, MAE: 21.94, MAPE: 0.0707, RMSE: 28.84
+2019-12-30 18:26:22,802 - INFO - Horizon 03, MAE: 21.94, MAPE: 0.0707, RMSE: 28.84
+2019-12-30 18:26:22,806 - INFO - Horizon 04, MAE: 27.01, MAPE: 0.0870, RMSE: 35.77
+2019-12-30 18:26:22,806 - INFO - Horizon 04, MAE: 27.01, MAPE: 0.0870, RMSE: 35.77
+2019-12-30 18:26:22,811 - INFO - Horizon 05, MAE: 32.09, MAPE: 0.1036, RMSE: 42.69
+2019-12-30 18:26:22,811 - INFO - Horizon 05, MAE: 32.09, MAPE: 0.1036, RMSE: 42.69
+2019-12-30 18:26:22,815 - INFO - Horizon 06, MAE: 33.41, MAPE: 0.1077, RMSE: 44.72
+2019-12-30 18:26:22,815 - INFO - Horizon 06, MAE: 33.41, MAPE: 0.1077, RMSE: 44.72
+2019-12-30 18:27:20,162 - INFO - Epoch [100/100] (30401) train_mae: 11.8615, val_mae: 12.0072 lr:0.000002 57.3s
+2019-12-30 18:27:20,162 - INFO - Epoch [100/100] (30401) train_mae: 11.8615, val_mae: 12.0072 lr:0.000002 57.3s
+2019-12-30 18:27:20,174 - INFO - Val loss decrease from 12.0073 to 12.0072, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0072-30401
+2019-12-30 18:27:20,174 - INFO - Val loss decrease from 12.0073 to 12.0072, saving to data/baselines/rnn/5083_P1_o24_h6_sb24/dcrnn_L_0_h_6_64-64_lr_0.01_bs_64_20191230165528/models-12.0072-30401
+2019-12-30 18:27:24,805 - INFO - Horizon 01, MAE: 11.02, MAPE: 0.0355, RMSE: 14.16
+2019-12-30 18:27:24,805 - INFO - Horizon 01, MAE: 11.02, MAPE: 0.0355, RMSE: 14.16
+2019-12-30 18:27:24,809 - INFO - Horizon 02, MAE: 16.69, MAPE: 0.0538, RMSE: 21.71
+2019-12-30 18:27:24,809 - INFO - Horizon 02, MAE: 16.69, MAPE: 0.0538, RMSE: 21.71
+2019-12-30 18:27:24,813 - INFO - Horizon 03, MAE: 21.94, MAPE: 0.0707, RMSE: 28.83
+2019-12-30 18:27:24,813 - INFO - Horizon 03, MAE: 21.94, MAPE: 0.0707, RMSE: 28.83
+2019-12-30 18:27:24,817 - INFO - Horizon 04, MAE: 27.00, MAPE: 0.0871, RMSE: 35.75
+2019-12-30 18:27:24,817 - INFO - Horizon 04, MAE: 27.00, MAPE: 0.0871, RMSE: 35.75
+2019-12-30 18:27:24,821 - INFO - Horizon 05, MAE: 32.08, MAPE: 0.1037, RMSE: 42.68
+2019-12-30 18:27:24,821 - INFO - Horizon 05, MAE: 32.08, MAPE: 0.1037, RMSE: 42.68
+2019-12-30 18:27:24,825 - INFO - Horizon 06, MAE: 33.40, MAPE: 0.1078, RMSE: 44.70
+2019-12-30 18:27:24,825 - INFO - Horizon 06, MAE: 33.40, MAPE: 0.1078, RMSE: 44.70
+Trained DCRNN model
+train mae: 11.8615
+val mae: 12.0072
+test mse: 1109.7472929544974
+test rmse: 33.31286977962868
+test mae: 23.752014114478165
+test mape: 0.0764276927082379
+Predictions saved as data/baselines/rnn/5083_P1_o24_h6_sb24/predictions.npz.
