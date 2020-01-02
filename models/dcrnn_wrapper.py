@@ -49,6 +49,7 @@ class DCRNN(Model):
         self.tf_config = tf.ConfigProto()
         if use_cpu_only:
             self.tf_config = tf.ConfigProto(device_count={'GPU': 0})
+
         self.tf_config.gpu_options.allow_growth = True
         self.supervisor = DCRNNSupervisor(adj_mx=self.adj_mx, **self.supervisor_config)
         self.session = tf.Session(config=self.tf_config)
@@ -103,5 +104,7 @@ class DCRNN(Model):
 
     def close(self):
         self.session.close()
+        tf.reset_default_graph()
+        
         if self.output_filename:
             del self.tee
