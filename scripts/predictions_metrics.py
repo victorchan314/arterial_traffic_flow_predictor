@@ -6,6 +6,9 @@ import sys
 parent_dir = os.path.abspath(".")
 sys.path.append(parent_dir)
 
+import numpy as np
+import pandas as pd
+
 from lib import data_utils
 from lib import utils
 
@@ -36,26 +39,18 @@ def print_errors(logdir, horizons, precision):
 
             print()
 
-def print_errors_latex(logdir, horizons, precision):
+def print_errors_latex(logdir, horizons, precision, ts_dir=None, phase_plans=None):
     dirs = sorted(os.listdir(logdir))
 
     error_types = ["mse", "rmse", "mae", "mape"]
     errors = {}
 
     for dir in dirs:
-        plan = dir.split("_")[1]
         offset_matches = re.findall("_o\d+_", dir)
         if len(offset_matches) != 1:
             raise ValueError("Experiment should have exactly 1 offset")
 
         offset = int(offset_matches[0][2:-1])
-
-        if not plan in errors:
-            errors[plan] = {e: {} for e in error_types}
-
-        for v in errors[plan].values():
-            if not offset in v:
-                v[offset] = {}
 
         predictions_path = os.path.join(logdir, dir, PREDICTIONS_FILENAME)
         groundtruth, predictions = utils.load_predictions(predictions_path)
@@ -64,20 +59,53 @@ def print_errors_latex(logdir, horizons, precision):
         horizons = range(1, horizon + 1) if horizons is None else sorted([int(h) for h in horizons])
         batch_size = predictions.shape[1]
 
-        for h in horizons:
-            prediction_errors = data_utils.get_standard_errors(groundtruth[h-1, ...], predictions[h-1, ...])
+        if not ts_dir is None:
+            ts_file = os.path.join(ts_dir, dir + "_sensor_data", "test.npz")
+            timestamps = np.load(ts_file)["timestamps_y"].astype(int) / 1e9 % 86400
 
-            for k, v in prediction_errors.items():
-                error = v
-                if h in errors[plan][k][offset]:
-                    previous_error = errors[plan][k][offset][h][0]
-                    previous_batch_size = errors[plan][k][offset][h][1]
-                    total_batch_size = batch_size + previous_batch_size
-                    average_error = (error * batch_size + previous_error * previous_batch_size) / total_batch_size
+            plans = phase_plans["PlanName"].unique()
+            all_groundtruths = {}
+            all_predictions = {}
 
-                    errors[plan][k][offset][h] = [average_error, total_batch_size]
-                else:
-                    errors[plan][k][offset][h] = [error, batch_size]
+            for plan in plans:
+                relevant_phase_plans = phase_plans[phase_plans["PlanName"] == plan]
+                intervals = relevant_phase_plans.loc[:, ["StartTime", "EndTime"]].values * 3600
+
+                timestamps_mask = np.logical_or.reduce([(timestamps >= start_time).all(axis=1) & (timestamps < end_time).all(axis=1) for start_time, end_time in intervals])
+                all_groundtruths[plan] = groundtruth[:, timestamps_mask, :]
+                all_predictions[plan] = predictions[:, timestamps_mask, :]
+        else:
+            plan = dir.split("_")[1]
+            plans = [plan]
+            all_groundtruths = {plan: groundtruth}
+            all_predictions = {plan: predictions}
+
+        for plan in plans:
+            if not plan in errors:
+                errors[plan] = {e: {} for e in error_types}
+
+            for v in errors[plan].values():
+                if not offset in v:
+                    v[offset] = {}
+
+        for plan in plans:
+            groundtruth = all_groundtruths[plan]
+            predictions = all_predictions[plan]
+
+            for h in horizons:
+                prediction_errors = data_utils.get_standard_errors(groundtruth[h-1, ...], predictions[h-1, ...])
+
+                for k, v in prediction_errors.items():
+                    error = v
+                    if h in errors[plan][k][offset]:
+                        previous_error = errors[plan][k][offset][h][0]
+                        previous_batch_size = errors[plan][k][offset][h][1]
+                        total_batch_size = batch_size + previous_batch_size
+                        average_error = (error * batch_size + previous_error * previous_batch_size) / total_batch_size
+
+                        errors[plan][k][offset][h] = [average_error, total_batch_size]
+                    else:
+                        errors[plan][k][offset][h] = [error, batch_size]
 
     for plan, v1 in errors.items():
         for error_type, v2 in v1.items():
@@ -119,20 +147,29 @@ def print_errors_latex(logdir, horizons, precision):
 def main(args):
     logdir = args.logdir
     horizons = args.horizons
-    latex = args.latex
+    not_latex = args.not_latex
     precision = args.round
+    ts_dir = args.no_plan_ts_dir
+    phase_plans_csv = args.phase_plans_csv
 
-    if latex:
-        print_errors_latex(logdir, horizons, precision)
-    else:
+    if not ts_dir is None and phase_plans_csv is None:
+        raise ValueError("phase_plans_csv must be supplied if ts_npz is supplied")
+
+    phase_plans = pd.read_csv(phase_plans_csv) if phase_plans_csv else None
+
+    if not_latex:
         print_errors(logdir, horizons, precision)
+    else:
+        print_errors_latex(logdir, horizons, precision, ts_dir, phase_plans)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("logdir", type=str, help="Location of experiment directories")
     parser.add_argument("--horizons", "--h", action="append", help="Horizon(s) to include")
-    parser.add_argument("--latex", "-l", action="store_true", help="Print for LaTeX table")
+    parser.add_argument("--not_latex", "-l", action="store_true", help="Don't print for LaTeX table")
     parser.add_argument("--round", "-r", type=int, default=4, help="Rounding precision")
+    parser.add_argument("--no_plan_ts_dir", type=str, help="Location of timestamps to calculate error across plans")
+    parser.add_argument("--phase_plans_csv", type=str, help="Location of csv with phase plan times")
     args = parser.parse_args()
 
     main(args)
