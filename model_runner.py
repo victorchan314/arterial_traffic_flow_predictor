@@ -114,11 +114,11 @@ def main(args):
     config = load_config(args.config)
 
     loop = config.get("loop", False)
-    plan = "P3"
+    plan = "P2"
 
     if loop:
         #for plan in ["P1", "P2", "P3"]:
-        for offset in [3, 6, 12, 24]:
+        for offset in [6, 12, 24]:
             data_directory = "data/inputs/5083/5083_{}_o{}_h6_sb{}_sensor_data".format(plan, offset, offset)
             data = load_data(data_directory, verbose=verbose)
             model_configs = config["models"]
