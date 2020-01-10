@@ -5,7 +5,7 @@ This repository contains all of the code that I have been using for my research.
 All commands must be run from the top-level Code directory.
 
     # Command to generate distances and adjacency matrix
-    python3 scripts/generate_graph_connections.py --intersection 5083 --plan_name P1 --adjacency_matrix_path data/inputs/model/distances_5083_P1.csv
+    python3 scripts/generate_graph_connections.py --plan_name P2 --dl 508302 508306 508201 508205 509101 509105 507202 507206 608101 608105 608104 608107 --adjacency_matrix_path test
     python3 DCRNN/scripts/gen_adj_mx.py --sensor_ids_filename data/inputs/model/sensors_advanced_5083.txt --distances data/inputs/model/distances_5083_P1.csv --output_pkl_filename data/inputs/model/adjacency_matrix_5083_P1.pkl
 
     # Command to run the training data generation script
