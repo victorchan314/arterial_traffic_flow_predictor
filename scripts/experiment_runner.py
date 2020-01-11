@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import yaml
 
 parent_dir = os.path.abspath(".")
 sys.path.append(parent_dir)
@@ -11,6 +12,10 @@ from models import models
 from lib import utils
 
 DATA_CATEGORIES = ["train", "val", "test"]
+
+def load_config(path):
+    with open(path) as f:
+        return yaml.safe_load(f)
 
 def load_data(data_directory, verbose=0):
     data = {}
@@ -106,7 +111,7 @@ def run_config(config, verbose=0):
 
 def main(args):
     verbose = args.verbose
-    config = utils.load_yaml(args.config)
+    config = load_config(args.config)
 
     loop = config.get("loop", False)
     plan = "P3"

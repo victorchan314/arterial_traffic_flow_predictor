@@ -1,5 +1,6 @@
 import os
 import sys
+import yaml
 
 import numpy as np
 
@@ -30,6 +31,10 @@ def load_predictions(path):
     predictions = predictions_file["predictions"]
 
     return groundtruth, predictions
+
+def load_yaml(path):
+    with open(path) as f:
+        return yaml.safe_load(f)
 
 def verify_or_create_path(path):
     os.makedirs(path, exist_ok=True)
