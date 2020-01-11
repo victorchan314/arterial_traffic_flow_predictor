@@ -46,13 +46,16 @@ def print_errors_latex(logdir, horizons, precision, ts_dir=None, phase_plans=Non
     errors = {}
 
     for dir in dirs:
+        predictions_path = os.path.join(logdir, dir, PREDICTIONS_FILENAME)
+        if not os.path.isdir(os.path.join(logdir, dir)) or not os.path.exists(predictions_path):
+            continue
+
         offset_matches = re.findall("_o\d+_", dir)
         if len(offset_matches) != 1:
             raise ValueError("Experiment should have exactly 1 offset")
 
         offset = int(offset_matches[0][2:-1])
 
-        predictions_path = os.path.join(logdir, dir, PREDICTIONS_FILENAME)
         groundtruth, predictions = utils.load_predictions(predictions_path)
 
         horizon = predictions.shape[0]
