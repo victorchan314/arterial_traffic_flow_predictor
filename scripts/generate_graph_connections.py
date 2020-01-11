@@ -76,6 +76,14 @@ def generate_graph_connections(detector_inventory, edges, phases, phase_plans, p
 
     return edges
 
+def add_self_edges(detector_list, graph_connections):
+    columns = graph_connections.columns
+    for detector in detector_list:
+        graph_connections = graph_connections.append(pd.Series(dict(zip(columns, [detector, detector, 1]))),
+                                                     ignore_index=True)
+
+    return graph_connections
+
 
 
 def main(args):
@@ -108,6 +116,7 @@ def main(args):
     relevant_edges = edges[edges[0].isin(detector_list) & edges[1].isin(detector_list)].copy()
 
     graph_connections = generate_graph_connections(detector_inventory, relevant_edges, phases, phase_plans, plan_name)
+    graph_connections = add_self_edges(detector_list, graph_connections)
 
     if args.adjacency_matrix_path:
         graph_connections.to_csv(adjacency_matrix_path, header=["from", "to", "cost"], index=False)
