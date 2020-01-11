@@ -114,20 +114,25 @@ def main(args):
     config = load_config(args.config)
 
     loop = config.get("loop", False)
-    plan = "P2"
+    plan = "P3"
 
     if loop:
+        from multiprocessing import Process
         #for plan in ["P1", "P2", "P3"]:
-        for offset in [6, 12, 24]:
+        for offset in [3, 6, 12, 24]:
             data_directory = "data/inputs/5083/5083_{}_o{}_h6_sb{}_sensor_data".format(plan, offset, offset)
             data = load_data(data_directory, verbose=verbose)
             model_configs = config["models"]
             model_order = config.get("model_order")
 
-            model_configs["DCRNN"]["base_dir"] = "data/baselines/rnn/5083_{}_o{}_h6_sb{}"\
+            model_configs["DCRNN"]["base_dir"] = "data/test_diag/5083_{}_o{}_h6_sb{}"\
                 .format(plan, offset, offset)
 
-            run_models(data, model_configs, model_order=model_order, verbose=verbose)
+            #run_models(data, model_configs, model_order=model_order, verbose=verbose)
+            p = Process(target=run_models,
+                        args=(data, model_configs),
+                        kwargs={"model_order": model_order, "verbose": verbose})
+            p.start()
     else:
         run_config(config, verbose=verbose)
 
