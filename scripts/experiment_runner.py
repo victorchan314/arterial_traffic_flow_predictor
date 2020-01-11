@@ -1,7 +1,9 @@
 import argparse
+import datetime as dt
+from multiprocessing import Process
 import os
+import shutil
 import sys
-import yaml
 
 parent_dir = os.path.abspath(".")
 sys.path.append(parent_dir)
@@ -13,9 +15,22 @@ from lib import utils
 
 DATA_CATEGORIES = ["train", "val", "test"]
 
-def load_config(path):
-    with open(path) as f:
-        return yaml.safe_load(f)
+def create_experiment_structure(base_dir, experiment_name, config_path):
+    timestamp = dt.datetime.today().strftime("%Y%m%d-%H%M%S")
+    experiment_dir = os.path.join(base_dir, "{}_{}".format(experiment_name, timestamp))
+
+    utils.verify_or_create_path(experiment_dir)
+    utils.verify_or_create_path(os.path.join(experiment_dir, "inputs"))
+    utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "dcrnn"))
+
+    shutil.copy(config_path, os.path.join(experiment_dir, "inputs", "{}.yaml".format(experiment_name)))
+
+    utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "baselines"))
+    utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "baselines", "constant"))
+    utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "baselines", "seasonal_naive"))
+    utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "baselines", "arimax"))
+    utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "baselines", "online_arimax"))
+    utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "baselines", "rnn"))
 
 def load_data(data_directory, verbose=0):
     data = {}
@@ -111,14 +126,17 @@ def run_config(config, verbose=0):
 
 def main(args):
     verbose = args.verbose
-    config = load_config(args.config)
+    config_path = args.config
 
-    loop = config.get("loop", False)
-    plan = "P3"
+    config = utils.load_yaml(config_path)
 
-    if loop:
-        from multiprocessing import Process
-        #for plan in ["P1", "P2", "P3"]:
+    base_dir = config["base_dir"]
+    experiment_name = config["experiment_name"]
+
+    create_experiment_structure(base_dir, experiment_name, config_path)
+    print(1/0)
+
+    for plan in ["P1", "P2", "P3"]:
         for offset in [3, 6, 12, 24]:
             data_directory = "data/inputs/5083/5083_{}_o{}_h6_sb{}_sensor_data".format(plan, offset, offset)
             data = load_data(data_directory, verbose=verbose)
@@ -133,12 +151,12 @@ def main(args):
                         args=(data, model_configs),
                         kwargs={"model_order": model_order, "verbose": verbose})
             p.start()
-    else:
-        run_config(config, verbose=verbose)
+
+    run_config(config, verbose=verbose)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("config", help="config file to specify data and model")
+    parser.add_argument("config", help="config file to specify detector list and parameters")
     parser.add_argument("-v", "--verbose", action="count", default=0, help="verbosity")
     args = parser.parse_args()
 
