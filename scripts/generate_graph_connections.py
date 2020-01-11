@@ -110,7 +110,7 @@ def main(args):
     graph_connections = generate_graph_connections(detector_inventory, relevant_edges, phases, phase_plans, plan_name)
 
     if args.adjacency_matrix_path:
-        graph_connections.to_csv(adjacency_matrix_path, header=False, index=False)
+        graph_connections.to_csv(adjacency_matrix_path, header=["from", "to", "cost"], index=False)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
