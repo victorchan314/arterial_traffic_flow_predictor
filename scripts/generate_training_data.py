@@ -185,7 +185,7 @@ def process_timeseries_detector_data(detector_data, detector_list, stretch_lengt
     if verbose:
         print("Processed detector data shape: {}".format(detector_data_array.shape))
 
-    return detector_data_array, filtered_timestamps
+    return detector_data_array, timestamps, filtered_timestamps
 
 
 def process_array_detector_data(detector_data, detector_list, stretch_length, verbose=0):
@@ -333,40 +333,20 @@ def main(args):
         dummy_data = generate_dummy_data(args.dummy, dummy_shape, verbose=verbose)
         if args.output_dir:
             generate_array_splits(dummy_data, x_offset, y_offset, args.output_dir, verbose=verbose)
-    elif args.timeseries:
-        detector_list_path = args.detector_list_path
-        plan_name = args.plan_name
-        split_by_day = args.split_by_day
-        stretch_length = x_offset + y_offset
-
-        detector_list = get_sensors_list(detector_list_path)
-        detector_data = get_detector_data(detector_list, plan=plan_name)
-
-        if split_by_day:
-            detector_data_array = [detector_data[detector_data["Time"].dt.dayofweek == i] for i in range(7)]
-            weekdays = range(7)
-        else:
-            detector_data_array = [detector_data]
-            weekdays = [None]
-
-        for i in range(len(detector_data_array)):
-            detector_data_processed, timestamps = process_timeseries_detector_data(detector_data_array[i], detector_list, stretch_length, verbose=verbose)
-
-            subdir = utils.get_subdir(plan_name, x_offset, y_offset, weekday=weekdays[i])
-
-            if args.output_dir:
-                output_dir = os.path.join(args.output_dir, subdir)
-                generate_timeseries_splits(detector_data_processed, output_dir, timestamps=timestamps, verbose=verbose)
-
-            if args.timestamps_dir:
-                timestamps_dir = os.path.join(args.timestamps_dir, subdir)
-                save_timestamps(timestamps, timestamps_dir, timeseries=True)
     else:
         detector_list_path = args.detector_list_path
         plan_name = args.plan_name
         split_by_day = args.split_by_day
-        start_time_buffer = args.start_time_buffer
-        end_time_buffer = args.end_time_buffer
+
+        is_timeseries = args.timeseries
+
+        if is_timeseries:
+            stretch_length = x_offset + y_offset
+            start_time_buffer = 0
+            end_time_buffer = 0
+        else:
+            start_time_buffer = args.start_time_buffer
+            end_time_buffer = args.end_time_buffer
 
         detector_list = get_sensors_list(detector_list_path)
         detector_data = get_detector_data(detector_list, plan=plan_name,
@@ -379,18 +359,31 @@ def main(args):
             detector_data_array = [detector_data]
             weekdays = [None]
 
-        for i in range(len(detector_data_array)):
-            detector_data_processed, timestamps, timestamps_array = process_array_detector_data(detector_data_array[i], detector_list, x_offset + y_offset, verbose=verbose)
+        if is_timeseries:
+            process_detector_data_func = lambda i:\
+                process_timeseries_detector_data(detector_data_array[i], detector_list, stretch_length, verbose=verbose)
+            generate_splits_func = lambda detector_data_processed, output_dir, timestamps:\
+                generate_timeseries_splits(detector_data_processed, output_dir, timestamps=timestamps, verbose=verbose)
+        else:
+            process_detector_data_func = lambda i:\
+                process_array_detector_data(detector_data_array[i], detector_list, x_offset + y_offset, verbose=verbose)
+            generate_splits_func = lambda detector_data_processed, output_dir, timestamps:\
+                generate_array_splits(detector_data_processed, x_offset, y_offset, output_dir, timestamps=timestamps,
+                              verbose=verbose)
 
-            subdir = utils.get_subdir(plan_name, x_offset, y_offset, start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer, weekday=weekdays[i])
+        for i in range(len(detector_data_array)):
+            detector_data_processed, _, timestamps = process_detector_data_func(i)
+
+            subdir = utils.get_subdir(plan_name, x_offset, y_offset, start_time_buffer=start_time_buffer,
+                                      end_time_buffer=end_time_buffer, weekday=weekdays[i])
 
             if args.output_dir:
                 output_dir = os.path.join(args.output_dir, subdir)
-                generate_array_splits(detector_data_processed, x_offset, y_offset, output_dir, timestamps=timestamps_array, verbose=verbose)
+                generate_splits_func(detector_data_processed, output_dir, timestamps)
 
             if args.timestamps_dir:
                 timestamps_dir = os.path.join(args.timestamps_dir, subdir)
-                save_timestamps(timestamps, timestamps_dir)
+                save_timestamps(timestamps, timestamps_dir, timeseries=is_timeseries)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

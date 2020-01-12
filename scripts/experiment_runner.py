@@ -14,9 +14,12 @@ import numpy as np
 from models import models
 from lib import utils
 from scripts.generate_graph_connections import main as generate_graph_connections
+from scripts.generate_training_data import main as generate_training_data
 
 DATA_CATEGORIES = ["train", "val", "test"]
 PLANS = ["P1", "P2", "P3"]
+OFFSETS = [3, 6, 12, 24]
+Y_OFFSET = 6
 
 def create_experiment_structure(base_dir, experiment_name, config_path):
     timestamp = dt.datetime.today().strftime("%Y%m%d-%H%M%S")
@@ -25,10 +28,9 @@ def create_experiment_structure(base_dir, experiment_name, config_path):
     utils.verify_or_create_path(experiment_dir)
     utils.verify_or_create_path(os.path.join(experiment_dir, "inputs", "model"))
     utils.verify_or_create_path(os.path.join(experiment_dir, "inputs", "sensor_data"))
-    utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "dcrnn"))
-
     shutil.copy(config_path, os.path.join(experiment_dir, "inputs", "{}.yaml".format(experiment_name)))
 
+    utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "dcrnn"))
     utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "baselines"))
     utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "baselines", "constant"))
     utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "baselines", "seasonal_naive"))
@@ -49,19 +51,56 @@ def populate_inputs(experiment_dir, detector_list):
     # Generate distances/graph connections
     for plan in PLANS:
         distances_path = os.path.join(inputs_dir, "model", "distances_{}.csv".format(plan))
-        generate_graph_connections_args_dict = {
+        args_dict = {
             "plan_name": plan,
             "detector_list": detector_list,
             "distances_path": distances_path
         }
-        generate_graph_connections_args = argparse.Namespace(**generate_graph_connections_args_dict)
-        generate_graph_connections(generate_graph_connections_args)
+        args = argparse.Namespace(**args_dict)
+        generate_graph_connections(args)
 
         subprocess.run(["python3", "DCRNN/scripts/gen_adj_mx.py"] +
                        "--sensor_ids_filename {} --distances_filename {} --output_pkl_filename {}".format(
                            detector_list_path, distances_path,
                            os.path.join(inputs_dir, "model", "adjacency_matrix_{}.pkl".format(plan))).split())
 
+    return detector_list_path
+
+def create_training_data(experiment_dir, detector_list_path, verbose=0):
+    for plan in PLANS:
+        for offset in OFFSETS:
+            sensor_data_dir = os.path.join(experiment_dir, "inputs", "sensor_data")
+            args_dict = {
+                "detector_list_path": detector_list_path,
+                "plan_name": plan,
+                "split_by_day": False,
+                "start_time_buffer": offset,
+                "end_time_buffer": 0,
+                "x_offset": offset,
+                "y_offset": Y_OFFSET,
+                "output_dir": sensor_data_dir,
+                "timestamps_dir": sensor_data_dir,
+                "timeseries": False,
+                "dummy": False,
+                "verbose": verbose // 2
+            }
+            args = argparse.Namespace(**args_dict)
+
+            # Data for ARIMAX
+            args_ts_dict = args_dict.copy()
+            args_ts_dict["start_time_buffer"] = 0
+            args_ts_dict["timeseries"] = True
+            args_ts = argparse.Namespace(**args_ts_dict)
+
+            def f():
+                generate_training_data(args)
+                generate_training_data(args_ts)
+
+            p = Process(target=f)
+            p.start()
+
+def copy_dcrnn_config(experiment_dir):
+    pass
 
 def load_data(data_directory, verbose=0):
     data = {}
@@ -166,7 +205,9 @@ def main(args):
     detector_list = list(map(str, config["detector_list"]))
 
     experiment_dir = create_experiment_structure(base_dir, experiment_name, config_path)
-    populate_inputs(experiment_dir, detector_list)
+    detector_list_path = populate_inputs(experiment_dir, detector_list)
+    create_training_data(experiment_dir, detector_list_path, verbose=verbose)
+    copy_dcrnn_config(experiment_dir)
     print(1/0)
 
     for plan in ["P1", "P2", "P3"]:
