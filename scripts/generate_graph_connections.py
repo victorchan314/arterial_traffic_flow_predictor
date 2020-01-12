@@ -89,7 +89,7 @@ def add_self_edges(detector_list, graph_connections):
 def main(args):
     plan_name = args.plan_name
     detector_list = args.detector_list
-    adjacency_matrix_path = args.adjacency_matrix_path
+    distances_path = args.distances_path
 
     #phase_timings = mysql_utils.execute_query(PHASE_TIMINGS_QUERY)
     detector_inventory = mysql_utils.execute_query(DETECTOR_INVENTORY_QUERY)
@@ -111,21 +111,20 @@ def main(args):
     # if args.detector_list:
     #     with open("data/inputs/model/sensors_advanced.txt", "w") as f:
     #         f.write(",".join(detector_list))
-    #         f.close()
 
     relevant_edges = edges[edges[0].isin(detector_list) & edges[1].isin(detector_list)].copy()
 
     graph_connections = generate_graph_connections(detector_inventory, relevant_edges, phases, phase_plans, plan_name)
     graph_connections = add_self_edges(detector_list, graph_connections)
 
-    if args.adjacency_matrix_path:
-        graph_connections.to_csv(adjacency_matrix_path, header=["from", "to", "cost"], index=False)
+    if args.distances_path:
+        graph_connections.to_csv(distances_path, header=["from", "to", "cost"], index=False)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3")
     parser.add_argument("--detector_list", "--dl", nargs="+", help="list of sensors to generate connections for")
-    parser.add_argument("--adjacency_matrix_path", help="output file for adjacency matrix, if one is generated")
+    parser.add_argument("--distances_path", help="output file for distances, if one is generated")
     args = parser.parse_args()
 
     main(args)

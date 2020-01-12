@@ -3,6 +3,7 @@ import datetime as dt
 from multiprocessing import Process
 import os
 import shutil
+import subprocess
 import sys
 
 parent_dir = os.path.abspath(".")
@@ -12,15 +13,18 @@ import numpy as np
 
 from models import models
 from lib import utils
+from scripts.generate_graph_connections import main as generate_graph_connections
 
 DATA_CATEGORIES = ["train", "val", "test"]
+PLANS = ["P1", "P2", "P3"]
 
 def create_experiment_structure(base_dir, experiment_name, config_path):
     timestamp = dt.datetime.today().strftime("%Y%m%d-%H%M%S")
     experiment_dir = os.path.join(base_dir, "{}_{}".format(experiment_name, timestamp))
 
     utils.verify_or_create_path(experiment_dir)
-    utils.verify_or_create_path(os.path.join(experiment_dir, "inputs"))
+    utils.verify_or_create_path(os.path.join(experiment_dir, "inputs", "model"))
+    utils.verify_or_create_path(os.path.join(experiment_dir, "inputs", "sensor_data"))
     utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "dcrnn"))
 
     shutil.copy(config_path, os.path.join(experiment_dir, "inputs", "{}.yaml".format(experiment_name)))
@@ -31,6 +35,33 @@ def create_experiment_structure(base_dir, experiment_name, config_path):
     utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "baselines", "arimax"))
     utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "baselines", "online_arimax"))
     utils.verify_or_create_path(os.path.join(experiment_dir, "experiments", "baselines", "rnn"))
+
+    return experiment_dir
+
+def populate_inputs(experiment_dir, detector_list):
+    inputs_dir = os.path.join(experiment_dir, "inputs")
+
+    # Save detector list
+    detector_list_path = os.path.join(inputs_dir, "model", "detector_list.txt")
+    with open(detector_list_path, "w") as f:
+        f.write(",".join(detector_list))
+
+    # Generate distances/graph connections
+    for plan in PLANS:
+        distances_path = os.path.join(inputs_dir, "model", "distances_{}.csv".format(plan))
+        generate_graph_connections_args_dict = {
+            "plan_name": plan,
+            "detector_list": detector_list,
+            "distances_path": distances_path
+        }
+        generate_graph_connections_args = argparse.Namespace(**generate_graph_connections_args_dict)
+        generate_graph_connections(generate_graph_connections_args)
+
+        subprocess.run(["python3", "DCRNN/scripts/gen_adj_mx.py"] +
+                       "--sensor_ids_filename {} --distances_filename {} --output_pkl_filename {}".format(
+                           detector_list_path, distances_path,
+                           os.path.join(inputs_dir, "model", "adjacency_matrix_{}.pkl".format(plan))).split())
+
 
 def load_data(data_directory, verbose=0):
     data = {}
@@ -132,8 +163,10 @@ def main(args):
 
     base_dir = config["base_dir"]
     experiment_name = config["experiment_name"]
+    detector_list = list(map(str, config["detector_list"]))
 
-    create_experiment_structure(base_dir, experiment_name, config_path)
+    experiment_dir = create_experiment_structure(base_dir, experiment_name, config_path)
+    populate_inputs(experiment_dir, detector_list)
     print(1/0)
 
     for plan in ["P1", "P2", "P3"]:

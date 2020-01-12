@@ -1,6 +1,6 @@
 base_dir: experiments
-detector_list: [508302, 508306, 508201, 508205, 509101, 509105, 507202, 507206, 608101, 608105, 608107, 608104]
 experiment_name: full_information
+detector_list: [508302, 508306, 508201, 508205, 509101, 509105, 507202, 507206, 608101, 608105, 608107, 608104]
 models:
   DCRNN:
     base_dir: data/test_diag/5083_P3_o{}_h6_sb{}
