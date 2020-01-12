@@ -1,4 +1,5 @@
 import argparse
+import copy
 from multiprocessing import Process
 import os
 from string import Template
@@ -106,15 +107,26 @@ def run_config(config, verbose=0):
 
     run_models(data, model_configs, model_order=model_order, verbose=verbose)
 
+def run_configs(configs, verbose=0):
+    for config in configs:
+        run_config(config, verbose=verbose)
+
 def loop_config(config, verbose=0):
     loop = config["loop"]
     values = loop["values"]
     keys = loop["keys"]
+    is_parallel = "parallel" in loop
 
     loop_mappings = utils.dictionary_product(values)
 
+    if is_parallel:
+        parallel = loop["parallel"]
+        parallel_values = {value: values[value] for value in parallel}
+        parallel_keys = utils.ordered_tuple_product(parallel_values, parallel)
+        configs = {key: [] for key in parallel_keys}
+
     for mapping in loop_mappings:
-        itr_config = config.copy()
+        itr_config = copy.deepcopy(config)
         for key in keys:
             c = itr_config
             config_path = key.split("/")
@@ -124,8 +136,19 @@ def loop_config(config, verbose=0):
             template = Template(c[config_path[-1]])
             c[config_path[-1]] = template.substitute(mapping)
 
-        p = Process(target=run_config, args=(itr_config,), kwargs={"verbose": verbose})
+        if is_parallel:
+            mapping_key = tuple(mapping[value] for value in parallel_values)
+            configs[mapping_key].append(itr_config)
+        else:
+            run_config(itr_config, verbose=verbose)
 
+    if is_parallel:
+        processes = []
+        for itr_configs in configs.values():
+            p = Process(target=run_configs, args=(itr_configs,), kwargs={"verbose": verbose})
+            processes.append(p)
+
+        utils.run_process_list_parallel(processes)
 
 def main(args):
     verbose = args.verbose

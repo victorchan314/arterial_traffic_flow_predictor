@@ -1,5 +1,6 @@
 import functools
 import itertools
+from multiprocessing import Process
 import os
 import sys
 import yaml
@@ -45,6 +46,24 @@ def load_predictions(path):
 def load_yaml(path):
     with open(path) as f:
         return yaml.safe_load(f)
+
+def ordered_tuple_product(dict_of_tuples, key_order):
+    list_of_tuples = [dict_of_tuples[key] for key in key_order]
+    tuples_product = list(itertools.product(*list_of_tuples))
+
+    return tuples_product
+
+def run_process_list_parallel(processes):
+    for p in processes:
+        p.start()
+
+    for p in processes:
+        p.join()
+
+def run_process_list_sequential(processes):
+    for p in processes:
+        p.start()
+        p.join()
 
 def verify_or_create_path(path):
     os.makedirs(path, exist_ok=True)
