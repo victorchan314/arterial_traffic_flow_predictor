@@ -8,20 +8,21 @@ import numpy as np
 
 WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
-def get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=0, end_time_buffer=0, weekday=None):
-    subdir = "{}_{}".format(intersection, plan_name)
+def get_subdir(plan_name, x_offset, y_offset, intersection=None, start_time_buffer=0, end_time_buffer=0, weekday=None):
+    components = [plan_name, "o{}".format(x_offset), "h{}".format(y_offset)]
 
-    if weekday is not None:
-        subdir += "_{}".format(WEEKDAYS[weekday])
-
-    subdir += "_o{}_h{}".format(x_offset, y_offset)
-
+    if not weekday is None:
+        components.insert(1, WEEKDAYS[weekday])
+    if not intersection is None:
+        components.insert(0, intersection)
     if start_time_buffer != 0:
-        subdir += "_sb{}".format(start_time_buffer)
+        components.append("sb{}".format(start_time_buffer))
     if end_time_buffer != 0:
-        subdir += "_eb{}".format(end_time_buffer)
+        components.append("eb{}".format(end_time_buffer))
 
-    subdir += "_sensor_data"
+    components += ["sensor", "data"]
+
+    subdir = "_".join(map(str, components))
 
     return subdir
 

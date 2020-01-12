@@ -12,10 +12,12 @@ import datetime as dt
 
 from lib import data_utils, mysql_utils, utils
 
-PHASE_PLANS_PATH = "data/inputs/model/phase_plans{}.csv"
-DETECTOR_LIST_PATH = "data/inputs/model/sensors_advanced{}.txt"
+PHASE_PLANS_PATH = "data/inputs/model/phase_plans.csv"
 
-DETECTOR_DATA_QUERY = "SELECT DetectorID, Year, Month, Day, Time, Volume AS Flow, Health FROM detector_data_processed_2017 NATURAL JOIN detector_health WHERE ({}) AND Health = 1"
+DETECTOR_DATA_QUERY = \
+    "SELECT DetectorID, Year, Month, Day, Time, Volume AS Flow, Health\
+    FROM detector_data_processed_2017 NATURAL JOIN detector_health\
+    WHERE ({}) AND Health = 1"
 DETECTOR_DATA_FREQUENCY = dt.timedelta(minutes=5)
 
 DUMMY_DATA_TYPES = ["zeros", "ones", "linear_integers", "linear_floats"]
@@ -47,17 +49,18 @@ def generate_dummy_data(dummy_data_type, dummy_shape, verbose=0):
 def get_sensors_list(path):
     with open(path, "r") as f:
         sensors = f.read()
-        f.close()
 
     sensors_list = sensors[:-1].split(",")
+    sensors_list = list(map(int, sensors_list))
 
     return sensors_list
 
-def get_detector_data(detector_list, intersection="", plan=None, limit=np.inf, date_limit=dt.date.max, start_time_buffer=0, end_time_buffer=0):
+def get_detector_data(detector_list, plan=None, limit=np.inf, date_limit=dt.date.max, start_time_buffer=0, end_time_buffer=0):
     query = DETECTOR_DATA_QUERY.format(" OR ".join(["DetectorID = {}".format(d) for d in detector_list]))
     if plan:
-        phase_plans = pd.read_csv(PHASE_PLANS_PATH.format(intersection))
-        relevant_phase_plans = phase_plans[phase_plans["PlanName"] == plan]
+        phase_plans = pd.read_csv(PHASE_PLANS_PATH)
+        relevant_phase_plans = phase_plans[(phase_plans["Intersection"] == phase_plans.loc[1, "Intersection"])
+                                           & (phase_plans["PlanName"] == plan)]
         intervals = relevant_phase_plans.loc[:, ["StartTime", "EndTime"]].values * 3600
         buffered_intervals = [[interval[0] - (DETECTOR_DATA_FREQUENCY * start_time_buffer).total_seconds(),
                                interval[1] + (DETECTOR_DATA_FREQUENCY * end_time_buffer).total_seconds()] for interval in intervals]
@@ -331,14 +334,13 @@ def main(args):
         if args.output_dir:
             generate_array_splits(dummy_data, x_offset, y_offset, args.output_dir, verbose=verbose)
     elif args.timeseries:
-        intersection = args.intersection
+        detector_list_path = args.detector_list_path
         plan_name = args.plan_name
         split_by_day = args.split_by_day
         stretch_length = x_offset + y_offset
 
-        intersection_string = "_{}".format(intersection) if intersection else ""
-        detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection_string))]
-        detector_data = get_detector_data(detector_list, intersection=intersection_string, plan=plan_name)
+        detector_list = get_sensors_list(detector_list_path)
+        detector_data = get_detector_data(detector_list, plan=plan_name)
 
         if split_by_day:
             detector_data_array = [detector_data[detector_data["Time"].dt.dayofweek == i] for i in range(7)]
@@ -350,7 +352,7 @@ def main(args):
         for i in range(len(detector_data_array)):
             detector_data_processed, timestamps = process_timeseries_detector_data(detector_data_array[i], detector_list, stretch_length, verbose=verbose)
 
-            subdir = utils.get_subdir(intersection, plan_name, x_offset, y_offset, weekday=weekdays[i])
+            subdir = utils.get_subdir(plan_name, x_offset, y_offset, weekday=weekdays[i])
 
             if args.output_dir:
                 output_dir = os.path.join(args.output_dir, subdir)
@@ -360,15 +362,14 @@ def main(args):
                 timestamps_dir = os.path.join(args.timestamps_dir, subdir)
                 save_timestamps(timestamps, timestamps_dir, timeseries=True)
     else:
-        intersection = args.intersection
+        detector_list_path = args.detector_list_path
         plan_name = args.plan_name
         split_by_day = args.split_by_day
         start_time_buffer = args.start_time_buffer
         end_time_buffer = args.end_time_buffer
 
-        intersection_string = "_{}".format(intersection) if intersection else ""
-        detector_list = [int(x) for x in get_sensors_list(DETECTOR_LIST_PATH.format(intersection_string))]
-        detector_data = get_detector_data(detector_list, intersection=intersection_string, plan=plan_name,
+        detector_list = get_sensors_list(detector_list_path)
+        detector_data = get_detector_data(detector_list, plan=plan_name,
                                           start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
 
         if split_by_day:
@@ -381,7 +382,7 @@ def main(args):
         for i in range(len(detector_data_array)):
             detector_data_processed, timestamps, timestamps_array = process_array_detector_data(detector_data_array[i], detector_list, x_offset + y_offset, verbose=verbose)
 
-            subdir = utils.get_subdir(intersection, plan_name, x_offset, y_offset, start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer, weekday=weekdays[i])
+            subdir = utils.get_subdir(plan_name, x_offset, y_offset, start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer, weekday=weekdays[i])
 
             if args.output_dir:
                 output_dir = os.path.join(args.output_dir, subdir)
@@ -393,7 +394,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--intersection", type=int, default=0, help="intersection to focus on. Assumes all relevant data/model/ files have proper suffix.")
+    parser.add_argument("--detector_list_path", "--dl", help="list of sensors to generate data for")
     parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3; or each to loop over all plans")
     parser.add_argument("--split_by_day", action="store_true", help="split by day of the week")
     parser.add_argument("--start_time_buffer", type=int, default=0, help="extra time steps before plan starts to include")
