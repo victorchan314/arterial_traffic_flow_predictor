@@ -56,7 +56,7 @@ def populate_inputs(experiment_dir, detector_list):
             "detector_list": detector_list,
             "distances_path": distances_path
         }
-        args = argparse.Namespace(**args_dict)
+        args = utils.Namespace(args_dict)
         generate_graph_connections(args)
 
         subprocess.run(["python3", "DCRNN/scripts/gen_adj_mx.py"] +
@@ -67,30 +67,27 @@ def populate_inputs(experiment_dir, detector_list):
     return detector_list_path
 
 def create_training_data(experiment_dir, detector_list_path, verbose=0):
+    processes = []
     for plan in PLANS:
         for offset in OFFSETS:
             sensor_data_dir = os.path.join(experiment_dir, "inputs", "sensor_data")
             args_dict = {
                 "detector_list_path": detector_list_path,
                 "plan_name": plan,
-                "split_by_day": False,
                 "start_time_buffer": offset,
-                "end_time_buffer": 0,
                 "x_offset": offset,
                 "y_offset": Y_OFFSET,
                 "output_dir": sensor_data_dir,
                 "timestamps_dir": sensor_data_dir,
-                "timeseries": False,
-                "dummy": False,
                 "verbose": verbose // 2
             }
-            args = argparse.Namespace(**args_dict)
+            args = utils.Namespace(args_dict)
 
             # Data for ARIMAX
             args_ts_dict = args_dict.copy()
-            args_ts_dict["start_time_buffer"] = 0
+            del args_ts_dict["start_time_buffer"]
             args_ts_dict["timeseries"] = True
-            args_ts = argparse.Namespace(**args_ts_dict)
+            args_ts = utils.Namespace(args_ts_dict)
 
             def f():
                 generate_training_data(args)
@@ -98,6 +95,10 @@ def create_training_data(experiment_dir, detector_list_path, verbose=0):
 
             p = Process(target=f)
             p.start()
+            processes.append(p)
+
+    for p in processes:
+        p.join()
 
 def copy_dcrnn_config(experiment_dir):
     pass

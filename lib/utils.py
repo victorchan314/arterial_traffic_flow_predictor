@@ -40,6 +40,14 @@ def load_yaml(path):
 def verify_or_create_path(path):
     os.makedirs(path, exist_ok=True)
 
+
+class Namespace(object):
+    def __init__(self, _dict):
+        self.__dict__.update(_dict)
+
+    def __getattr__(self, item):
+        return False
+
 class Tee(object):
     def __init__(self, path=None):
         self.file = open(path, "w")
