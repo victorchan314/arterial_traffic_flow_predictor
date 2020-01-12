@@ -1,5 +1,7 @@
 import argparse
+from multiprocessing import Process
 import os
+from string import Template
 import sys
 
 parent_dir = os.path.abspath(".")
@@ -104,30 +106,33 @@ def run_config(config, verbose=0):
 
     run_models(data, model_configs, model_order=model_order, verbose=verbose)
 
+def loop_config(config, verbose=0):
+    loop = config["loop"]
+    values = loop["values"]
+    keys = loop["keys"]
+
+    loop_mappings = utils.dictionary_product(values)
+
+    for mapping in loop_mappings:
+        itr_config = config.copy()
+        for key in keys:
+            c = itr_config
+            config_path = key.split("/")
+            for k in config_path[:-1]:
+                c = c[k]
+
+            template = Template(c[config_path[-1]])
+            c[config_path[-1]] = template.substitute(mapping)
+
+        p = Process(target=run_config, args=(itr_config,), kwargs={"verbose": verbose})
+
+
 def main(args):
     verbose = args.verbose
     config = utils.load_yaml(args.config)
 
-    loop = config.get("loop", False)
-    plan = "P3"
-
-    if loop:
-        from multiprocessing import Process
-        #for plan in ["P1", "P2", "P3"]:
-        for offset in [3, 6, 12, 24]:
-            data_directory = "data/inputs/5083/5083_{}_o{}_h6_sb{}_sensor_data".format(plan, offset, offset)
-            data = load_data(data_directory, verbose=verbose)
-            model_configs = config["models"]
-            model_order = config.get("model_order")
-
-            model_configs["DCRNN"]["base_dir"] = "data/test_diag/5083_{}_o{}_h6_sb{}"\
-                .format(plan, offset, offset)
-
-            #run_models(data, model_configs, model_order=model_order, verbose=verbose)
-            p = Process(target=run_models,
-                        args=(data, model_configs),
-                        kwargs={"model_order": model_order, "verbose": verbose})
-            p.start()
+    if "loop" in config.keys():
+        loop_config(config, verbose=verbose)
     else:
         run_config(config, verbose=verbose)
 
