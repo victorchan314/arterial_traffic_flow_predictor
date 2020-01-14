@@ -21,3 +21,5 @@ config/config.py
 
 # test files
 **/test
+config/experiment_runner_config.yaml
+config/model_runner_config.yaml

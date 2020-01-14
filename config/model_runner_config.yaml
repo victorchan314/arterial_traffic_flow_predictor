@@ -1,10 +1,14 @@
-data_directory: data/inputs/5083/5083_P3_o${offset}_h6_sb${offset}_sensor_data
+data_directory: data/inputs/5083/5083_${plan}_o${offset}_h6_sb${offset}_${sub}_sensor_data
 loop:
   values:
+    plan: ["P1", "P2", "P3"]
     offset: [3, 6, 12, 24]
-  parallel: ["offset"]
   keys: ["data_directory", "models/DCRNN/base_dir"]
+  substitutions:
+    sub:
+      key: plan
+      map: {"P1": "one", "P2": "two", "P3": "three"}
 model_order: ["DCRNN"]
 models:
   DCRNN:
-    base_dir: "data/test_std1_2/5083_P3_o${offset}_h6_sb${offset}"
+    base_dir: "data/test2/5083_${plan}_o${offset}_h6_sb${offset}"

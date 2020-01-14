@@ -121,6 +121,11 @@ def loop_config(config, verbose=0):
 
     loop_mappings = utils.dictionary_product(values)
 
+    if "substitutions" in loop:
+        for k, v in loop["substitutions"].items():
+            for mapping in loop_mappings:
+                mapping[k] = v["map"][mapping[v["key"]]]
+
     if is_parallel:
         parallel = loop["parallel"]
         parallel_values = {value: values[value] for value in parallel}

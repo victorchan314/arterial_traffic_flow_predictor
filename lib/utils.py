@@ -14,7 +14,7 @@ WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 def dictionary_product(d):
     split_dict = [[{k: v1} for v1 in v0] for k, v0 in d.items()]
     split_dict_product = list(itertools.product(*split_dict))
-    dict_product = map(lambda d0: functools.reduce(lambda d1, d2: {**d1, **d2}, d0), split_dict_product)
+    dict_product = list(map(lambda d0: functools.reduce(lambda d1, d2: {**d1, **d2}, d0), split_dict_product))
 
     return dict_product
 
