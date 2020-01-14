@@ -4,7 +4,19 @@ loop:
     plan: ["P1", "P2", "P3"]
     offset: [3, 6, 12, 24]
   keys: ["data_directory", "models/DCRNN/base_dir", ["models/DCRNN/lol", int]]
-  substitutions:
+  exclude:
+    - key: "models/DCRNN"
+      values:
+        plan: P1
+    - key: "models/DCRNN"
+      values:
+        plan: P3
+        offset: 12
+    - key: "models/DCRNN"
+      values:
+        plan: P3
+        offset: 24
+  substitute:
     sub:
       key: plan
       map: {"P1": 1, "P2": 2, "P3": 3}

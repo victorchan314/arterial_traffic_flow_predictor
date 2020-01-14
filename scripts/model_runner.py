@@ -67,8 +67,8 @@ def run_models(data, model_configs, model_order=None, verbose=0):
 
         if isinstance(model_configs[model_name], list):
             model_kwargs = model_configs[model_name]
-        elif isinstance(model_configs[model_name], dict):
-            model_kwargs = model_configs[model_name].values()
+        elif isinstance(model_configs[model_name], dict) and model_configs[model_name].get("__named_models__", False):
+            model_kwargs = [v for k, v in model_configs[model_name].items() if k != "__named_models__"]
         else:
             model_kwargs = [model_configs[model_name]]
 
@@ -91,8 +91,8 @@ def run_models(data, model_configs, model_order=None, verbose=0):
                         for key, value in errors[category].items():
                             print("{} {}: {}".format(category, key, value))
 
-            base_dir = kwargs.get("base_dir", None)
-            if not base_dir is None:
+            if "base_dir" in kwargs:
+                base_dir = kwargs["base_dir"]
                 utils.verify_or_create_path(base_dir)
                 path = os.path.join(base_dir, "predictions.npz")
                 model.save_predictions(path)
@@ -105,7 +105,8 @@ def run_config(config, verbose=0):
     model_configs = config["models"]
     model_order = config.get("model_order")
 
-    run_models(data, model_configs, model_order=model_order, verbose=verbose)
+    if model_configs:
+        run_models(data, model_configs, model_order=model_order, verbose=verbose)
 
 def run_configs(configs, verbose=0):
     for config in configs:
@@ -116,11 +117,12 @@ def loop_config(config, verbose=0):
     values = loop["values"]
     keys = loop["keys"]
     is_parallel = "parallel" in loop
+    exclude = loop.get("exclude", [])
 
     loop_mappings = utils.dictionary_product(values)
 
-    if "substitutions" in loop:
-        for k, v in loop["substitutions"].items():
+    if "substitute" in loop:
+        for k, v in loop["substitute"].items():
             for mapping in loop_mappings:
                 mapping[k] = v["map"][mapping[v["key"]]]
 
@@ -147,6 +149,17 @@ def loop_config(config, verbose=0):
 
             template = Template(c[config_path[-1]])
             c[config_path[-1]] = type_cast(template.substitute(mapping))
+
+        for exclusions in exclude:
+            exclude_values = exclusions["values"]
+            if all([exclude_values[k] == mapping[k] for k in exclude_values]):
+                c = itr_config
+                key = exclusions["key"]
+                config_path = key.split("/")
+                for k in config_path[:-1]:
+                    c = c[k]
+
+                del c[config_path[-1]]
 
         if is_parallel:
             mapping_key = tuple(mapping[value] for value in parallel_values)

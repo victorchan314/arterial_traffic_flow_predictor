@@ -16,7 +16,7 @@ from DCRNN.model.dcrnn_supervisor import DCRNNSupervisor
 class DCRNN(Model):
     """Wrapper that runs DCRNN and saves the results"""
     def __init__(self, *args, config_filename=None, is_trained=False, output_filename=None, predictions_filename=None,
-                 use_cpu_only=False, base_dir=None, **kwargs):
+                 use_cpu_only=False, base_dir=None, calculate_train_and_val_errors=True, **kwargs):
         super(DCRNN, self).__init__(*args, **kwargs)
 
         if not base_dir is None:
@@ -33,6 +33,7 @@ class DCRNN(Model):
             self.predictions_filename = predictions_filename
 
         self._is_trained = is_trained
+        self.calculate_train_and_val_errors = calculate_train_and_val_errors
 
         if self.output_filename:
             self.tee = Tee(self.output_filename)
@@ -65,7 +66,9 @@ class DCRNN(Model):
             if "train" in self.supervisor_config and "model_filename" in self.supervisor_config["train"]:
                 self.supervisor.load(self.session, self.supervisor_config['train']['model_filename'])
 
-        self.get_errors_from_log_file()
+        if self.calculate_train_and_val_errors:
+            self.get_errors_from_log_file()
+
         self.predictions = self.predict(None)
         self.errors["test"] = data_utils.get_standard_errors(np.array(self.predictions["groundtruth"]), np.array(self.predictions["predictions"]))
 

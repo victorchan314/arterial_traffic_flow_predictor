@@ -130,6 +130,9 @@ def copy_dcrnn_configs(experiment_path, detector_list):
             dcrnn_config = copy.deepcopy(config)
 
             rnn_config["base_dir"] = rnn_base_dir
+            del rnn_config["data"]["graph_pkl_filename"]
+            del rnn_config["model"]["filter_type"]
+            del rnn_config["model"]["max_diffusion_step"]
             rnn_config["model"]["use_gc_for_ru"] = False
 
             dcrnn_config["base_dir"] = dcrnn_base_dir
@@ -149,14 +152,15 @@ def copy_model_runner_config(experiment_path, experiment_name):
     baselines_base_dir = os.path.join(experiment_path, "experiments", "baselines")
 
     subdir_template = utils.get_subdir("${plan}", "${offset}", 6, start_time_buffer="${offset}")
-    ts_subdir_template = utils.get_subdir("${plan}", "${offset}", 6)
-
     sensor_data_path = os.path.join(experiment_path, "inputs", "sensor_data")
     sensor_data_template = os.path.join(sensor_data_path, subdir_template + "_sensor_data")
+    ts_sensor_data_subdir = utils.get_subdir("${plan}", "${offset}", 6) + "_sensor_data"
 
     config["data_directory"] = sensor_data_template
-    config["models"]["DCRNN"]["base_dir"] = os.path.join(dcrnn_base_dir, subdir_template)
-    config["models"]["RNN"]["base_dir"] = os.path.join(baselines_base_dir, "rnn", subdir_template)
+    config["models"]["Constant"]["base_dir"] = os.path.join(baselines_base_dir, "constant", subdir_template)
+    config["models"]["SeasonalNaive"]["base_dir"] = os.path.join(baselines_base_dir, "seasonal_naive", subdir_template)
+    config["models"]["DCRNN"]["DCRNN"]["base_dir"] = os.path.join(dcrnn_base_dir, subdir_template)
+    config["models"]["DCRNN"]["RNN"]["base_dir"] = os.path.join(baselines_base_dir, "rnn", subdir_template)
 
     sarimax_config = config["models"]["SARIMAX"]["SARIMAX"]
     online_sarimax_config = config["models"]["SARIMAX"]["OnlineSARIMAX"]
@@ -167,10 +171,10 @@ def copy_model_runner_config(experiment_path, experiment_name):
     online_sarimax_config["seasonal_order"] = SARIMAX_ORDER[1][:]
 
     sarimax_config["base_dir"] = os.path.join(baselines_base_dir, "arimax", subdir_template)
-    sarimax_config["train_file"] = os.path.join(sensor_data_path, ts_subdir_template, "train_ts.npz")
+    sarimax_config["train_file"] = os.path.join(sensor_data_path, ts_sensor_data_subdir, "train_ts.npz")
     sarimax_config["ts_dir"] = sensor_data_template
     online_sarimax_config["base_dir"] = os.path.join(baselines_base_dir, "online_arimax", subdir_template)
-    online_sarimax_config["train_file"] = os.path.join(sensor_data_path, ts_subdir_template, "train_ts.npz")
+    online_sarimax_config["train_file"] = os.path.join(sensor_data_path, ts_sensor_data_subdir, "train_ts.npz")
     online_sarimax_config["ts_dir"] = sensor_data_template
 
     model_runner_config_path = os.path.join(experiment_path, "inputs",
