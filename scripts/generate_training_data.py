@@ -376,6 +376,7 @@ def main(args):
 
             subdir = utils.get_subdir(plan_name, x_offset, y_offset, start_time_buffer=start_time_buffer,
                                       end_time_buffer=end_time_buffer, weekday=weekdays[i])
+            subdir += "_sensor_data"
 
             if args.output_dir:
                 output_dir = os.path.join(args.output_dir, subdir)

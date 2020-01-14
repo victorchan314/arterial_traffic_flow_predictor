@@ -1,10 +1,12 @@
 import argparse
+import copy
 import datetime as dt
 from multiprocessing import Process
 import os
 import shutil
 import subprocess
 import sys
+import yaml
 
 parent_dir = os.path.abspath(".")
 sys.path.append(parent_dir)
@@ -20,6 +22,8 @@ DATA_CATEGORIES = ["train", "val", "test"]
 PLANS = ["P1", "P2", "P3"]
 OFFSETS = [3, 6, 12, 24]
 Y_OFFSET = 6
+
+DEFAULT_DCRNN_CONFIG_PATH = "config/default/dcrnn_config.yaml"
 
 def create_experiment_structure(base_dir, experiment_name, config_path):
     timestamp = dt.datetime.today().strftime("%Y%m%d-%H%M%S")
@@ -100,8 +104,43 @@ def create_training_data(experiment_dir, detector_list_path, verbose=0):
     for p in processes:
         p.join()
 
-def copy_dcrnn_config(experiment_dir):
-    pass
+def copy_dcrnn_configs(experiment_dir, detector_list):
+    default_config = utils.load_yaml(DEFAULT_DCRNN_CONFIG_PATH)
+
+    rnn_experiment_path = os.path.join(experiment_dir, "experiments", "baselines", "rnn")
+    dcrnn_experiment_path = os.path.join(experiment_dir, "experiments", "dcrnn")
+    sensor_data_dir = os.path.join(experiment_dir, "inputs", "sensor_data")
+    adjacency_matrix_path = os.path.join(experiment_dir, "inputs", "model", "adjacency_matrix_{}.pkl")
+
+    for plan in PLANS:
+        plan_adjacency_matrix_path = adjacency_matrix_path.format(plan)
+        for offset in OFFSETS:
+            config = copy.deepcopy(default_config)
+            subdir = utils.get_subdir(plan, offset, Y_OFFSET, start_time_buffer=offset)
+            rnn_base_dir = os.path.join(rnn_experiment_path, subdir)
+            dcrnn_base_dir = os.path.join(dcrnn_experiment_path, subdir)
+            utils.verify_or_create_path(rnn_base_dir)
+            utils.verify_or_create_path(dcrnn_base_dir)
+
+            config["data"]["dataset_dir"] = os.path.join(sensor_data_dir, subdir + "_sensor_data")
+            config["model"]["horizon"] = Y_OFFSET
+            config["model"]["num_nodes"] = len(detector_list)
+            config["model"]["seq_len"] = offset
+
+            rnn_config = copy.deepcopy(config)
+            dcrnn_config = copy.deepcopy(config)
+
+            rnn_config["base_dir"] = rnn_base_dir
+            rnn_config["model"]["use_gc_for_ru"] = False
+
+            dcrnn_config["base_dir"] = dcrnn_base_dir
+            dcrnn_config["data"]["graph_pkl_filename"] = plan_adjacency_matrix_path
+            dcrnn_config["model"]["filter_type"] = "dual_random_walk"
+            dcrnn_config["model"]["max_diffusion_step"] = 2
+            dcrnn_config["model"]["use_gc_for_ru"] = True
+
+            utils.save_yaml(rnn_config, os.path.join(rnn_base_dir, "{}.yaml".format(subdir)))
+            utils.save_yaml(dcrnn_config, os.path.join(dcrnn_base_dir, "{}.yaml".format(subdir)))
 
 def load_data(data_directory, verbose=0):
     data = {}
@@ -208,7 +247,7 @@ def main(args):
     experiment_dir = create_experiment_structure(base_dir, experiment_name, config_path)
     detector_list_path = populate_inputs(experiment_dir, detector_list)
     create_training_data(experiment_dir, detector_list_path, verbose=verbose)
-    copy_dcrnn_config(experiment_dir)
+    copy_dcrnn_configs(experiment_dir, detector_list)
     print(1/0)
 
     for plan in ["P1", "P2", "P3"]:

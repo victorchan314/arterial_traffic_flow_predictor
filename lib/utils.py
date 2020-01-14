@@ -30,8 +30,6 @@ def get_subdir(plan_name, x_offset, y_offset, intersection=None, start_time_buff
     if end_time_buffer != 0:
         components.append("eb{}".format(end_time_buffer))
 
-    components += ["sensor", "data"]
-
     subdir = "_".join(map(str, components))
 
     return subdir
@@ -64,6 +62,10 @@ def run_process_list_sequential(processes):
     for p in processes:
         p.start()
         p.join()
+
+def save_yaml(data, path):
+    with open(path, "w") as f:
+        yaml.dump(data, f, default_flow_style=False)
 
 def verify_or_create_path(path):
     os.makedirs(path, exist_ok=True)
