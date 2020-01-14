@@ -1,0 +1,42 @@
+data_directory: null
+loop:
+  values:
+    plan: ["P1", "P2", "P3"]
+    offset: [3, 6, 12, 24]
+  parallel: ["plan"]
+  keys:
+    - "data_directory"
+    - "models/DCRNN/base_dir"
+    - "models/RNN/base_dir"
+    - "models/SARIMAX/SARIMAX/base_dir"
+    - "models/SARIMAX/SARIMAX/train_file"
+    - "models/SARIMAX/SARIMAX/ts_dir"
+    - "models/SARIMAX/OnlineSARIMAX/base_dir"
+    - "models/SARIMAX/OnlineSARIMAX/train_file"
+    - "models/SARIMAX/OnlineSARIMAX/ts_dir"
+model_order: ["Constant", "SeasonalNaive", "DCRNN", "RNN", "SARIMAX"]
+models:
+  Constant: {}
+  SeasonalNaive:
+    seasonality: null
+  DCRNN:
+    base_dir: null
+  RNN:
+    base_dir: null
+  SARIMAX:
+    SARIMAX:
+      order: null
+      seasonal_order: null
+      use_exog: True
+      online: False
+      base_dir: null
+      train_file: null
+      ts_dir: null
+    OnlineSARIMAX:
+      order: null
+      seasonal_order: null
+      use_exog: True
+      online: True
+      base_dir: null
+      train_file: null
+      ts_dir: null

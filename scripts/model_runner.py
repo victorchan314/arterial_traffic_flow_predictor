@@ -67,6 +67,8 @@ def run_models(data, model_configs, model_order=None, verbose=0):
 
         if isinstance(model_configs[model_name], list):
             model_kwargs = model_configs[model_name]
+        elif isinstance(model_configs[model_name], dict):
+            model_kwargs = model_configs[model_name].values()
         else:
             model_kwargs = [model_configs[model_name]]
 
