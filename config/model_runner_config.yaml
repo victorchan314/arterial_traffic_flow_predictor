@@ -1,27 +1,11 @@
-data_directory: data/inputs/5083/5083_${plan}_o${offset}_h6_sb${offset}_${sub}_sensor_data
+data_directory: data/inputs/5083/5083_${plan}_o${offset}_h6_sb${offset}_sensor_data
 loop:
   values:
-    plan: ["P1", "P2", "P3"]
-    offset: [3, 6, 12, 24]
-  keys: ["data_directory", "models/DCRNN/base_dir", ["models/DCRNN/lol", int]]
-  exclude:
-    - key: "models/DCRNN"
-      values:
-        plan: P1
-    - key: "models/DCRNN"
-      values:
-        plan: P3
-        offset: 12
-    - key: "models/DCRNN"
-      values:
-        plan: P3
-        offset: 24
-  substitute:
-    sub:
-      key: plan
-      map: {"P1": 1, "P2": 2, "P3": 3}
+    plan: ["P2"]
+    offset: [3, 6]
+  keys: ["data_directory", "models/DCRNN/base_dir"]
 model_order: ["DCRNN"]
 models:
   DCRNN:
-    lol: ${sub}
     base_dir: "data/test/5083_${plan}_o${offset}_h6_sb${offset}"
+    calculate_train_and_val_errors: False

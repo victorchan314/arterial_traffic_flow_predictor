@@ -49,10 +49,8 @@ All commands must be run from the top-level Code directory.
 
 ### TODO
 
-- Try predicting one horizon at once (implement in DCRNN)
-- Add different kinds of errors to output
-- Baseline methods visualization and table
+- Automatic exclusion of sensors that are too unhealthy (get health for each sensor for time period and remove max in loop until adequate)
+- Verbosity in experiment_runner.py
 - Predictions on dummy data that is linear
-- Try predictions for only 1 or 2 detectors with full coverage
 - Flow and occupancy and flow / occupancy
 - Visualization library

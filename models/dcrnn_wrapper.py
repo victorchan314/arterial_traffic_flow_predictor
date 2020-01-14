@@ -1,13 +1,12 @@
 import os
-import sys
 import re
-import yaml
 
 import numpy as np
 import tensorflow as tf
 
 from models.model import Model
 from lib import data_utils
+from lib import utils
 from lib.utils import Tee
 
 from DCRNN.lib.utils import load_graph_data
@@ -22,24 +21,24 @@ class DCRNN(Model):
         if not base_dir is None:
             base = base_dir.split("/")[-1]
             self.config_filename = os.path.join(base_dir, "{}.yaml".format(base))
-            self.output_filename = os.path.join(base_dir, "{}.out".format(base))
             self.predictions_filename = os.path.join(base_dir, "predictions.npz")
         else:
             if not config_filename:
                 raise ValueError("config_filename is a required argument")
 
             self.config_filename = config_filename
-            self.output_filename = output_filename
             self.predictions_filename = predictions_filename
 
+        self.output_filename = output_filename
         self._is_trained = is_trained
         self.calculate_train_and_val_errors = calculate_train_and_val_errors
 
         if self.output_filename:
+            self.output_filename = os.path.join(base_dir, "{}.out".format(base))
+            self.output_filename = output_filename
             self.tee = Tee(self.output_filename)
 
-        with open(self.config_filename) as f:
-            self.supervisor_config = yaml.load(f)
+        self. supervisor_config = utils.load_yaml(self.config_filename)
 
         graph_pkl_filename = self.supervisor_config['data'].get('graph_pkl_filename', None)
         if graph_pkl_filename is None:
