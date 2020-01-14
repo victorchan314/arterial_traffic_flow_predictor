@@ -134,14 +134,21 @@ def loop_config(config, verbose=0):
 
     for mapping in loop_mappings:
         itr_config = copy.deepcopy(config)
-        for key in keys:
+        for loop_key in keys:
+            if isinstance(loop_key, str):
+                key = loop_key
+                type_cast = str
+            else:
+                key = loop_key[0]
+                type_cast = getattr(__builtins__, loop_key[1])
+
             c = itr_config
             config_path = key.split("/")
             for k in config_path[:-1]:
                 c = c[k]
 
             template = Template(c[config_path[-1]])
-            c[config_path[-1]] = template.substitute(mapping)
+            c[config_path[-1]] = type_cast(template.substitute(mapping))
 
         if is_parallel:
             mapping_key = tuple(mapping[value] for value in parallel_values)
