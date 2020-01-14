@@ -1,3 +1,4 @@
+import builtins
 import functools
 import itertools
 from multiprocessing import Process
@@ -33,6 +34,9 @@ def get_subdir(plan_name, x_offset, y_offset, intersection=None, start_time_buff
     subdir = "_".join(map(str, components))
 
     return subdir
+
+def get_type_by_name(type_name):
+    return getattr(builtins, type_name)
 
 def load_predictions(path):
     predictions_file = np.load(path)

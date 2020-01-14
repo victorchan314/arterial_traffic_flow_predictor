@@ -10,19 +10,18 @@ import sys
 parent_dir = os.path.abspath(".")
 sys.path.append(parent_dir)
 
-import numpy as np
-
-from models import models
 from lib import utils
 from scripts.generate_graph_connections import main as generate_graph_connections
 from scripts.generate_training_data import main as generate_training_data
+from scripts.model_runner import main as model_runner
+
 
 DATA_CATEGORIES = ["train", "val", "test"]
 PLANS = ["P1", "P2", "P3"]
 OFFSETS = [3, 6, 12, 24]
 Y_OFFSET = 6
-
 SARIMAX_ORDER = ([2, 1, 0], [0, 0, 0, 0])
+
 
 def create_experiment_structure(base_dir, experiment_name, config_path):
     timestamp = dt.datetime.today().strftime("%Y%m%d-%H%M%S")
@@ -158,7 +157,6 @@ def copy_model_runner_config(experiment_path, experiment_name):
     config["data_directory"] = sensor_data_template
     config["models"]["DCRNN"]["base_dir"] = os.path.join(dcrnn_base_dir, subdir_template)
     config["models"]["RNN"]["base_dir"] = os.path.join(baselines_base_dir, "rnn", subdir_template)
-    config["models"]["SeasonalNaive"]["seasonality"] = None
 
     sarimax_config = config["models"]["SARIMAX"]["SARIMAX"]
     online_sarimax_config = config["models"]["SARIMAX"]["OnlineSARIMAX"]
@@ -175,100 +173,22 @@ def copy_model_runner_config(experiment_path, experiment_name):
     online_sarimax_config["train_file"] = os.path.join(sensor_data_path, ts_subdir_template, "train_ts.npz")
     online_sarimax_config["ts_dir"] = sensor_data_template
 
-    utils.save_yaml(config, os.path.join(experiment_path, "inputs",
-                                         "model_runner_config_{}.yaml".format(experiment_name)))
+    model_runner_config_path = os.path.join(experiment_path, "inputs",
+                                            "model_runner_config_{}.yaml".format(experiment_name))
+    utils.save_yaml(config, model_runner_config_path)
 
-def load_data(data_directory, verbose=0):
-    data = {}
-    if verbose:
-        print("Loading data from directory {}".format(data_directory))
+    return model_runner_config_path
 
-    for category in DATA_CATEGORIES:
-        path = "{}/{}.npz".format(data_directory, category)
-        if verbose > 1:
-            print("Loading datafile at path {}".format(path))
+def run_models(model_runner_config_path, verbose=0):
+    args_dict = {
+        "config": model_runner_config_path,
+        "verbose": verbose
+    }
+    args = utils.Namespace(args_dict)
 
-        with open(path, "rb") as f:
-            npz = np.load(f)
-            data["{}_{}".format(category, "x")] = npz["x"]
-            data["{}_{}".format(category, "y")] = npz["y"]
-
-            if verbose > 2:
-                print("{}_{} shape: {}".format(category, "x", npz["x"].shape))
-                print("{}_{} shape: {}".format(category, "y", npz["y"].shape))
-
-    return data
-
-def load_models(model_names):
-    return [getattr(models, model_name) for model_name in model_names]
-
-def run_models(data, model_configs, model_order=None, verbose=0):
-    train_x = data["train_x"]
-    train_y = data["train_y"]
-    val_x = data["val_x"]
-    val_y = data["val_y"]
-    test_x = data["test_x"]
-    test_y = data["test_y"]
-
-    model_names = list(model_configs.keys()) if model_order is None else model_order
-    models = load_models(model_names)
-
-    if verbose:
-        print("Starting to run models...")
-
-    if verbose > 2:
-        print("Max train_y: {}".format(np.max(train_y)))
-        print("Min train_y: {}".format(np.min(train_y)))
-        print("Max val_y: {}".format(np.max(val_y)))
-        print("Min val_y: {}".format(np.min(val_y)))
-        print("Max test_y: {}".format(np.max(test_y)))
-        print("Min test_y: {}".format(np.min(test_y)))
-
-    for i in range(len(models)):
-        model_name = model_names[i]
-        model_class = models[i]
-
-        if isinstance(model_configs[model_name], list):
-            model_kwargs = model_configs[model_name]
-        else:
-            model_kwargs = [model_configs[model_name]]
-
-        for kwargs in model_kwargs:
-            model = model_class(train_x, train_y, val_x, val_y, test_x, test_y,
-                                verbose=verbose, **kwargs)
-            if verbose:
-                print("Created {} model".format(model_name))
-
-            model.train()
-
-            if verbose:
-                print("Trained {} model".format(model_name))
-
-            errors = model.get_errors()
-
-            if verbose > 1:
-                for category in DATA_CATEGORIES:
-                    if category in errors:
-                        for key, value in errors[category].items():
-                            print("{} {}: {}".format(category, key, value))
-
-            base_dir = kwargs.get("base_dir", None)
-            if not base_dir is None:
-                utils.verify_or_create_path(base_dir)
-                path = os.path.join(base_dir, "predictions.npz")
-                model.save_predictions(path)
-
-            model.close()
+    model_runner(args)
 
 
-
-def run_config(config, verbose=0):
-    data_directory = config["data_directory"]
-    data = load_data(data_directory, verbose=verbose)
-    model_configs = config["models"]
-    model_order = config.get("model_order")
-
-    run_models(data, model_configs, model_order=model_order, verbose=verbose)
 
 def main(args):
     verbose = args.verbose
@@ -286,26 +206,9 @@ def main(args):
     detector_list_path = populate_inputs(experiment_path, detector_list)
     create_training_data(experiment_path, detector_list_path, verbose=verbose)
     copy_dcrnn_configs(experiment_path, detector_list)
-    copy_model_runner_config(experiment_path, experiment_name)
-    print(1/0)
+    model_runner_config_path = copy_model_runner_config(experiment_path, experiment_name)
 
-    for plan in ["P1", "P2", "P3"]:
-        for offset in [3, 6, 12, 24]:
-            data_directory = "data/inputs/5083/5083_{}_o{}_h6_sb{}_sensor_data".format(plan, offset, offset)
-            data = load_data(data_directory, verbose=verbose)
-            model_configs = config["models"]
-            model_order = config.get("model_order")
-
-            model_configs["DCRNN"]["base_dir"] = "data/test_diag/5083_{}_o{}_h6_sb{}"\
-                .format(plan, offset, offset)
-
-            #run_models(data, model_configs, model_order=model_order, verbose=verbose)
-            p = Process(target=run_models,
-                        args=(data, model_configs),
-                        kwargs={"model_order": model_order, "verbose": verbose})
-            p.start()
-
-    run_config(config, verbose=verbose)
+    run_models(model_runner_config_path, verbose=verbose)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

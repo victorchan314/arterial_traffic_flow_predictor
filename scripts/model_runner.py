@@ -99,8 +99,6 @@ def run_models(data, model_configs, model_order=None, verbose=0):
 
             model.close()
 
-
-
 def run_config(config, verbose=0):
     data_directory = config["data_directory"]
     data = load_data(data_directory, verbose=verbose)
@@ -140,7 +138,7 @@ def loop_config(config, verbose=0):
                 type_cast = str
             else:
                 key = loop_key[0]
-                type_cast = getattr(__builtins__, loop_key[1])
+                type_cast = utils.get_type_by_name(loop_key[1])
 
             c = itr_config
             config_path = key.split("/")
@@ -163,6 +161,8 @@ def loop_config(config, verbose=0):
             processes.append(p)
 
         utils.run_process_list_parallel(processes)
+
+
 
 def main(args):
     verbose = args.verbose
