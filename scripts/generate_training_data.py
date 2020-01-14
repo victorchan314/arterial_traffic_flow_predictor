@@ -50,7 +50,7 @@ def get_sensors_list(path):
     with open(path, "r") as f:
         sensors = f.read()
 
-    sensors_list = sensors[:-1].split(",")
+    sensors_list = sensors.split(",")
     sensors_list = list(map(int, sensors_list))
 
     return sensors_list
