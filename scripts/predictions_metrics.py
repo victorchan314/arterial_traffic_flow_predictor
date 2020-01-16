@@ -39,7 +39,7 @@ def print_errors(logdir, horizons, precision):
 
             print()
 
-def print_errors_latex(logdir, horizons, precision, ts_dir=None, phase_plans=None):
+def print_errors_latex(logdir, horizons, precision, detectors=None, detector_list=None, ts_dir=None, phase_plans=None):
     dirs = sorted(os.listdir(logdir))
 
     error_types = ["mse", "rmse", "mae", "mape"]
@@ -57,6 +57,11 @@ def print_errors_latex(logdir, horizons, precision, ts_dir=None, phase_plans=Non
         offset = int(offset_matches[0][2:-1])
 
         groundtruth, predictions = utils.load_predictions(predictions_path)
+
+        if not detectors is None:
+            detectors_mask = [True if detector in detectors else False for detector in detector_list]
+            groundtruth = groundtruth[:, :, detectors_mask, :]
+            predictions = predictions[:, :, detectors_mask, :]
 
         horizon = predictions.shape[0]
         horizons = range(1, horizon + 1) if horizons is None else sorted([int(h) for h in horizons])
@@ -78,7 +83,7 @@ def print_errors_latex(logdir, horizons, precision, ts_dir=None, phase_plans=Non
                 all_groundtruths[plan] = groundtruth[:, timestamps_mask, :]
                 all_predictions[plan] = predictions[:, timestamps_mask, :]
         else:
-            plan = dir.split("_")[1]
+            plan = dir.split("_")[0]
             plans = [plan]
             all_groundtruths = {plan: groundtruth}
             all_predictions = {plan: predictions}
@@ -149,6 +154,8 @@ def print_errors_latex(logdir, horizons, precision, ts_dir=None, phase_plans=Non
 
 def main(args):
     logdir = args.logdir
+    detectors = args.detectors
+    detector_list_path = args.detector_list_path
     horizons = args.horizons
     not_latex = args.not_latex
     precision = args.round
@@ -158,16 +165,27 @@ def main(args):
     if not ts_dir is None and phase_plans_csv is None:
         raise ValueError("phase_plans_csv must be supplied if ts_npz is supplied")
 
+    if detector_list_path:
+        with open(detector_list_path, "r") as f:
+            detector_list_file = f.read()
+
+        detector_list = list(map(int, detector_list_file.split(",")))
+    else:
+        detector_list = None
+
     phase_plans = pd.read_csv(phase_plans_csv) if phase_plans_csv else None
 
     if not_latex:
         print_errors(logdir, horizons, precision)
     else:
-        print_errors_latex(logdir, horizons, precision, ts_dir, phase_plans)
+        print_errors_latex(logdir, horizons, precision, detectors=detectors, detector_list=detector_list,
+                           ts_dir=ts_dir, phase_plans=phase_plans)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("logdir", type=str, help="Location of experiment directories")
+    parser.add_argument("--detectors", "-d", type=int, nargs="+", help="Detectors to calculate error for")
+    parser.add_argument("--detector_list_path", "--dl", type=str, help="Order of detectors in predictions")
     parser.add_argument("--horizons", "--h", action="append", help="Horizon(s) to include")
     parser.add_argument("--not_latex", "-l", action="store_true", help="Don't print for LaTeX table")
     parser.add_argument("--round", "-r", type=int, default=4, help="Rounding precision")
