@@ -17,7 +17,7 @@ PHASE_PLANS_PATH = "data/inputs/model/phase_plans.csv"
 DETECTOR_DATA_QUERY = \
     "SELECT DetectorID, Year, Month, Day, Time, Volume AS Flow, Health\
     FROM detector_data_processed_2017 NATURAL JOIN detector_health\
-    WHERE ({}) AND Health = 1"
+    WHERE ({}) AND Health = 1;"
 DETECTOR_DATA_FREQUENCY = dt.timedelta(minutes=5)
 
 DUMMY_DATA_TYPES = ["zeros", "ones", "linear_integers", "linear_floats"]
@@ -64,7 +64,8 @@ def get_detector_data(detector_list, plan=None, limit=np.inf, date_limit=dt.date
         intervals = relevant_phase_plans.loc[:, ["StartTime", "EndTime"]].values * 3600
         buffered_intervals = [[interval[0] - (DETECTOR_DATA_FREQUENCY * start_time_buffer).total_seconds(),
                                interval[1] + (DETECTOR_DATA_FREQUENCY * end_time_buffer).total_seconds()] for interval in intervals]
-        query += " AND ({})".format(" OR ".join(["(Time >= {} AND Time < {})".format(interval[0], interval[1]) for interval in buffered_intervals]))
+        query = query[:-1] + " AND ({})".format(" OR ".join(["(Time >= {} AND Time < {})".format(
+                interval[0], interval[1]) for interval in buffered_intervals])) + query[-1]
 
     query_results = mysql_utils.execute_query(query)
     
