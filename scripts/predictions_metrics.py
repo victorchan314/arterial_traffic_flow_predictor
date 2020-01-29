@@ -60,8 +60,8 @@ def print_errors_latex(logdir, horizons, precision, detectors=None, detector_lis
 
         if not detectors is None:
             detectors_mask = [True if detector in detectors else False for detector in detector_list]
-            groundtruth = groundtruth[:, :, detectors_mask, :]
-            predictions = predictions[:, :, detectors_mask, :]
+            groundtruth = groundtruth[:, :, detectors_mask, ...]
+            predictions = predictions[:, :, detectors_mask, ...]
 
         horizon = predictions.shape[0]
         horizons = range(1, horizon + 1) if horizons is None else sorted([int(h) for h in horizons])
@@ -129,12 +129,13 @@ def print_errors_latex(logdir, horizons, precision, detectors=None, detector_lis
 
                     errors[plan][error_type][offset][horizon] = error
 
+    output = ""
     for plan in sorted(errors.keys()):
-        print(plan)
+        output = utils.proxy_print(output, plan)
 
         for error_type in error_types:
             table_line_errors = errors[plan][error_type]
-            table_line = error_type.upper()
+            table_line = "& " + error_type.upper()
             for offset in sorted(table_line_errors.keys()):
                 for horizon in sorted(table_line_errors[offset].keys()):
                     error = table_line_errors[offset][horizon]
@@ -148,7 +149,9 @@ def print_errors_latex(logdir, horizons, precision, detectors=None, detector_lis
 
             table_line += " \\\\"
 
-            print(table_line)
+            output = utils.proxy_print(output, table_line)
+
+    return output
 
 
 
@@ -161,6 +164,7 @@ def main(args):
     precision = args.round
     ts_dir = args.no_plan_ts_dir
     phase_plans_csv = args.phase_plans_csv
+    do_not_print = args.do_not_print
 
     if not ts_dir is None and phase_plans_csv is None:
         raise ValueError("phase_plans_csv must be supplied if ts_npz is supplied")
@@ -176,9 +180,13 @@ def main(args):
     phase_plans = pd.read_csv(phase_plans_csv) if phase_plans_csv else None
 
     if not_latex:
-        print_errors(logdir, horizons, precision)
+        output = print_errors(logdir, horizons, precision)
+        if do_not_print:
+            return output
+        else:
+            print(output)
     else:
-        print_errors_latex(logdir, horizons, precision, detectors=detectors, detector_list=detector_list,
+        return print_errors_latex(logdir, horizons, precision, detectors=detectors, detector_list=detector_list,
                            ts_dir=ts_dir, phase_plans=phase_plans)
 
 if __name__ == "__main__":
@@ -188,7 +196,8 @@ if __name__ == "__main__":
     parser.add_argument("--detector_list_path", "--dl", type=str, help="Order of detectors in predictions")
     parser.add_argument("--horizons", "--h", action="append", help="Horizon(s) to include")
     parser.add_argument("--not_latex", "-l", action="store_true", help="Don't print for LaTeX table")
-    parser.add_argument("--round", "-r", type=int, default=4, help="Rounding precision")
+    parser.add_argument("--round", "-r", type=int, default=2, help="Rounding precision")
+    parser.add_argument("--do_not_print", action="store_true", help="Flag to suppress printing")
     parser.add_argument("--no_plan_ts_dir", type=str, help="Location of timestamps to calculate error across plans")
     parser.add_argument("--phase_plans_csv", type=str, help="Location of csv with phase plan times")
     args = parser.parse_args()

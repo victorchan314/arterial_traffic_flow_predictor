@@ -54,6 +54,12 @@ def ordered_tuple_product(dict_of_tuples, key_order):
 
     return tuples_product
 
+def proxy_print(old_string, new_string):
+    old_string += new_string
+    old_string += "\n"
+
+    return old_string
+
 def run_process_list_parallel(processes):
     for p in processes:
         p.start()
