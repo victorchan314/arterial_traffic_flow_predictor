@@ -12,6 +12,8 @@ __pycache__
 data/**/*sensor_data
 data/**/dcrnn_*
 data/old_experiments
+experiments/**/sensor_data
+experiments/**/dcrnn_*
 
 # sub-repository
 DCRNN

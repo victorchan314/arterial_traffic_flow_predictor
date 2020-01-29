@@ -1,0 +1,3 @@
+base_dir: experiments
+experiment_name: no-upstream
+detector_list: [508302, 508306, 508205, 509101, 509105, 507202, 507206]
