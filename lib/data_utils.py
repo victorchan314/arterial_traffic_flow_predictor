@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+# Metrics
+
 def mse(y, y_hat):
     return np.mean(np.power(y - y_hat, 2))
 
@@ -40,6 +42,7 @@ def get_standard_errors(y, y_hat, suffix=None):
         "mape" + suffix: mape(y, y_hat)
     }
 
+
 def compare_timedeltas(operation, timedelta1, timedelta2):
     if operation == "==":
         return pd.to_timedelta(timedelta1) == pd.to_timedelta(timedelta2)
@@ -56,6 +59,28 @@ def compare_timedeltas(operation, timedelta1, timedelta2):
     else:
         raise Exception("Operation {} not recognized".format(operation))
 
+def convert_to_fourier_day(x, num_fourier_terms=1):
+    days = pd.Series(x).dt.dayofweek / 7
+    terms = []
+
+    for i in range(1, num_fourier_terms + 1):
+        angles = 2 * i * np.pi * days
+        terms.append(np.sin(angles))
+        terms.append(np.cos(angles))
+
+    fourier_terms = np.column_stack(terms)
+
+    return fourier_terms
+
+# Flattens a matrix composed of sections of rolling values into one flat array
+# The first 2 dimensions of matrix should have the rolling values
+def flatten_circulant_like_matrix_by_stretches(matrix, stretches):
+    flattened = np.empty((0,) + matrix.shape[2:], dtype=matrix.dtype)
+    for start, end in stretches:
+        flattened = np.concatenate((flattened, matrix[start:end, 0, ...], matrix[end - 1, 1:, ...]), axis=0)
+
+    return flattened
+
 def get_groundtruth_from_y(y):
     if y.shape[-1] == 2:
         return np.transpose(y[:, :, :, 1], axes=(1, 0, 2))
@@ -69,15 +94,6 @@ def get_stretches(datetimes, frequency):
     stretches = np.vstack((stretch_starts, stretch_ends)).T
 
     return stretches
-
-# Flattens a matrix composed of sections of rolling values into one flat array
-# The first 2 dimensions of matrix should have the rolling values
-def flatten_circulant_like_matrix_by_stretches(matrix, stretches):
-    flattened = np.empty((0,) + matrix.shape[2:], dtype=matrix.dtype)
-    for start, end in stretches:
-        flattened = np.concatenate((flattened, matrix[start:end, 0, ...], matrix[end - 1, 1:, ...]), axis=0)
-
-    return flattened
 
 # Appends filler data to an array until its axis has at least length limit
 def pad_array(array, limit, axis=0, filler="zeros"):
@@ -95,16 +111,3 @@ def pad_array(array, limit, axis=0, filler="zeros"):
         return padded_array
     else:
         return array
-
-def convert_to_fourier_day(x, num_fourier_terms=1):
-    days = pd.Series(x).dt.dayofweek / 7
-    terms = []
-
-    for i in range(1, num_fourier_terms + 1):
-        angles = 2 * i * np.pi * days
-        terms.append(np.sin(angles))
-        terms.append(np.cos(angles))
-
-    fourier_terms = np.column_stack(terms)
-
-    return fourier_terms

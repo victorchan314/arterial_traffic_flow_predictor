@@ -15,7 +15,8 @@ All commands must be run from the top-level Code directory.
     python3 scripts/generate_training_data.py --intersection 5083 --plan_name P2 --x_offset 3 --y_offset 6 --output_dir data/inputs --timestamps_dir data/inputs --timeseries -v
 
     # Command to run all models to have errors in a central location
-    python3 model_runner.py config.yaml -vv
+    python3 model_runner.py config/model_runner_config.yaml -vv
+    python3 experiment_runner.py config/experiment_runner_config.yaml -vv
 
     # Command to run DCRNN for sensor 5083
     python3 DCRNN/dcrnn_train.py --config_filename data/5083/5083.yaml | tee data/5083/5083.out
@@ -25,6 +26,10 @@ All commands must be run from the top-level Code directory.
 
     # Command to plot predictions
     python3 DCRNN/scripts/graph_predictions.py data/5083/predictions.npz data/inputs/5083_sensor_data/test.npz
+    
+    # Command to get predictions metrics
+    python3 scripts/experiment_metrics.py experiments/full-information_20200114-123958/ -d 508302 508306
+    python3 scripts/predictions_metrics.py -d 508302 508306 --dl experiments/full-information_20200114-123958/inputs/model/detector_list.txt --h 1 --h 3 --h 6 --round 2 experiments/full-information_20200114-123958/experiments/dcrnn/
 
 ### Notes to self about DCRNN
 

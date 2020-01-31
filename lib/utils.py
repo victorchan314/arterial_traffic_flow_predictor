@@ -2,6 +2,7 @@ import builtins
 import functools
 import itertools
 import os
+import shutil
 import sys
 import yaml
 

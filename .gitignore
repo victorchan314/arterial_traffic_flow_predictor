@@ -11,7 +11,7 @@ __pycache__
 # data files
 data/**/*sensor_data
 data/**/dcrnn_*
-data/old_experiments
+data/general_experiments
 experiments/**/sensor_data
 experiments/**/dcrnn_*
 
