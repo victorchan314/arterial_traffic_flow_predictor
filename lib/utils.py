@@ -12,6 +12,16 @@ import numpy as np
 WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 
+def concatenate_functions(functions):
+    def function(*args, **kwargs):
+        return_value = functions[0](*args, **kwargs)
+        for function in functions[1:]:
+            return_value = function(return_value, *args, **kwargs)
+
+        return return_value
+
+    return function
+
 def dictionary_product(d):
     split_dict = [[{k: v1} for v1 in v0] for k, v0 in d.items()]
     split_dict_product = list(itertools.product(*split_dict))
@@ -108,3 +118,53 @@ class Tee(object):
     def close(self):
         sys.stdout = self.stdout
         self.file.close()
+
+class DataAugmenter(object):
+    def __init__(self, path, function):
+        self.dir = path
+        self.function = function
+        self.original_paths = []
+        self.temp_paths = []
+
+    def copy(self):
+        try:
+            for filename in os.listdir(self.dir):
+                if "timestamps" in filename:
+                    break
+
+                path = os.path.join(self.dir, filename)
+                temp_path = os.path.join(self.dir, "__temp__{}".format(filename))
+                self.original_paths.append(path)
+                self.temp_paths.append(temp_path)
+
+                file = np.load(path)
+                file_dict = self._augment_data(file)
+
+                shutil.move(path, temp_path)
+                np.savez_compressed(path, **file_dict)
+        except:
+            self.restore()
+            raise
+
+    def restore(self):
+        for original_path, temp_path in zip(self.original_paths, self.temp_paths):
+            if os.path.exists(temp_path):
+                shutil.move(temp_path, original_path)
+
+    def _augment_data(self, file):
+        if "x" in file.keys():
+            keys = [("x", "timestamps_x"), ("y", "timestamps_y")]
+        elif "data" in file.keys():
+            keys = [("data", "timestamps")]
+        else:
+            raise ValueError("File in data directory does not have data inside it")
+
+        file_dict = dict(file)
+        for data_key, timestamps_key in keys:
+            old_data = file[data_key]
+            timestamps = file[timestamps_key]
+
+            new_data = self.function(old_data, timestamps)
+            file_dict[data_key] = new_data
+
+        return file_dict

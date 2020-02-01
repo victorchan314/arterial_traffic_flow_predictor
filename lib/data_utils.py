@@ -111,3 +111,12 @@ def pad_array(array, limit, axis=0, filler="zeros"):
         return padded_array
     else:
         return array
+
+def zero_out_detectors(detectors, detector_list):
+    indices = [True if detector in detectors else False for detector in detector_list]
+    def function(data, timestamps):
+        data[..., indices, 1:] = 0
+
+        return data
+
+    return function

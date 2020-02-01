@@ -11,6 +11,7 @@ sys.path.append(parent_dir)
 import numpy as np
 
 from models import models
+from lib import data_utils
 from lib import utils
 
 DATA_CATEGORIES = ["train", "val", "test"]
@@ -35,6 +36,22 @@ def load_data(data_directory, verbose=0):
                 print("{}_{} shape: {}".format(category, "y", npz["y"].shape))
 
     return data
+
+def get_augment_function(data_augment_dict):
+    functions = []
+    if "zero" in data_augment_dict:
+        zero = data_augment_dict["zero"]
+
+        if "detectors" in zero:
+            from scripts.generate_training_data import get_sensors_list
+            detectors = zero["detectors"]
+            detector_list = get_sensors_list(detectors["detector_list"])
+            zero_detector_function = data_utils.zero_out_detectors(detectors["detectors"], detector_list)
+            functions.append(zero_detector_function)
+
+    augment_function = utils.concatenate_functions(functions)
+
+    return augment_function
 
 def load_models(model_names):
     return [getattr(models, model_name) for model_name in model_names]
@@ -104,9 +121,20 @@ def run_config(config, verbose=0):
     data = load_data(data_directory, verbose=verbose)
     model_configs = config["models"]
     model_order = config.get("model_order")
+    data_augment = config.get("data_augment", {})
 
     if model_configs:
-        run_models(data, model_configs, model_order=model_order, verbose=verbose)
+        if data_augment:
+            augment_function = get_augment_function(data_augment)
+            data_augmenter = utils.DataAugmenter(data_directory, augment_function)
+            data_augmenter.copy()
+
+            try:
+                run_models(data, model_configs, model_order=model_order, verbose=verbose)
+            finally:
+                data_augmenter.restore()
+        else:
+            run_models(data, model_configs, model_order=model_order, verbose=verbose)
 
 def run_configs(configs, verbose=0):
     for config in configs:
