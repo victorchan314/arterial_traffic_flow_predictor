@@ -15,7 +15,7 @@ from lib import data_utils, mysql_utils, utils
 PHASE_PLANS_PATH = "data/inputs/model/phase_plans.csv"
 
 DETECTOR_DATA_QUERY = \
-    "SELECT DetectorID, Year, Month, Day, Time, Volume AS Flow, Health\
+    "SELECT DetectorID, Year, Month, Day, Time, Volume AS Flow, Occupancy, Speed, Health\
     FROM detector_data_processed_2017 NATURAL JOIN detector_health\
     WHERE ({}) AND Health = 1;"
 DETECTOR_DATA_FREQUENCY = dt.timedelta(minutes=5)
@@ -55,7 +55,8 @@ def get_sensors_list(path):
 
     return sensors_list
 
-def get_detector_data(detector_list, plan=None, limit=np.inf, date_limit=dt.date.max, start_time_buffer=0, end_time_buffer=0):
+def get_detector_data(detector_list, plan=None, limit=np.inf, date_limit=dt.date.max, features=[],
+                      start_time_buffer=0, end_time_buffer=0):
     query = DETECTOR_DATA_QUERY.format(" OR ".join(["DetectorID = {}".format(d) for d in detector_list]))
     if plan:
         phase_plans = pd.read_csv(PHASE_PLANS_PATH)
@@ -68,7 +69,15 @@ def get_detector_data(detector_list, plan=None, limit=np.inf, date_limit=dt.date
                 interval[0], interval[1]) for interval in buffered_intervals])) + query[-1]
 
     query_results = mysql_utils.execute_query(query)
-    
+
+    columns = ["DetectorID", "Date", "Time", "Seconds"]
+    if "Flow" in features:
+        columns.append("Flow")
+    if "Occupancy" in features:
+        columns.append("Occupancy")
+    if "Speed" in features:
+        columns.append("Speed")
+
     results = []
 
     for row in query_results:
@@ -78,9 +87,23 @@ def get_detector_data(detector_list, plan=None, limit=np.inf, date_limit=dt.date
         row_date = dt.date(row[1], row[2], row[3])
         if row_date <= date_limit:
             row_datetime = dt.datetime(row[1], row[2], row[3], row[4] // 3600, (row[4] % 3600) // 60, row[4] % 60)
-            results.append([row[0], row_date, row_datetime, row[4] / 86400, row[5]])
+            seconds_fraction = row[4] / 86400
+            flow = row[5]
+            occupancy = row[6]
+            speed = row[7]
 
-    detector_data = pd.DataFrame(results, columns=["DetectorID", "Date", "Time", "Seconds", "Flow"])
+            data_row = [row[0], row_date, row_datetime, seconds_fraction]
+
+            if "Flow" in features:
+                data_row.append(flow)
+            if "Occupancy" in features:
+                data_row.append(occupancy)
+            if "Speed" in features:
+                data_row.append(speed)
+
+            results.append(data_row)
+
+    detector_data = pd.DataFrame(results, columns=columns)
 
     return detector_data
 
@@ -320,6 +343,7 @@ def save_timestamps(timestamps, output_path, timeseries=False):
 
 
 def main(args):
+    features = args.features
     x_offset = args.x_offset
     y_offset = args.y_offset
     verbose = args.verbose or 0
@@ -350,7 +374,7 @@ def main(args):
             end_time_buffer = args.end_time_buffer
 
         detector_list = get_sensors_list(detector_list_path)
-        detector_data = get_detector_data(detector_list, plan=plan_name,
+        detector_data = get_detector_data(detector_list, plan=plan_name, features=features,
                                           start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
 
         if split_by_day:
@@ -391,6 +415,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--detector_list_path", "--dl", help="list of sensors to generate data for")
     parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3; or each to loop over all plans")
+    parser.add_argument("--features", "-f", nargs="+", default=["Flow"], help="Flow, occupancy, or speed")
     parser.add_argument("--split_by_day", action="store_true", help="split by day of the week")
     parser.add_argument("--start_time_buffer", type=int, default=0, help="extra time steps before plan starts to include")
     parser.add_argument("--end_time_buffer", type=int, default=0, help="extra time steps after plan ends to include")
