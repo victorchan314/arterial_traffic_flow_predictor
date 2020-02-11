@@ -69,7 +69,7 @@ def populate_inputs(experiment_path, detector_list):
 
     return detector_list_path
 
-def create_training_data(experiment_path, detector_list_path, verbose=0):
+def create_training_data(experiment_path, detector_list_path, override=None, verbose=0):
     processes = []
     for plan in PLANS:
         for offset in OFFSETS:
@@ -77,6 +77,7 @@ def create_training_data(experiment_path, detector_list_path, verbose=0):
             args_dict = {
                 "detector_list_path": detector_list_path,
                 "plan_name": plan,
+                "features": ["Flow"],
                 "start_time_buffer": offset,
                 "x_offset": offset,
                 "y_offset": Y_OFFSET,
@@ -84,6 +85,10 @@ def create_training_data(experiment_path, detector_list_path, verbose=0):
                 "timestamps_dir": sensor_data_dir,
                 "verbose": verbose // 2
             }
+
+            if override:
+                args_dict.update(override)
+
             args = utils.Namespace(args_dict)
 
             # Data for ARIMAX
@@ -103,7 +108,7 @@ def create_training_data(experiment_path, detector_list_path, verbose=0):
     for p in processes:
         p.join()
 
-def copy_dcrnn_configs(experiment_path, detector_list):
+def copy_dcrnn_configs(experiment_path, detector_list, rnn_config_override=None, dcrnn_config_override=None):
     default_config = utils.load_yaml("config/default/dcrnn_config.yaml")
 
     rnn_experiment_path = os.path.join(experiment_path, "experiments", "baselines", "rnn")
@@ -140,6 +145,11 @@ def copy_dcrnn_configs(experiment_path, detector_list):
             dcrnn_config["model"]["filter_type"] = "dual_random_walk"
             dcrnn_config["model"]["max_diffusion_step"] = 2
             dcrnn_config["model"]["use_gc_for_ru"] = True
+
+            if rnn_config_override:
+                rnn_config = utils.update_config_with_dict_override(rnn_config, rnn_config_override)
+            if dcrnn_config_override:
+                dcrnn_config = utils.update_config_with_dict_override(dcrnn_config, dcrnn_config_override)
 
             utils.save_yaml(rnn_config, os.path.join(rnn_base_dir, "{}.yaml".format(subdir)))
             utils.save_yaml(dcrnn_config, os.path.join(dcrnn_base_dir, "{}.yaml".format(subdir)))
@@ -204,12 +214,26 @@ def main(args):
     experiment_name = config["experiment_name"]
     detector_list = list(map(str, config["detector_list"]))
 
+    override = config.get("override", {})
+    generate_training_data_override = override.get("generate_training_data", {})
+    rnn_config_override = override.get("rnn_config", {})
+    dcrnn_config_override = override.get("dcrnn_config", {})
+
+    if "features" in config:
+        features = config["features"]
+        generate_training_data_override["features"] = features
+        rnn_config_override["model/input_dim"] = len(features) + 1
+        rnn_config_override["model/output_dim"] = len(features) + 1
+        dcrnn_config_override["model/input_dim"] = len(features) + 1
+        dcrnn_config_override["model/output_dim"] = len(features) + 1
+
     experiment_dir = create_experiment_structure(base_dir, experiment_name, config_path)
     experiment_path = os.path.join(base_dir, experiment_dir)
 
     detector_list_path = populate_inputs(experiment_path, detector_list)
-    create_training_data(experiment_path, detector_list_path, verbose=verbose)
-    copy_dcrnn_configs(experiment_path, detector_list)
+    create_training_data(experiment_path, detector_list_path, override=generate_training_data_override, verbose=verbose)
+    copy_dcrnn_configs(experiment_path, detector_list,
+                       rnn_config_override=rnn_config_override, dcrnn_config_override=dcrnn_config_override)
     model_runner_config_path = copy_model_runner_config(experiment_path, experiment_name)
 
     run_models(model_runner_config_path, verbose=verbose)

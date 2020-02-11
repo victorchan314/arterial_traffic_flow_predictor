@@ -1,4 +1,5 @@
 import builtins
+import copy
 import functools
 import itertools
 import os
@@ -86,6 +87,19 @@ def run_process_list_sequential(processes):
 def save_yaml(data, path):
     with open(path, "w") as f:
         yaml.dump(data, f, default_flow_style=False)
+
+def update_config_with_dict_override(config, override):
+    config = copy.deepcopy(config)
+
+    for update_key, value in override.items():
+        keys = update_key.split("/")
+        c = config
+        for k in keys[:-1]:
+            c = c[k]
+
+        c[keys[-1]] = value
+
+    return config
 
 def verify_or_create_path(path):
     os.makedirs(path, exist_ok=True)
