@@ -56,7 +56,7 @@ def get_augment_function(data_augment_dict):
 def load_models(model_names):
     return [getattr(models, model_name) for model_name in model_names]
 
-def run_models(data, model_configs, model_order=None, verbose=0):
+def run_models(data, model_configs, model_order=None, overwrite=False, verbose=0):
     train_x = data["train_x"]
     train_y = data["train_y"]
     val_x = data["val_x"]
@@ -90,6 +90,13 @@ def run_models(data, model_configs, model_order=None, verbose=0):
             model_kwargs = [model_configs[model_name]]
 
         for kwargs in model_kwargs:
+            if not overwrite and os.path.exists(kwargs["base_dir"])\
+                    and "predictions.npz" in os.listdir(kwargs["base_dir"]):
+                if verbose:
+                    print("Predictions exist in {}; skipping this model to not overwrite".format(kwargs["base_dir"]))
+
+                continue
+
             model = model_class(train_x, train_y, val_x, val_y, test_x, test_y,
                                 verbose=verbose, **kwargs)
             if verbose:
@@ -122,6 +129,7 @@ def run_config(config, verbose=0):
     model_configs = config["models"]
     model_order = config.get("model_order")
     data_augment = config.get("data_augment", {})
+    overwrite = config.get("overwrite", False)
 
     if model_configs:
         if data_augment:
@@ -130,11 +138,11 @@ def run_config(config, verbose=0):
             data_augmenter.copy()
 
             try:
-                run_models(data, model_configs, model_order=model_order, verbose=verbose)
+                run_models(data, model_configs, model_order=model_order, overwrite=overwrite, verbose=verbose)
             finally:
                 data_augmenter.restore()
         else:
-            run_models(data, model_configs, model_order=model_order, verbose=verbose)
+            run_models(data, model_configs, model_order=model_order, overwrite=overwrite, verbose=verbose)
 
 def run_configs(configs, verbose=0):
     for config in configs:

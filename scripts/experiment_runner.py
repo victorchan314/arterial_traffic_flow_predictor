@@ -208,33 +208,43 @@ def main(args):
     verbose = args.verbose
     config_path = args.config
 
-    config = utils.load_yaml(config_path)
+    if not os.path.isdir(config_path):
+        config = utils.load_yaml(config_path)
 
-    base_dir = config["base_dir"]
-    experiment_name = config["experiment_name"]
-    detector_list = list(map(str, config["detector_list"]))
+        base_dir = config["base_dir"]
+        experiment_name = config["experiment_name"]
+        detector_list = list(map(str, config["detector_list"]))
 
-    override = config.get("override", {})
-    generate_training_data_override = override.get("generate_training_data", {})
-    rnn_config_override = override.get("rnn_config", {})
-    dcrnn_config_override = override.get("dcrnn_config", {})
+        override = config.get("override", {})
+        generate_training_data_override = override.get("generate_training_data", {})
+        rnn_config_override = override.get("rnn_config", {})
+        dcrnn_config_override = override.get("dcrnn_config", {})
 
-    if "features" in config:
-        features = config["features"]
-        generate_training_data_override["features"] = features
-        rnn_config_override["model/input_dim"] = len(features) + 1
-        rnn_config_override["model/output_dim"] = len(features) + 1
-        dcrnn_config_override["model/input_dim"] = len(features) + 1
-        dcrnn_config_override["model/output_dim"] = len(features) + 1
+        if "features" in config:
+            features = config["features"]
+            generate_training_data_override["features"] = features
+            rnn_config_override["model/input_dim"] = len(features) + 1
+            rnn_config_override["model/output_dim"] = len(features) + 1
+            dcrnn_config_override["model/input_dim"] = len(features) + 1
+            dcrnn_config_override["model/output_dim"] = len(features) + 1
 
-    experiment_dir = create_experiment_structure(base_dir, experiment_name, config_path)
-    experiment_path = os.path.join(base_dir, experiment_dir)
+        experiment_dir = create_experiment_structure(base_dir, experiment_name, config_path)
+        experiment_path = os.path.join(base_dir, experiment_dir)
 
-    detector_list_path = populate_inputs(experiment_path, detector_list)
-    create_training_data(experiment_path, detector_list_path, override=generate_training_data_override, verbose=verbose)
-    copy_dcrnn_configs(experiment_path, detector_list,
-                       rnn_config_override=rnn_config_override, dcrnn_config_override=dcrnn_config_override)
-    model_runner_config_path = copy_model_runner_config(experiment_path, experiment_name)
+        detector_list_path = populate_inputs(experiment_path, detector_list)
+        create_training_data(experiment_path, detector_list_path, override=generate_training_data_override, verbose=verbose)
+        copy_dcrnn_configs(experiment_path, detector_list,
+                           rnn_config_override=rnn_config_override, dcrnn_config_override=dcrnn_config_override)
+        model_runner_config_path = copy_model_runner_config(experiment_path, experiment_name)
+    else:
+        experiment_path = config_path
+        inputs_dir = os.path.join(experiment_path, "inputs")
+        model_runner_config_path = os.path.join(inputs_dir, [f for f in os.listdir(inputs_dir)
+                                                             if f.startswith("model_runner_config")][0])
+
+        config = utils.load_yaml(model_runner_config_path)
+        config["overwrite"] = False
+        utils.save_yaml(config, model_runner_config_path)
 
     run_models(model_runner_config_path, verbose=verbose)
 
