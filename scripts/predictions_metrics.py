@@ -51,7 +51,8 @@ def print_errors(logdir, horizons, precision):
 
             print()
 
-def print_errors_latex(logdir, horizons, features, precision, detectors=None, detector_list=None, ts_dir=None, phase_plans=None):
+def print_errors_latex(logdir, horizons, features, precision, detectors=None, detector_list=None,
+                       ts_dir=None, phase_plans=None):
     dirs = sorted(os.listdir(logdir))
 
     error_types = ["mse", "rmse", "mae", "mape"]
@@ -70,10 +71,10 @@ def print_errors_latex(logdir, horizons, features, precision, detectors=None, de
 
         groundtruth, predictions = load_predictions(predictions_path, detectors=detectors, detector_list=detector_list)
 
-        horizon = predictions.shape[0]
-        horizons = range(1, horizon + 1) if horizons is None else sorted([int(h) for h in horizons])
-        num_features = 1 if len(predictions.shape) < 4 else predictions.shape[3]
-        features = range(num_features) if features is None else sorted([int(f) - 1 for f in features])
+        dir_horizon = predictions.shape[0]
+        dir_horizons = range(1, dir_horizon + 1) if horizons is None else sorted([int(h) for h in horizons])
+        dir_num_features = 1 if len(predictions.shape) < 4 else predictions.shape[3]
+        dir_features = range(dir_num_features) if features is None else sorted([int(f) - 1 for f in features])
         batch_size = predictions.shape[1]
 
         if not ts_dir is None:
@@ -99,10 +100,11 @@ def print_errors_latex(logdir, horizons, features, precision, detectors=None, de
 
         for plan in plans:
             if not plan in errors:
-                errors[plan] = {f: {} for f in features}
+                errors[plan] = {f: {} for f in dir_features}
 
-            for feature in features:
-                errors[plan][feature] = {e: {} for e in error_types}
+            for feature in errors[plan]:
+                if not errors[plan][feature]:
+                    errors[plan][feature] = {e: {} for e in error_types}
 
                 for v in errors[plan][feature].values():
                     if not offset in v:
@@ -112,8 +114,8 @@ def print_errors_latex(logdir, horizons, features, precision, detectors=None, de
             groundtruth = all_groundtruths[plan]
             predictions = all_predictions[plan]
 
-            for f in features:
-                for h in horizons:
+            for f in dir_features:
+                for h in dir_horizons:
                     prediction_errors = data_utils.get_standard_errors(groundtruth[h-1, :, :, f], predictions[h-1, :, :, f])
 
                     for k, v in prediction_errors.items():
