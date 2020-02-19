@@ -190,7 +190,7 @@ class SARIMAX(Model):
                     model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
                     results = model.fit(disp=self.verbose // 4, maxiter=200)
                     warnings.filterwarnings("error")
-                except np.linalg.linalg.LinAlgError:
+                except (np.linalg.LinAlgError, np.linalg.linalg.LinAlgError):
                     if self.verbose > 1:
                         print("Model for data at index {} produced non-positive-definite covariance matrix, simple_differencing set to True".format(i))
 
