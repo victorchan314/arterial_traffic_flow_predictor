@@ -186,11 +186,11 @@ class SARIMAX(Model):
                     if self.verbose > 1:
                         print("Model for data at index {} did not converge".format(i))
 
-                    warnings.filterwarnings("default")
+                    warnings.filterwarnings("ignore")
                     model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
                     results = model.fit(disp=self.verbose // 4, maxiter=200)
                     warnings.filterwarnings("error")
-                except (np.linalg.LinAlgError, np.linalg.linalg.LinAlgError):
+                except np.linalg.linalg.LinAlgError:
                     if self.verbose > 1:
                         print("Model for data at index {} produced non-positive-definite covariance matrix, simple_differencing set to True".format(i))
 
@@ -198,9 +198,13 @@ class SARIMAX(Model):
                                     simple_differencing=True)
                     results = model.fit(disp=self.verbose // 4)
                 except Warning:
-                    warnings.filterwarnings("default")
-                    model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
-                    results = model.fit(disp=self.verbose // 4)
+                    warnings.filterwarnings("ignore")
+                    try:
+                        model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order, enforce_stationarity=False)
+                        results = model.fit(disp=self.verbose // 4)
+                    except np.linalg.linalg.LinAlgError:
+                        model = sarimax(x[i, :] + np.random.randn(*x[i, :].shape), exog=exog_x, order=order, seasonal_order=seasonal_order)
+
                     warnings.filterwarnings("error")
 
             predictions[i, :] = results.forecast(horizon, exog=exog_y)
