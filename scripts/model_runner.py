@@ -56,7 +56,7 @@ def get_augment_function(data_augment_dict):
 def load_models(model_names):
     return [getattr(models, model_name) for model_name in model_names]
 
-def run_models(data, model_configs, model_order=None, overwrite=False, verbose=0):
+def run_models(data, model_configs, model_order=None, overwrite=False, debug=False, verbose=0):
     train_x = data["train_x"]
     train_y = data["train_y"]
     val_x = data["val_x"]
@@ -92,9 +92,12 @@ def run_models(data, model_configs, model_order=None, overwrite=False, verbose=0
         for kwargs in model_kwargs:
             if not overwrite and os.path.exists(kwargs["base_dir"])\
                     and "predictions.npz" in os.listdir(kwargs["base_dir"]):
-                if verbose:
+                if verbose > 1:
                     print("Predictions exist in {}; skipping this model to not overwrite".format(kwargs["base_dir"]))
 
+                continue
+            elif debug:
+                print("Debug: running model at base_dir {}".format(kwargs["base_dir"]))
                 continue
 
             model = model_class(train_x, train_y, val_x, val_y, test_x, test_y,
@@ -102,7 +105,12 @@ def run_models(data, model_configs, model_order=None, overwrite=False, verbose=0
             if verbose:
                 print("Created {} model".format(model_name))
 
-            model.train()
+            try:
+                model.train()
+            except Exception as e:
+                model.close()
+                print(e)
+                continue
 
             if verbose:
                 print("Trained {} model".format(model_name))
@@ -123,7 +131,7 @@ def run_models(data, model_configs, model_order=None, overwrite=False, verbose=0
 
             model.close()
 
-def run_config(config, verbose=0):
+def run_config(config, debug=False, verbose=0):
     data_directory = config["data_directory"]
     data = load_data(data_directory, verbose=verbose)
     model_configs = config["models"]
@@ -138,17 +146,17 @@ def run_config(config, verbose=0):
             data_augmenter.copy()
 
             try:
-                run_models(data, model_configs, model_order=model_order, overwrite=overwrite, verbose=verbose)
+                run_models(data, model_configs, model_order=model_order, overwrite=overwrite, debug=debug, verbose=verbose)
             finally:
                 data_augmenter.restore()
         else:
-            run_models(data, model_configs, model_order=model_order, overwrite=overwrite, verbose=verbose)
+            run_models(data, model_configs, model_order=model_order, overwrite=overwrite, debug=debug, verbose=verbose)
 
-def run_configs(configs, verbose=0):
+def run_configs(configs, debug=False, verbose=0):
     for config in configs:
-        run_config(config, verbose=verbose)
+        run_config(config, debug=debug, verbose=verbose)
 
-def loop_config(config, verbose=0):
+def loop_config(config, debug=False, verbose=0):
     loop = config["loop"]
     values = loop["values"]
     keys = loop["keys"]
@@ -206,7 +214,7 @@ def loop_config(config, verbose=0):
     if is_parallel:
         processes = []
         for itr_configs in configs.values():
-            p = Process(target=run_configs, args=(itr_configs,), kwargs={"verbose": verbose})
+            p = Process(target=run_configs, args=(itr_configs,), kwargs={"debug": debug, "verbose": verbose})
             processes.append(p)
 
         utils.run_process_list_parallel(processes)
@@ -216,15 +224,17 @@ def loop_config(config, verbose=0):
 def main(args):
     verbose = args.verbose
     config = utils.load_yaml(args.config)
+    debug = args.debug
 
     if "loop" in config.keys():
-        loop_config(config, verbose=verbose)
+        loop_config(config, debug=debug, verbose=verbose)
     else:
-        run_config(config, verbose=verbose)
+        run_config(config, debug=debug, verbose=verbose)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("config", help="config file to specify data and model")
+    parser.add_argument("-d", "--debug", action="store_true", help="Execute model runner without running models")
     parser.add_argument("-v", "--verbose", action="count", default=0, help="verbosity")
     args = parser.parse_args()
 

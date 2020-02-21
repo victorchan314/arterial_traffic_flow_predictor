@@ -193,9 +193,10 @@ def copy_model_runner_config(experiment_path, experiment_name):
 
     return model_runner_config_path
 
-def run_models(model_runner_config_path, verbose=0):
+def run_models(model_runner_config_path, debug=False, verbose=0):
     args_dict = {
         "config": model_runner_config_path,
+        "debug": debug,
         "verbose": verbose
     }
     args = utils.Namespace(args_dict)
@@ -207,6 +208,7 @@ def run_models(model_runner_config_path, verbose=0):
 def main(args):
     verbose = args.verbose
     config_path = args.config
+    debug = args.debug
 
     if not os.path.isdir(config_path):
         config = utils.load_yaml(config_path)
@@ -246,11 +248,12 @@ def main(args):
         config["overwrite"] = False
         utils.save_yaml(config, model_runner_config_path)
 
-    run_models(model_runner_config_path, verbose=verbose)
+    run_models(model_runner_config_path, debug=debug, verbose=verbose)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("config", help="config file to specify detector list and parameters")
+    parser.add_argument("-d", "--debug", action="store_true", help="Execute experiment runner without running models")
     parser.add_argument("-v", "--verbose", action="count", default=0, help="verbosity")
     args = parser.parse_args()
 
