@@ -14,7 +14,7 @@ from lib import utils
 class SARIMAX(Model):
     """Model that uses SARIMAX to predict future values of training data per sensor"""
     def __init__(self, *args, order=(1, 0, 0), seasonal_order=(0, 0, 0, 0), use_exog=True, online=False,
-                 is_trained=False, base_dir=None, train_file=None, ts_dir=None, num_fourier_terms=1,
+                 is_trained=False, base_dir=None, train_file=None, ts_dir=None, num_fit_tries=100, num_fourier_terms=1,
                  calculate_train_error=False, calculate_val_error=False, verbose=0, **kwargs):
         super(SARIMAX, self).__init__(*args, **kwargs)
         self.order = order
@@ -22,6 +22,7 @@ class SARIMAX(Model):
         self.use_exog = use_exog
         self.online = online
         self._is_trained = is_trained
+        self.num_fit_tries = num_fit_tries
         self.calculate_train_error = calculate_train_error
         self.calculate_val_error = calculate_val_error
         self.verbose = verbose
@@ -66,6 +67,8 @@ class SARIMAX(Model):
             self.params_pkl_file = None
         else:
             self.params_pkl_file = os.path.join(base_dir, "params.pkl")
+            if verbose:
+                print("Created SARIMAX model for {}".format(base_dir))
 
     def train(self):
         self._train()
@@ -180,30 +183,40 @@ class SARIMAX(Model):
                 results = model.smooth(params)
             else:
                 try:
-                    model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
-                    results = model.fit(disp=self.verbose // 4)
-                except ConvergenceWarning:
-                    if self.verbose > 1:
-                        print("Model for data at index {} did not converge".format(i))
+                    try:
+                        model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
+                        results = model.fit(disp=self.verbose // 4)
+                    except ConvergenceWarning:
+                        try:
+                            if self.verbose > 1:
+                                print("Model for data at index {} did not converge".format(i))
 
-                    warnings.filterwarnings("ignore")
-                    model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
-                    results = model.fit(disp=self.verbose // 4, maxiter=200)
-                    warnings.filterwarnings("error")
-                except np.linalg.linalg.LinAlgError:
-                    if self.verbose > 1:
-                        print("Model for data at index {} produced non-positive-definite covariance matrix, simple_differencing set to True".format(i))
+                            warnings.filterwarnings("ignore")
+                            model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order)
+                            results = model.fit(disp=self.verbose // 4, maxiter=200)
+                            warnings.filterwarnings("error")
+                        except np.linalg.linalg.LinAlgError:
+                            if self.verbose > 1:
+                                print("Model for data at index {} produced non-positive-definite covariance matrix, simple_differencing set to True".format(i))
 
-                    model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order,
-                                    simple_differencing=True)
-                    results = model.fit(disp=self.verbose // 4)
-                except Warning:
+                            model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order,
+                                            simple_differencing=True)
+                            results = model.fit(disp=self.verbose // 4)
+                except (Warning, Exception):
                     warnings.filterwarnings("ignore")
                     try:
                         model = sarimax(x[i, :], exog=exog_x, order=order, seasonal_order=seasonal_order, enforce_stationarity=False)
                         results = model.fit(disp=self.verbose // 4)
-                    except np.linalg.linalg.LinAlgError:
-                        model = sarimax(x[i, :] + np.random.randn(*x[i, :].shape), exog=exog_x, order=order, seasonal_order=seasonal_order)
+                    except Exception:
+                        x_perturbed = x[i, :]
+                        for j in range(self.num_fit_tries):
+                            x_perturbed += np.random.randn(*x_perturbed.shape)
+                            try:
+                                model = sarimax(x_perturbed, exog=exog_x, order=order, seasonal_order=seasonal_order)
+                            except Exception:
+                                continue
+
+                            break
 
                     warnings.filterwarnings("error")
 
