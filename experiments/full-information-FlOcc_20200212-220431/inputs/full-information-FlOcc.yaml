@@ -1,0 +1,4 @@
+base_dir: experiments
+experiment_name: full-information-FlOcc
+detector_list: [508302, 508306, 508205, 507202, 507206, 509101, 509105, 608101, 608105, 608107, 608104]
+features: ["Flow", "Occupancy"]
