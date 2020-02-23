@@ -95,6 +95,9 @@ def update_config_with_dict_override(config, override):
         keys = update_key.split("/")
         c = config
         for k in keys[:-1]:
+            if not k in c:
+                c[k] = {}
+
             c = c[k]
 
         c[keys[-1]] = value

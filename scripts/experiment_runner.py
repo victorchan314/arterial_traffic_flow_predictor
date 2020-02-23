@@ -154,7 +154,15 @@ def copy_dcrnn_configs(experiment_path, detector_list, rnn_config_override=None,
             utils.save_yaml(rnn_config, os.path.join(rnn_base_dir, "{}.yaml".format(subdir)))
             utils.save_yaml(dcrnn_config, os.path.join(dcrnn_base_dir, "{}.yaml".format(subdir)))
 
-def copy_model_runner_config(experiment_path, experiment_name):
+def update_model_runner_override(override, detector_list_path=None):
+    override = copy.deepcopy(override)
+    for k in override:
+        if override[k] == "detector_list_path":
+            override[k] = detector_list_path
+
+    return override
+
+def copy_model_runner_config(experiment_path, experiment_name, override=None):
     default_config = utils.load_yaml("config/default/model_runner_config.yaml")
     config = copy.deepcopy(default_config)
 
@@ -186,6 +194,9 @@ def copy_model_runner_config(experiment_path, experiment_name):
     online_sarimax_config["base_dir"] = os.path.join(baselines_base_dir, "online_arimax", subdir_template)
     online_sarimax_config["train_file"] = os.path.join(sensor_data_path, ts_sensor_data_subdir, "train_ts.npz")
     online_sarimax_config["ts_dir"] = sensor_data_template
+
+    if override:
+        config = utils.update_config_with_dict_override(config, override)
 
     model_runner_config_path = os.path.join(experiment_path, "inputs",
                                             "model_runner_config_{}.yaml".format(experiment_name))
@@ -221,6 +232,7 @@ def main(args):
         generate_training_data_override = override.get("generate_training_data", {})
         rnn_config_override = override.get("rnn_config", {})
         dcrnn_config_override = override.get("dcrnn_config", {})
+        model_runner_override = override.get("model_runner", {})
 
         if "features" in config:
             features = config["features"]
@@ -237,7 +249,10 @@ def main(args):
         create_training_data(experiment_path, detector_list_path, override=generate_training_data_override, verbose=verbose)
         copy_dcrnn_configs(experiment_path, detector_list,
                            rnn_config_override=rnn_config_override, dcrnn_config_override=dcrnn_config_override)
-        model_runner_config_path = copy_model_runner_config(experiment_path, experiment_name)
+
+        model_runner_override = update_model_runner_override(model_runner_override, detector_list_path=detector_list_path)
+        model_runner_config_path = copy_model_runner_config(experiment_path, experiment_name,
+                                                            override=model_runner_override)
     else:
         experiment_path = config_path
         inputs_dir = os.path.join(experiment_path, "inputs")
