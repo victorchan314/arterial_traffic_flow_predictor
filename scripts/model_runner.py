@@ -48,6 +48,11 @@ def get_augment_function(data_augment_dict):
             detector_list = get_sensors_list(detectors["detector_list"])
             zero_detector_function = data_utils.zero_out_detectors(detectors["detectors"], detector_list)
             functions.append(zero_detector_function)
+        if "days" in zero:
+            proportion = zero["days"]["proportion"]
+            seed = zero["days"].get("seed", 1)
+            zero_days_function = data_utils.zero_out_days(proportion, seed)
+            functions.append(zero_days_function)
 
     augment_function = utils.concatenate_functions(functions)
 

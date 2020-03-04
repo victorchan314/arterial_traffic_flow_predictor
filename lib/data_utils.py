@@ -120,3 +120,20 @@ def zero_out_detectors(detectors, detector_list):
         return data
 
     return function
+
+def zero_out_days(proportion, seed):
+    def function(data, timestamps):
+        timestamps_shape = timestamps.shape
+        dates = pd.to_datetime(timestamps.flatten()).date.reshape(timestamps_shape)
+        unique_dates = np.unique(dates)
+
+        random_state = np.random.get_state()
+        np.random.seed(seed)
+        zero_dates = np.random.choice(unique_dates, size=(int(proportion * len(unique_dates)),), replace=False)
+        np.random.set_state(random_state)
+
+        data[np.isin(dates, zero_dates), ..., 1:] = 0
+
+        return data
+
+    return function
