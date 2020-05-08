@@ -38,7 +38,7 @@ class DCRNN(Model):
             self.output_filename = output_filename
             self.tee = Tee(self.output_filename)
 
-        self. supervisor_config = utils.load_yaml(self.config_filename)
+        self.supervisor_config = utils.load_yaml(self.config_filename)
 
         graph_pkl_filename = self.supervisor_config['data'].get('graph_pkl_filename', None)
         if graph_pkl_filename is None:

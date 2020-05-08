@@ -77,6 +77,7 @@ def main(args):
         "round": precision,
         "do_not_print": True,
         "not_latex": False,
+        "features": None,
         "no_plan_ts_dir": None,
         "phase_plans_csv": None
     }
