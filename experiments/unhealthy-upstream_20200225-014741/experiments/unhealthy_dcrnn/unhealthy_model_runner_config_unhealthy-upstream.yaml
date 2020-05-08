@@ -1,0 +1,32 @@
+data_augment:
+  zero:
+    detectors:
+      detector_list: experiments/unhealthy-upstream_20200225-014741/inputs/model/detector_list.txt
+      detectors:
+      - 608107
+      - 608104
+      - 608101
+      - 608105
+data_directory: experiments/unhealthy-upstream_20200225-014741/inputs/sensor_data/${plan}_o${offset}_h6_sb${offset}_sensor_data
+loop:
+  keys:
+  - data_directory
+  - models/DCRNN/base_dir
+  parallel:
+  - plan
+  values:
+    offset:
+    - 3
+    - 6
+    - 12
+    - 24
+    plan:
+    - P1
+    - P2
+    - P3
+models:
+  DCRNN:
+    base_dir: experiments/unhealthy-upstream_20200225-014741/experiments/unhealthy_dcrnn/${plan}_o${offset}_h6_sb${offset}
+    calculate_train_and_val_errors: false
+    is_trained: true
+overwrite: false
