@@ -49,10 +49,10 @@ def get_subdir(plan_name, x_offset, y_offset, intersection=None, start_time_buff
 def get_type_by_name(type_name):
     return getattr(builtins, type_name)
 
-def load_predictions(path):
+def load_predictions(path, predictions_key="predictions", groundtruth_key="groundtruth"):
     predictions_file = np.load(path)
-    groundtruth = predictions_file["groundtruth"]
-    predictions = predictions_file["predictions"]
+    groundtruth = predictions_file[groundtruth_key]
+    predictions = predictions_file[predictions_key]
 
     return groundtruth, predictions
 

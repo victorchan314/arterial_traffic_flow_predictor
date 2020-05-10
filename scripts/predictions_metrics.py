@@ -18,8 +18,8 @@ PREDICTIONS_FILENAME = "predictions.npz"
 
 
 
-def load_predictions(predictions_path, detectors=None, detector_list=None):
-    groundtruth, predictions = utils.load_predictions(predictions_path)
+def load_predictions(predictions_path, detectors=None, detector_list=None, predictions_key="predictions", groundtruth_key="groundtruth"):
+    groundtruth, predictions = utils.load_predictions(predictions_path, predictions_key=predictions_key, groundtruth_key=groundtruth_key)
 
     if not detectors is None:
         detectors_mask = [True if detector in detectors else False for detector in detector_list]
@@ -52,7 +52,7 @@ def print_errors(logdir, horizons, precision):
             print()
 
 def print_errors_latex(logdir, horizons, features, precision, detectors=None, detector_list=None,
-                       ts_dir=None, phase_plans=None):
+                       ts_dir=None, phase_plans=None, gfsd=False):
     dirs = sorted(os.listdir(logdir))
 
     error_types = ["mse", "rmse", "mae", "mape"]
@@ -70,6 +70,12 @@ def print_errors_latex(logdir, horizons, features, precision, detectors=None, de
         offset = int(offset_matches[0][2:-1])
 
         groundtruth, predictions = load_predictions(predictions_path, detectors=detectors, detector_list=detector_list)
+        if gfsd:
+            experiment_dir = os.sep.join(os.path.normpath(logdir).split(os.sep)[:-2])
+            sensor_data_path = os.path.join(experiment_dir, "inputs", "sensor_data", "{}_sensor_data".format(dir), "test.npz")
+            sensor_groundtruth, _ = load_predictions(sensor_data_path, detectors=detectors, detector_list=detector_list,
+                                                     predictions_key="y", groundtruth_key="y")
+            groundtruth = np.transpose(sensor_groundtruth[..., 1:], axes=(1, 0, 2, 3))
 
         dir_horizon = predictions.shape[0]
         dir_horizons = range(1, dir_horizon + 1) if horizons is None else sorted([int(h) for h in horizons])
@@ -178,6 +184,7 @@ def main(args):
     detector_list_path = args.detector_list_path
     horizons = args.horizons
     features = args.features
+    groundtruth_from_sensor_data = args.groundtruth_from_sensor_data
     not_latex = args.not_latex
     precision = args.round
     ts_dir = args.no_plan_ts_dir
@@ -205,7 +212,8 @@ def main(args):
             print(output)
     else:
         return print_errors_latex(logdir, horizons, features, precision, detectors=detectors,
-                                  detector_list=detector_list, ts_dir=ts_dir, phase_plans=phase_plans)
+                                  detector_list=detector_list, ts_dir=ts_dir, phase_plans=phase_plans,
+                                  gfsd=groundtruth_from_sensor_data)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -214,6 +222,7 @@ if __name__ == "__main__":
     parser.add_argument("--detector_list_path", "--dl", type=str, help="Order of detectors in predictions")
     parser.add_argument("--horizons", "--h", nargs="+", help="Horizon(s) to include")
     parser.add_argument("--features", "--f", nargs="+", help="Feature(s) to include")
+    parser.add_argument("--groundtruth_from_sensor_data", "-g", action="store_true", help="Use groundtruth from sensor_data and not predictions")
     parser.add_argument("--not_latex", "-l", action="store_true", help="Don't print for LaTeX table")
     parser.add_argument("--round", "-r", type=int, default=2, help="Rounding precision")
     parser.add_argument("--do_not_print", action="store_true", help="Flag to suppress printing")
