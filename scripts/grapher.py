@@ -12,24 +12,41 @@ from matplotlib.lines import Line2D
 import seaborn as sns
 import pandas as pd
 
-from lib import data_utils
-from lib import utils
 from scripts.generate_training_data import get_detector_data
 
 
+sns_colors = sns.color_palette("colorblind")
+cycle = [sns_colors[i] for i in [2, 9, 6, 4, 8, 0, 3, 1, 7, 5]]
+mpl.rcParams["axes.prop_cycle"] = mpl.cycler(color=cycle)
+colors = cycle
+
+
+def get_one_detector_data(detector):
+    data_P1 = get_detector_data([detector], plan="P1", features=["Flow", "Occupancy", "Speed"])
+    data_P2 = get_detector_data([detector], plan="P2", features=["Flow", "Occupancy", "Speed"])
+    data_P3 = get_detector_data([detector], plan="P3", features=["Flow", "Occupancy", "Speed"])
+
+    return data_P1, data_P2, data_P3
 
 def plot_data_over_time(ax, x, y, title=None, xlabel="Date", ylabel=None, color=None):
     ax.set_title(title)
     ax.set(xlabel=xlabel, ylabel=ylabel)
     ax.plot(x, y, c=color)
 
-def plot_fundamental_diagram_color_by_plan(flow_P1, flow_P2, flow_P3, occupancy_P1, occupancy_P2, occupancy_P3,
-                                           title=None):
+def plot_fundamental_diagram_color_by_plan(detector_id):
+    data_P1, data_P2, data_P3 = get_one_detector_data(detector_id)
+    flow_P1 = data_P1["Flow"]
+    flow_P2 = data_P2["Flow"]
+    flow_P3 = data_P3["Flow"]
+    occupancy_P1 = data_P1["Occupancy"] / 36
+    occupancy_P2 = data_P2["Occupancy"] / 36
+    occupancy_P3 = data_P3["Occupancy"] / 36
+
     sns.scatterplot(occupancy_P2, flow_P2, linewidth=0, s=10, label="Morning peak")
     sns.scatterplot(occupancy_P1, flow_P1, linewidth=0, s=10, label="Off peak")
     sns.scatterplot(occupancy_P3, flow_P3, linewidth=0, s=10, label="Evening peak")
 
-    plt.title(title)
+    plt.title("Detector {} Fundamental Diagram".format(detector_id))
     plt.xlabel("Occupancy (%)")
     plt.ylabel("Flow (vph)")
     plt.xlim(0, 100)
@@ -37,22 +54,22 @@ def plot_fundamental_diagram_color_by_plan(flow_P1, flow_P2, flow_P3, occupancy_
     plt.legend()
     plt.show()
 
+def graph_detector_data_time_series(detector_id, xticks_datetime_precision="D", num_xticks=12):
+    data_P1, data_P2, data_P3 = get_one_detector_data(detector_id)
 
-def graph1(data_508302_P1, data_508302_P2, data_508302_P3, colors,
-           xticks_datetime_precision="D", num_xticks=12):
-    data_508302_P1 = data_508302_P1[data_508302_P1["Time"].dt.month == 8]
-    data_508302_P2 = data_508302_P2[data_508302_P2["Time"].dt.month == 8]
-    data_508302_P3 = data_508302_P3[data_508302_P3["Time"].dt.month == 8]
+    data_P1 = data_P1[data_P1["Time"].dt.month == 8]
+    data_P2 = data_P2[data_P2["Time"].dt.month == 8]
+    data_P3 = data_P3[data_P3["Time"].dt.month == 8]
 
     fig, axes = plt.subplots(2, 1, figsize=(12, 6))
     fig.autofmt_xdate()
-    fig.suptitle("Detector 508302 Data in the Month of August")
+    fig.suptitle("Detector {} Data in the Month of August".format(detector_id))
     features = ["Flow", "Occupancy"]
     ylabels = ["Flow (vph)", "Occupancy (%)"]
     scales = [1, 36]
 
     for ax, feature, ylabel, scale in zip(axes, features, ylabels, scales):
-        full_data = pd.concat((data_508302_P1, data_508302_P2, data_508302_P3), ignore_index=True)
+        full_data = pd.concat((data_P1, data_P2, data_P3), ignore_index=True)
         full_data.sort_values("Time", inplace=True)
 
         x = full_data["Time"]
@@ -84,7 +101,7 @@ def graph1(data_508302_P1, data_508302_P2, data_508302_P3, colors,
         ax.set_xticks(xticks_locs)
         ax.set_xticklabels(xticks_spaced_labels)
 
-        legend_elements = [Line2D([0], [0], color=colors[0], label="Morrning peak"),
+        legend_elements = [Line2D([0], [0], color=colors[0], label="Morning peak"),
                            Line2D([0], [0], color=colors[1], label="Evening peak"),
                            Line2D([0], [0], color=colors[2], label="Off peak")]
         box = ax.get_position()
@@ -97,34 +114,13 @@ def graph1(data_508302_P1, data_508302_P2, data_508302_P3, colors,
 def main(args):
     graph = args.graph
 
-    data_508302_P1 = get_detector_data([508302], plan="P1", features=["Flow", "Occupancy", "Speed"])
-    data_508302_P2 = get_detector_data([508302], plan="P2", features=["Flow", "Occupancy", "Speed"])
-    data_508302_P3 = get_detector_data([508302], plan="P3", features=["Flow", "Occupancy", "Speed"])
-    data_508306_P1 = get_detector_data([508306], plan="P1", features=["Flow", "Occupancy", "Speed"])
-    data_508306_P2 = get_detector_data([508306], plan="P2", features=["Flow", "Occupancy", "Speed"])
-    data_508306_P3 = get_detector_data([508306], plan="P3", features=["Flow", "Occupancy", "Speed"])
-
-    sns_colors = sns.color_palette("colorblind")
-    cycle = [sns_colors[i] for i in [2, 9, 6, 4, 8, 0, 3, 1, 7, 5]]
-    mpl.rcParams["axes.prop_cycle"] = mpl.cycler(color=cycle)
-
     if graph == 1:
-        graph1(data_508302_P1, data_508302_P2, data_508302_P3, cycle)
+        graph_detector_data_time_series(508302)
     elif graph == 2:
-        plot_fundamental_diagram_color_by_plan(data_508302_P1["Flow"],
-                                               data_508302_P2["Flow"],
-                                               data_508302_P3["Flow"],
-                                               data_508302_P1["Occupancy"] / 36,
-                                               data_508302_P2["Occupancy"] / 36,
-                                               data_508302_P3["Occupancy"] / 36,
-                                               title="Detector 508302 Fundamental Diagram")
-        plot_fundamental_diagram_color_by_plan(data_508306_P1["Flow"],
-                                               data_508306_P2["Flow"],
-                                               data_508306_P3["Flow"],
-                                               data_508306_P1["Occupancy"] / 36,
-                                               data_508306_P2["Occupancy"] / 36,
-                                               data_508306_P3["Occupancy"] / 36,
-                                               title="Detector 508306 Fundamental Diagram")
+        plot_fundamental_diagram_color_by_plan(508302)
+        plot_fundamental_diagram_color_by_plan(508306)
+    elif graph == 3:
+        graph_detector_data_time_series(608107)
     else:
         raise ValueError("Invalid graph ID")
 
