@@ -184,6 +184,47 @@ def graph_predictions(y, y_hat, x, x_array, sensor, step=4, title=None, num_xtic
 
     plt.show()
 
+def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title=None, num_xticks=12, xticks_datetime_precision="D"):
+    plt.figure(figsize=(16, 5))
+    plt.title(title)
+
+    xticks = np.arange(x.shape[0])
+    xticks_labels = np.datetime_as_string(x, unit=xticks_datetime_precision)
+    xticks_locs = [xticks[x.shape[0] // num_xticks * i] for i in range(num_xticks)] + [xticks[-1]]
+    xticks_spaced_labels = [xticks_labels[x.shape[0] // num_xticks * i] for i in range(num_xticks)] + [xticks_labels[-1]]
+
+    plt.xlabel("Time")
+    plt.ylabel("Flow (vph)")
+    plt.xticks(xticks_locs, xticks_spaced_labels)
+
+    plt.plot(xticks, y[:, sensor], label="Ground Truth")
+
+    reordered_colors =[6, 5, 2]
+
+    #for i, h in enumerate([1, 3, 6]):
+    h = 6
+    for i, (y_hat, model_name) in enumerate(zip(y_hats, ["DCRNN", "GRU", "ARIMAX"])):
+        stretches = data_utils.get_stretches(x_array[:, h - 1], DETECTOR_DATA_FREQUENCY)
+        color = colors[reordered_colors[i]]
+        #color = colors[i + 1]
+
+        for start, end in stretches:
+            x_stretch = x_array[start:end, h - 1]
+            y_hat_stretch = y_hat[h - 1, start:end, sensor]
+            x_stretch_range = fit_dates_to_timestamps(x, x_stretch, xticks)
+
+            if start == 0:
+                label = "{}".format(model_name)
+            else:
+                label = None
+
+            plt.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.7)
+
+    plt.legend()
+    plt.xlim(xticks.shape[0] * 4 / 7 - 13, xticks.shape[0])
+
+    plt.show()
+
 def graph4():
     logdirs = [x for x in os.listdir("experiments") if x.startswith("full-information_")]
     if len(logdirs) > 1:
@@ -204,7 +245,37 @@ def graph4():
     sensor = sensors[detector]
 
     graph_predictions(groundtruth, predictions, timestamps, timestamps_array, sensor=sensor,
-                      title="Detector {} Full Information Test Predictions".format(detector))
+                      title="Detector {} Full Information DCRNN Test Predictions".format(detector))
+
+def graph5():
+    logdirs = [x for x in os.listdir("experiments") if x.startswith("full-information_")]
+    if len(logdirs) > 1:
+        raise ValueError("More than 1 full-information logdir: {}".format(logdirs))
+
+    dcrnn_predictions_path = os.path.join("experiments", logdirs[0], "experiments", "dcrnn", "P2_o12_h6_sb12", "predictions.npz")
+    gru_predictions_path = os.path.join("experiments", logdirs[0], "experiments", "baselines", "rnn", "P2_o12_h6_sb12", "predictions.npz")
+    arimax_predictions_path = os.path.join("experiments", logdirs[0], "experiments", "baselines", "arimax", "P2_o12_h6_sb12", "predictions.npz")
+    timestamps_path = os.path.join("experiments", logdirs[0], "inputs", "sensor_data", "P2_o12_h6_sb12_sensor_data", "test.npz")
+
+    groundtruth, dcrnn_predictions = utils.load_predictions(dcrnn_predictions_path)
+    _, gru_predictions = utils.load_predictions(gru_predictions_path)
+    _, arimax_predictions = utils.load_predictions(arimax_predictions_path)
+
+    groundtruth = groundtruth[..., 0]
+    dcrnn_predictions = dcrnn_predictions[..., 0]
+    gru_predictions = gru_predictions[..., 0]
+
+    timestamps_array = np.load(timestamps_path)["timestamps_y"]
+    timestamps, groundtruth = extract_flat_data(timestamps_array, groundtruth)
+
+    sensors = {508302: 0, 508306: 1}
+    detector = 508306
+    sensor = sensors[detector]
+
+    graph_predictions_and_baselines(groundtruth, timestamps, timestamps_array,
+                                    [dcrnn_predictions, gru_predictions, arimax_predictions],
+                                    sensor=sensor,
+                                    title="Detector {} Full Information Test Predictions".format(detector))
 
 
 def main(args):
@@ -219,6 +290,8 @@ def main(args):
         graph_detector_data_time_series(608107)
     elif graph == 4:
         graph4()
+    elif graph == 5:
+        graph5()
     else:
         raise ValueError("Invalid graph ID")
 
