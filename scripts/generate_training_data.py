@@ -56,7 +56,7 @@ def get_sensors_list(path):
     return sensors_list
 
 def get_detector_data(detector_list, plan=None, limit=np.inf, date_limit=dt.date.max, features=[],
-                      start_time_buffer=0, end_time_buffer=0):
+                      weekday_only=False, start_time_buffer=0, end_time_buffer=0):
     query = DETECTOR_DATA_QUERY.format(" OR ".join(["DetectorID = {}".format(d) for d in detector_list]))
     if plan:
         phase_plans = pd.read_csv(PHASE_PLANS_PATH)
@@ -85,7 +85,7 @@ def get_detector_data(detector_list, plan=None, limit=np.inf, date_limit=dt.date
             break
 
         row_date = dt.date(row[1], row[2], row[3])
-        if row_date <= date_limit:
+        if row_date <= date_limit and (not weekday_only or row_date.weekday() < 5):
             row_datetime = dt.datetime(row[1], row[2], row[3], row[4] // 3600, (row[4] % 3600) // 60, row[4] % 60)
             seconds_fraction = row[4] / 86400
             flow = row[5]
@@ -362,6 +362,7 @@ def main(args):
         detector_list_path = args.detector_list_path
         plan_name = args.plan_name
         split_by_day = args.split_by_day
+        weekday_only = args.weekday_only
 
         is_timeseries = args.timeseries
 
@@ -374,7 +375,7 @@ def main(args):
             end_time_buffer = args.end_time_buffer
 
         detector_list = get_sensors_list(detector_list_path)
-        detector_data = get_detector_data(detector_list, plan=plan_name, features=features,
+        detector_data = get_detector_data(detector_list, plan=plan_name, features=features, weekday_only=weekday_only,
                                           start_time_buffer=start_time_buffer, end_time_buffer=end_time_buffer)
 
         if split_by_day:
@@ -417,6 +418,7 @@ if __name__ == "__main__":
     parser.add_argument("--plan_name", help="name of plan: E, P1, P2, or P3; or each to loop over all plans")
     parser.add_argument("--features", "-f", nargs="+", default=["Flow"], help="Flow, occupancy, or speed")
     parser.add_argument("--split_by_day", action="store_true", help="split by day of the week")
+    parser.add_argument("--weekday_only", action="store_true", help="remove weekend data")
     parser.add_argument("--start_time_buffer", type=int, default=0, help="extra time steps before plan starts to include")
     parser.add_argument("--end_time_buffer", type=int, default=0, help="extra time steps after plan ends to include")
     parser.add_argument("--x_offset", type=int, default=12, help="number of time steps to use for training")
