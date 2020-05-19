@@ -9,19 +9,19 @@
 __pycache__
 
 # data files
-data/**/*sensor_data
-data/**/dcrnn_*
-data/general_experiments
-experiments/**/sensor_data
-experiments/**/dcrnn_*
+/data/**/*sensor_data
+/data/**/dcrnn_*
+/data/general_experiments
+/experiments/**/sensor_data
+/experiments/**/dcrnn_*
 
 # sub-repository
-DCRNN
+/DCRNN
 
 # sensitive
-config/config.py
+/config/config.py
 
 # test files
 **/test
-config/experiment_runner_config.yaml
-config/model_runner_config.yaml
+/config/experiment_runner_config.yaml
+/config/model_runner_config.yaml
