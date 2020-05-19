@@ -54,6 +54,12 @@ def load_predictions(path, predictions_key="predictions", groundtruth_key="groun
     groundtruth = predictions_file[groundtruth_key]
     predictions = predictions_file[predictions_key]
 
+    if groundtruth.ndim != 4:
+        groundtruth = groundtruth[..., np.newaxis]
+
+    if predictions.ndim != 4:
+        predictions = predictions[..., np.newaxis]
+
     return groundtruth, predictions
 
 def load_yaml(path):

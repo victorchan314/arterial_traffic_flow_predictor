@@ -71,7 +71,7 @@ def print_errors_latex(logdir, horizons, features, precision, detectors=None, de
 
         groundtruth, predictions = load_predictions(predictions_path, detectors=detectors, detector_list=detector_list)
         if gfsd:
-            experiment_dir = os.sep.join(os.path.normpath(logdir).split(os.sep)[:-2])
+            experiment_dir = os.sep.join(os.path.normpath(logdir).split(os.sep)[:2])
             sensor_data_path = os.path.join(experiment_dir, "inputs", "sensor_data", "{}_sensor_data".format(dir), "test.npz")
             sensor_groundtruth, _ = load_predictions(sensor_data_path, detectors=detectors, detector_list=detector_list,
                                                      predictions_key="y", groundtruth_key="y")
