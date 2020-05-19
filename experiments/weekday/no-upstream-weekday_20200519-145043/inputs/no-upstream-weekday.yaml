@@ -1,0 +1,6 @@
+base_dir: experiments/weekday
+experiment_name: no-upstream-weekday
+detector_list: [508302, 508306, 508205, 509101, 509105, 507202, 507206]
+override:
+  generate_training_data:
+    weekday_only: True

@@ -1,0 +1,7 @@
+base_dir: experiments/weekday
+experiment_name: no-downstream-FlOcc-weekday
+detector_list: [508302, 508306, 608101, 608105, 608107, 608104]
+features: ["Flow", "Occupancy"]
+override:
+  generate_training_data:
+    weekday_only: True

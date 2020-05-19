@@ -1,0 +1,97 @@
+data_augment:
+  zero:
+    detectors:
+      detector_list: experiments/weekday/unhealthy-downstream-turn-weekday_20200519-145900/inputs/model/detector_list.txt
+      detectors:
+      - 507202
+      - 507206
+      - 509101
+      - 509105
+data_directory: experiments/weekday/unhealthy-downstream-turn-weekday_20200519-145900/inputs/sensor_data/${plan}_o${offset}_h6_sb${offset}_sensor_data
+loop:
+  exclude:
+  - key: models/SARIMAX/OnlineSARIMAX
+    values:
+      offset: 3
+  keys:
+  - data_directory
+  - models/Constant/base_dir
+  - models/SeasonalNaive/base_dir
+  - models/DCRNN/DCRNN/base_dir
+  - models/DCRNN/RNN/base_dir
+  - models/SARIMAX/SARIMAX/base_dir
+  - models/SARIMAX/SARIMAX/train_file
+  - models/SARIMAX/SARIMAX/ts_dir
+  - models/SARIMAX/OnlineSARIMAX/base_dir
+  - models/SARIMAX/OnlineSARIMAX/train_file
+  - models/SARIMAX/OnlineSARIMAX/ts_dir
+  - - models/SeasonalNaive/seasonality
+    - int
+  parallel:
+  - plan
+  substitute:
+    seasonality:
+      key: plan
+      map:
+        P1: 102
+        P2: 36
+        P3: 42
+  values:
+    offset:
+    - 3
+    - 6
+    - 12
+    - 24
+    plan:
+    - P2
+    - P3
+model_order:
+- Constant
+- SeasonalNaive
+- DCRNN
+- SARIMAX
+models:
+  Constant:
+    base_dir: experiments/weekday/unhealthy-downstream-turn-weekday_20200519-145900/experiments/baselines/constant/${plan}_o${offset}_h6_sb${offset}
+  DCRNN:
+    DCRNN:
+      base_dir: experiments/weekday/unhealthy-downstream-turn-weekday_20200519-145900/experiments/dcrnn/${plan}_o${offset}_h6_sb${offset}
+    RNN:
+      base_dir: experiments/weekday/unhealthy-downstream-turn-weekday_20200519-145900/experiments/baselines/rnn/${plan}_o${offset}_h6_sb${offset}
+    __named_models__: true
+  SARIMAX:
+    OnlineSARIMAX:
+      base_dir: experiments/weekday/unhealthy-downstream-turn-weekday_20200519-145900/experiments/baselines/online_arimax/${plan}_o${offset}_h6_sb${offset}
+      online: true
+      order:
+      - 2
+      - 1
+      - 0
+      seasonal_order:
+      - 0
+      - 0
+      - 0
+      - 0
+      train_file: experiments/weekday/unhealthy-downstream-turn-weekday_20200519-145900/inputs/sensor_data/${plan}_o${offset}_h6_sensor_data/train_ts.npz
+      ts_dir: experiments/weekday/unhealthy-downstream-turn-weekday_20200519-145900/inputs/sensor_data/${plan}_o${offset}_h6_sb${offset}_sensor_data
+      use_exog: true
+    SARIMAX:
+      base_dir: experiments/weekday/unhealthy-downstream-turn-weekday_20200519-145900/experiments/baselines/arimax/${plan}_o${offset}_h6_sb${offset}
+      online: false
+      order:
+      - 2
+      - 1
+      - 0
+      seasonal_order:
+      - 0
+      - 0
+      - 0
+      - 0
+      train_file: experiments/weekday/unhealthy-downstream-turn-weekday_20200519-145900/inputs/sensor_data/${plan}_o${offset}_h6_sensor_data/train_ts.npz
+      ts_dir: experiments/weekday/unhealthy-downstream-turn-weekday_20200519-145900/inputs/sensor_data/${plan}_o${offset}_h6_sb${offset}_sensor_data
+      use_exog: true
+    __named_models__: true
+  SeasonalNaive:
+    base_dir: experiments/weekday/unhealthy-downstream-turn-weekday_20200519-145900/experiments/baselines/seasonal_naive/${plan}_o${offset}_h6_sb${offset}
+    seasonality: ${seasonality}
+overwrite: false

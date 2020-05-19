@@ -1,0 +1,9 @@
+base_dir: experiments/weekday
+experiment_name: unhealthy-days-0.5-weekday
+detector_list: [508302, 508306, 508205, 507202, 507206, 509101, 509105, 608101, 608105, 608107, 608104]
+override:
+  generate_training_data:
+    weekday_only: True
+  model_runner:
+    "data_augment/zero/days/proportion": 0.5
+    "data_augment/zero/days/seed": 1
