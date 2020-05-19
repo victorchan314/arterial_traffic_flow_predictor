@@ -1,0 +1,4 @@
+base_dir: experiments
+experiment_name: no-downstream-weekday
+detector_list: [508302, 508306, 608101, 608105, 608107, 608104]
+#features: ["Flow", "Occupancy"]
