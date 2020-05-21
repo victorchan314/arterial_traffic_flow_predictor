@@ -49,7 +49,7 @@ def plot_fundamental_diagram_color_by_plan(detector_id):
 
     sns.scatterplot(occupancy_P2, flow_P2, linewidth=0, s=10, label="Morning peak")
     sns.scatterplot(occupancy_P1, flow_P1, linewidth=0, s=10, label="Off peak")
-    sns.scatterplot(occupancy_P3, flow_P3, linewidth=0, s=10, label="Evening peak")
+    sns.scatterplot(occupancy_P3, flow_P3, linewidth=0, s=10, label="Afternoon peak")
 
     plt.title("Detector {} Fundamental Diagram".format(detector_id))
     plt.xlabel("Occupancy (%)")
@@ -107,7 +107,7 @@ def graph_detector_data_time_series(detector_id, xticks_datetime_precision="D", 
         ax.set_xticklabels(xticks_spaced_labels)
 
         legend_elements = [Line2D([0], [0], color=colors[0], label="Morning peak"),
-                           Line2D([0], [0], color=colors[1], label="Evening peak"),
+                           Line2D([0], [0], color=colors[1], label="Afternoon peak"),
                            Line2D([0], [0], color=colors[2], label="Off peak")]
         box = ax.get_position()
         ax.set_position([box.x0 - box.width * 0.05, box.y0, box.width, box.height])
@@ -162,7 +162,7 @@ def graph_predictions(y, y_hat, x, x_array, sensor, step=4, title=None, num_xtic
             ax1.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.6)
 
     ax1.legend()
-    ax1.set_xlim(xticks.shape[0] * 4 / 7 - 13, xticks.shape[0])
+    ax1.set_xlim(xticks.shape[0] * 22 / 35 + 36, xticks.shape[0])
 
     ax2.legend()
     stretches = data_utils.get_stretches(x_array[:, 0], DETECTOR_DATA_FREQUENCY)
@@ -221,7 +221,7 @@ def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title
             plt.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.7)
 
     plt.legend()
-    plt.xlim(xticks.shape[0] * 4 / 7 - 13, xticks.shape[0])
+    plt.xlim(xticks.shape[0] * 22 / 35 + 36, xticks.shape[0])
 
     plt.show()
 
@@ -236,6 +236,7 @@ def graph4():
     groundtruth, predictions = utils.load_predictions(predictions_path)
     groundtruth = groundtruth[..., 0]
     predictions = predictions[..., 0]
+    predictions = np.maximum(predictions, 0)
 
     timestamps_array = np.load(timestamps_path)["timestamps_y"]
     timestamps, groundtruth = extract_flat_data(timestamps_array, groundtruth)
@@ -265,6 +266,10 @@ def graph5():
     dcrnn_predictions = dcrnn_predictions[..., 0]
     gru_predictions = gru_predictions[..., 0]
 
+    dcrnn_predictions = np.maximum(dcrnn_predictions, 0)
+    gru_predictions = np.maximum(gru_predictions, 0)
+    arimax_predictions = np.maximum(arimax_predictions, 0)
+
     timestamps_array = np.load(timestamps_path)["timestamps_y"]
     timestamps, groundtruth = extract_flat_data(timestamps_array, groundtruth)
 
@@ -275,7 +280,7 @@ def graph5():
     graph_predictions_and_baselines(groundtruth, timestamps, timestamps_array,
                                     [dcrnn_predictions, gru_predictions, arimax_predictions],
                                     sensor=sensor,
-                                    title="Detector {} Full Information Test Predictions".format(detector))
+                                    title="Detector {} Full Information Test Predictions for a 30 Minute Horizon".format(detector))
 
 
 def main(args):
