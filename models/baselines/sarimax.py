@@ -75,7 +75,7 @@ class SARIMAX(Model):
 
     def _train(self):
         if self.verbose:
-            print("Beginning ARMAX training")
+            print("Beginning SARIMAX training")
 
         if self.online:
             self._is_trained = True
