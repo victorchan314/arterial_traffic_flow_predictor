@@ -90,6 +90,15 @@ def main(args):
                        ["unhealthy-downstream", False],
                        ["unhealthy-downstream-through", False],
                        ["unhealthy-downstream-turn", False]]
+    elif id == 3:
+        experiments = [["full-information", False],
+                       ["unhealthy-stopbar", True],
+                       ["unhealthy-advance", True],
+                       ["unhealthy-stopbar", False],
+                       ["unhealthy-advance", False],
+                       ["full-information-FlOcc", False],
+                       ["unhealthy-stopbar-FlOcc", True],
+                       ["unhealthy-stopbar-FlOcc", False]]
     else:
         raise ValueError("Invalid id {}".format(id))
 
