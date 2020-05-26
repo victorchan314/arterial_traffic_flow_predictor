@@ -32,7 +32,7 @@ train:
   max_grad_norm: 5
   max_to_keep: 100
   min_learning_rate: 2.0e-06
-  model_filename: experiments/full-information-weekday_20200518-173342/experiments/dcrnn/P2_o3_h6_sb3/dcrnn_DR_2_h_6_64-64_lr_0.01_bs_64_20200518173554/models-13.4513-2920
+  model_filename: experiments/weekday/full-information-FlOcc-weekday_20200519-143558/experiments/dcrnn/P2_o3_h6_sb3/dcrnn_DR_2_h_6_64-64_lr_0.01_bs_64_20200519214649/models-46.4245-2044
   optimizer: adam
   patience: 50
   steps:
