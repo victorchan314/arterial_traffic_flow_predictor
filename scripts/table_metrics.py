@@ -26,7 +26,7 @@ def build_metrics_table(base_dir, experiments, args_dict):
 
     for experiment_name, repredict in experiments:
         experiment_dir = get_weekday_experiment_dir(base_dir, experiment_name)
-        dcrnn_dir = os.path.join(experiment_dir, "experiments", "dcrnn" if repredict else "unhealthy_dcrnn")
+        dcrnn_dir = os.path.join(experiment_dir, "experiments", "unhealthy_dcrnn" if repredict else "dcrnn")
 
         detector_list_path = os.path.join(experiment_dir, "inputs", "model", "detector_list.txt")
 
@@ -70,12 +70,26 @@ def main(args):
     }
 
     if id == 1:
-        experiments = [["full-information", True],
-                       ["no-upstream", True],
-                       ["no-downstream", True],
-                       ["full-information-FlOcc", True],
-                       ["no-upstream-FlOcc", True],
-                       ["no-downstream-FlOcc", True]]
+        experiments = [["full-information", False],
+                       ["no-upstream", False],
+                       ["no-downstream", False],
+                       ["full-information-FlOcc", False],
+                       ["no-upstream-FlOcc", False],
+                       ["no-downstream-FlOcc", False]]
+    elif id == 2:
+        experiments = [["full-information", False],
+                       ["unhealthy-upstream", True],
+                       ["unhealthy-upstream-through", True],
+                       ["unhealthy-stopbar", True],
+                       ["unhealthy-downstream", True],
+                       ["unhealthy-downstream-through", True],
+                       ["unhealthy-downstream-turn", True],
+                       ["unhealthy-upstream", False],
+                       ["unhealthy-upstream-through", False],
+                       ["unhealthy-stopbar", False],
+                       ["unhealthy-downstream", False],
+                       ["unhealthy-downstream-through", False],
+                       ["unhealthy-downstream-turn", False]]
     else:
         raise ValueError("Invalid id {}".format(id))
 
