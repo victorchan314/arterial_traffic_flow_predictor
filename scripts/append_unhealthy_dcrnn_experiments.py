@@ -65,7 +65,7 @@ def update_model_runner_config_for_unhealthy_dcrnn(model_runner_config):
     model_runner_config["models"]["DCRNN"] = model_runner_config["models"]["DCRNN"]["DCRNN"]
     dcrnn_base_dir = model_runner_config["models"]["DCRNN"]["base_dir"]
     split_dcrnn_base_dir = os.path.normpath(dcrnn_base_dir).split(os.sep)
-    split_dcrnn_base_dir[3] = "unhealthy_dcrnn"
+    split_dcrnn_base_dir[-2] = "unhealthy_dcrnn"
     model_runner_config["models"]["DCRNN"]["base_dir"] = os.path.join(*split_dcrnn_base_dir)
     model_runner_config["models"]["DCRNN"]["is_trained"] = True
     model_runner_config["models"]["DCRNN"]["calculate_train_and_val_errors"] = False
@@ -84,7 +84,7 @@ def main(args):
 
     adapt_dcrnn_configs_to_unhealthy_dcrnn_folder(dcrnn_path, unhealthy_dcrnn_path, model_dcrnn_path)
 
-    experiment_name = os.path.normpath(experiment_folder).split(os.sep)[1].split("_")[0]
+    experiment_name = os.path.normpath(experiment_folder).split(os.sep)[-1].split("_")[0]
     model_runner_config_path = os.path.join(experiment_folder, "inputs", "model_runner_config_{}.yaml".format(experiment_name))
     model_runner_config = utils.load_yaml(model_runner_config_path)
     model_runner_config = update_model_runner_config_for_unhealthy_dcrnn(model_runner_config)

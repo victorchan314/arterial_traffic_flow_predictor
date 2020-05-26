@@ -1,0 +1,27 @@
+data_augment:
+  zero:
+    days:
+      proportion: 0.25
+      seed: 1
+data_directory: experiments/weekday/unhealthy-days-0.25-weekday_20200519-151256/inputs/sensor_data/${plan}_o${offset}_h6_sb${offset}_sensor_data
+loop:
+  keys:
+  - data_directory
+  - models/DCRNN/base_dir
+  parallel:
+  - plan
+  values:
+    offset:
+    - 3
+    - 6
+    - 12
+    - 24
+    plan:
+    - P2
+    - P3
+models:
+  DCRNN:
+    base_dir: experiments/weekday/unhealthy-days-0.25-weekday_20200519-151256/experiments/unhealthy_dcrnn/${plan}_o${offset}_h6_sb${offset}
+    calculate_train_and_val_errors: false
+    is_trained: true
+overwrite: false

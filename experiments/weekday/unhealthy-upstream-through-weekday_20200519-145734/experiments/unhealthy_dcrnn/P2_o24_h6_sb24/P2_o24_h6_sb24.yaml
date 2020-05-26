@@ -1,0 +1,43 @@
+base_dir: experiments/weekday/unhealthy-upstream-through-weekday_20200519-145734/experiments/unhealthy_dcrnn/P2_o24_h6_sb24
+data:
+  batch_size: 64
+  dataset_dir: experiments/weekday/unhealthy-upstream-through-weekday_20200519-145734/inputs/sensor_data/P2_o24_h6_sb24_sensor_data
+  graph_pkl_filename: experiments/weekday/unhealthy-upstream-through-weekday_20200519-145734/inputs/model/adjacency_matrix_P2.pkl
+  test_batch_size: 64
+  val_batch_size: 64
+log_level: INFO
+model:
+  cl_decay_steps: 2000
+  filter_type: dual_random_walk
+  horizon: 6
+  input_dim: 2
+  l1_decay: 0
+  max_diffusion_step: 2
+  num_nodes: 11
+  num_rnn_layers: 2
+  output_dim: 2
+  rnn_units: 64
+  seq_len: 24
+  use_curriculum_learning: true
+  use_gc_for_ru: true
+train:
+  base_lr: 0.01
+  dropout: 0
+  epoch: 26
+  epochs: 100
+  epsilon: 0.001
+  global_step: 1971
+  log_dir: experiments/weekday/unhealthy-upstream-through-weekday_20200519-145734/experiments/unhealthy_dcrnn/P2_o24_h6_sb24/dcrnn_DR_2_h_6_64-64_lr_0.01_bs_64_20200521085135
+  lr_decay_ratio: 0.1
+  max_grad_norm: 5
+  max_to_keep: 100
+  min_learning_rate: 2.0e-06
+  model_filename: experiments/full-information-weekday_20200518-173342/experiments/dcrnn/P2_o24_h6_sb24/dcrnn_DR_2_h_6_64-64_lr_0.01_bs_64_20200518210007/models-11.9128-2190
+  optimizer: adam
+  patience: 50
+  steps:
+  - 20
+  - 30
+  - 40
+  - 50
+  test_every_n_epochs: 10
