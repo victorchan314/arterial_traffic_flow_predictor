@@ -21,7 +21,8 @@ def get_weekday_experiment_dir(base_dir, experiment_name):
 
     return os.path.join(base_dir, dirs[0])
 
-def build_metrics_table(base_dir, experiments, args_dict):
+def build_metrics_table(base_dir, experiments, args_dict, gfts=False):
+    args_dict["groundtruth_from_sensor_data"] = gfts
     tables = {}
 
     for experiment_name, repredict in experiments:
@@ -68,6 +69,7 @@ def main(args):
         "no_plan_ts_dir": None,
         "phase_plans_csv": None
     }
+    gfts = False
 
     if id == 1:
         experiments = [["full-information", False],
@@ -99,10 +101,21 @@ def main(args):
                        ["full-information-FlOcc", False],
                        ["unhealthy-stopbar-FlOcc", True],
                        ["unhealthy-stopbar-FlOcc", False]]
+    elif id == 4:
+        gfts = True
+        experiments = [["full-information", False],
+                       ["unhealthy-days-0.05", True],
+                       ["unhealthy-days-0.1", True],
+                       ["unhealthy-days-0.25", True],
+                       ["unhealthy-days-0.5", True],
+                       ["unhealthy-days-0.05", False],
+                       ["unhealthy-days-0.1", False],
+                       ["unhealthy-days-0.25", False],
+                       ["unhealthy-days-0.5", False]]
     else:
         raise ValueError("Invalid id {}".format(id))
 
-    tables = build_metrics_table(base_dir, experiments, args_dict)
+    tables = build_metrics_table(base_dir, experiments, args_dict, gfts=gfts)
     for plan, table in tables.items():
         print(plan)
         print(table)
