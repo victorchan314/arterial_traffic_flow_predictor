@@ -132,8 +132,10 @@ def graph_predictions(y, y_hat, x, x_array, sensor, step=4, title=None, num_xtic
 
     xticks = np.arange(x.shape[0])
     xticks_labels = np.datetime_as_string(x, unit=xticks_datetime_precision)
-    xticks_locs = [xticks[x.shape[0] // num_xticks * i] for i in range(num_xticks)] + [xticks[-1]]
-    xticks_spaced_labels = [xticks_labels[x.shape[0] // num_xticks * i] for i in range(num_xticks)] + [xticks_labels[-1]]
+    x_stretches = data_utils.get_stretches_larger_than_freq(x, dt.timedelta(days=1))
+    x_stretches[:, 1] -= 36
+    xticks_locs = x_stretches.flatten()
+    xticks_spaced_labels = pd.DatetimeIndex(xticks_labels[xticks_locs]).strftime("%m/%d")
 
     for ax in (ax1, ax2):
         ax.set(xlabel="Time", ylabel="Flow (vph)")
@@ -162,7 +164,7 @@ def graph_predictions(y, y_hat, x, x_array, sensor, step=4, title=None, num_xtic
             ax1.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.6)
 
     ax1.legend()
-    ax1.set_xlim(xticks.shape[0] * 22 / 35 + 36, xticks.shape[0])
+    ax1.set_xlim(xticks.shape[0] * 22 / 35 + 39, xticks.shape[0])
 
     ax2.legend()
     stretches = data_utils.get_stretches(x_array[:, 0], DETECTOR_DATA_FREQUENCY)
@@ -180,7 +182,7 @@ def graph_predictions(y, y_hat, x, x_array, sensor, step=4, title=None, num_xtic
 
             ax2.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.6)
 
-    ax2.set_xlim(xticks.shape[0] * 4 / 8, xticks.shape[0] * 6 / 8)
+    ax2.set_xlim(xticks.shape[0] * 4 / 8 - 13, xticks.shape[0] * 6 / 8 - 6)
 
     plt.show()
 
@@ -190,8 +192,10 @@ def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title
 
     xticks = np.arange(x.shape[0])
     xticks_labels = np.datetime_as_string(x, unit=xticks_datetime_precision)
-    xticks_locs = [xticks[x.shape[0] // num_xticks * i] for i in range(num_xticks)] + [xticks[-1]]
-    xticks_spaced_labels = [xticks_labels[x.shape[0] // num_xticks * i] for i in range(num_xticks)] + [xticks_labels[-1]]
+    x_stretches = data_utils.get_stretches_larger_than_freq(x, dt.timedelta(days=1))
+    x_stretches[:, 1] -= 36
+    xticks_locs = x_stretches.flatten()
+    xticks_spaced_labels = pd.DatetimeIndex(xticks_labels[xticks_locs]).strftime("%m/%d")
 
     plt.xlabel("Time")
     plt.ylabel("Flow (vph)")
@@ -221,17 +225,17 @@ def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title
             plt.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.7)
 
     plt.legend()
-    plt.xlim(xticks.shape[0] * 22 / 35 + 36, xticks.shape[0])
+    plt.xlim(xticks.shape[0] * 22 / 35 + 39, xticks.shape[0])
 
     plt.show()
 
 def graph4():
-    logdirs = [x for x in os.listdir("experiments") if x.startswith("full-information_")]
+    logdirs = [x for x in os.listdir(os.path.join("experiments", "weekday")) if x.startswith("full-information-weekday_")]
     if len(logdirs) > 1:
         raise ValueError("More than 1 full-information logdir: {}".format(logdirs))
 
-    predictions_path = os.path.join("experiments", logdirs[0], "experiments", "dcrnn", "P2_o12_h6_sb12", "predictions.npz")
-    timestamps_path = os.path.join("experiments", logdirs[0], "inputs", "sensor_data", "P2_o12_h6_sb12_sensor_data", "test.npz")
+    predictions_path = os.path.join("experiments", "weekday", logdirs[0], "experiments", "dcrnn", "P2_o12_h6_sb12", "predictions.npz")
+    timestamps_path = os.path.join("experiments", "weekday", logdirs[0], "inputs", "sensor_data", "P2_o12_h6_sb12_sensor_data", "test.npz")
 
     groundtruth, predictions = utils.load_predictions(predictions_path)
     groundtruth = groundtruth[..., 0]
@@ -249,14 +253,14 @@ def graph4():
                       title="Detector {} Full Information DCRNN Test Predictions".format(detector))
 
 def graph5():
-    logdirs = [x for x in os.listdir("experiments") if x.startswith("full-information_")]
+    logdirs = [x for x in os.listdir(os.path.join("experiments", "weekday")) if x.startswith("full-information-weekday_")]
     if len(logdirs) > 1:
         raise ValueError("More than 1 full-information logdir: {}".format(logdirs))
 
-    dcrnn_predictions_path = os.path.join("experiments", logdirs[0], "experiments", "dcrnn", "P2_o12_h6_sb12", "predictions.npz")
-    gru_predictions_path = os.path.join("experiments", logdirs[0], "experiments", "baselines", "rnn", "P2_o12_h6_sb12", "predictions.npz")
-    arimax_predictions_path = os.path.join("experiments", logdirs[0], "experiments", "baselines", "arimax", "P2_o12_h6_sb12", "predictions.npz")
-    timestamps_path = os.path.join("experiments", logdirs[0], "inputs", "sensor_data", "P2_o12_h6_sb12_sensor_data", "test.npz")
+    dcrnn_predictions_path = os.path.join("experiments", "weekday", logdirs[0], "experiments", "dcrnn", "P2_o12_h6_sb12", "predictions.npz")
+    gru_predictions_path = os.path.join("experiments", "weekday", logdirs[0], "experiments", "baselines", "rnn", "P2_o12_h6_sb12", "predictions.npz")
+    arimax_predictions_path = os.path.join("experiments", "weekday", logdirs[0], "experiments", "baselines", "arimax", "P2_o12_h6_sb12", "predictions.npz")
+    timestamps_path = os.path.join("experiments", "weekday", logdirs[0], "inputs", "sensor_data", "P2_o12_h6_sb12_sensor_data", "test.npz")
 
     groundtruth, dcrnn_predictions = utils.load_predictions(dcrnn_predictions_path)
     _, gru_predictions = utils.load_predictions(gru_predictions_path)

@@ -95,6 +95,14 @@ def get_stretches(datetimes, frequency):
 
     return stretches
 
+def get_stretches_larger_than_freq(datetimes, frequency):
+    break_indices = np.argwhere(compare_timedeltas(">", datetimes[1:] - datetimes[:-1], frequency)).flatten() + 1
+    stretch_starts = np.concatenate(([0], break_indices))
+    stretch_ends = np.concatenate((stretch_starts, [datetimes.shape[0]]))[1:]
+    stretches = np.vstack((stretch_starts, stretch_ends)).T
+
+    return stretches
+
 # Appends filler data to an array until its axis has at least length limit
 def pad_array(array, limit, axis=0, filler="zeros"):
     padding = limit - array.shape[axis]
