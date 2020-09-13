@@ -22,6 +22,7 @@ sns_colors = sns.color_palette("colorblind")
 cycle = [sns_colors[i] for i in [2, 9, 6, 4, 8, 0, 3, 1, 7, 5]]
 mpl.rcParams["axes.prop_cycle"] = mpl.cycler(color=cycle)
 colors = cycle
+linestyles = ["--", ":", "-."]
 
 DETECTOR_DATA_FREQUENCY = dt.timedelta(minutes=5)
 
@@ -59,21 +60,34 @@ def plot_fundamental_diagram_color_by_plan(detector_id):
     plt.legend()
     plt.show()
 
-def graph_detector_data_time_series(detector_id, xticks_datetime_precision="D", num_xticks=12):
+def graph_detector_data_time_series(detector_id, xticks_datetime_precision="D", num_xticks=12, condensed=False):
     data_P1, data_P2, data_P3 = get_one_detector_data(detector_id)
 
     data_P1 = data_P1[data_P1["Time"].dt.month == 8]
     data_P2 = data_P2[data_P2["Time"].dt.month == 8]
     data_P3 = data_P3[data_P3["Time"].dt.month == 8]
 
-    fig, axes = plt.subplots(2, 1, figsize=(12, 6))
-    fig.autofmt_xdate()
+    figsize = (12, 6)
+
+    if condensed:
+        data_P1 = data_P1[(data_P1["Time"].dt.day >= 20) & (data_P1["Time"].dt.day <= 31)]
+        data_P2 = data_P2[(data_P2["Time"].dt.day >= 20) & (data_P2["Time"].dt.day <= 31)]
+        data_P3 = data_P3[(data_P3["Time"].dt.day >= 20) & (data_P3["Time"].dt.day <= 31)]
+        figsize = (8, 6)
+        num_xticks = 4
+
+    fig, axes = plt.subplots(2, 1, figsize=figsize)
+    if condensed:
+        fig.subplots_adjust(hspace=0)
+        fig.autofmt_xdate(rotation=0, ha="center")
+    else:
+        fig.autofmt_xdate()
     fig.suptitle("Detector {} Data in the Month of August".format(detector_id))
     features = ["Flow", "Occupancy"]
     ylabels = ["Flow (vph)", "Occupancy (%)"]
     scales = [1, 36]
 
-    for ax, feature, ylabel, scale in zip(axes, features, ylabels, scales):
+    for index, ax, feature, ylabel, scale in zip([0, 1], axes, features, ylabels, scales):
         full_data = pd.concat((data_P1, data_P2, data_P3), ignore_index=True)
         full_data.sort_values("Time", inplace=True)
 
@@ -102,7 +116,10 @@ def graph_detector_data_time_series(detector_id, xticks_datetime_precision="D", 
 
             ax.plot(xticks[starts[i]:starts[i + 1] + 1], y[starts[i]:starts[i + 1] + 1], c=colors[color])
 
-        ax.set(xlabel="Time", ylabel=ylabel)
+        if not condensed or index == 1:
+            ax.set(xlabel="Time")
+
+        ax.set(ylabel=ylabel)
         ax.set_xticks(xticks_locs)
         ax.set_xticklabels(xticks_spaced_labels)
 
@@ -110,8 +127,13 @@ def graph_detector_data_time_series(detector_id, xticks_datetime_precision="D", 
                            Line2D([0], [0], color=colors[1], label="Afternoon peak"),
                            Line2D([0], [0], color=colors[2], label="Off peak")]
         box = ax.get_position()
-        ax.set_position([box.x0 - box.width * 0.05, box.y0, box.width, box.height])
-        ax.legend(handles=legend_elements, loc="center left", bbox_to_anchor=(0.95, 0.5))
+        if condensed:
+            ax.set_position([box.x0 - box.width * 0.05, box.y0 * 1.1, box.width * 1.14, box.height])
+            if index == 1:
+                ax.legend(handles=legend_elements, loc="upper center", bbox_to_anchor=(0.13, 0.99))
+        else:
+            ax.set_position([box.x0 - box.width * 0.05, box.y0 * 1.1, box.width, box.height])
+            ax.legend(handles=legend_elements, loc="center left", bbox_to_anchor=(0.95, 0.5))
 
     plt.show()
 
@@ -186,8 +208,9 @@ def graph_predictions(y, y_hat, x, x_array, sensor, step=4, title=None, num_xtic
 
     plt.show()
 
-def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title=None, num_xticks=12, xticks_datetime_precision="D"):
-    plt.figure(figsize=(16, 5))
+def graph_predictions_condensed(y, y_hat, x, x_array, sensor, step=4, title=None,
+                                num_xticks=12, xticks_datetime_precision="D"):
+    plt.figure(figsize=(16, 3.7))
     plt.title(title)
 
     xticks = np.arange(x.shape[0])
@@ -201,9 +224,54 @@ def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title
     plt.ylabel("Flow (vph)")
     plt.xticks(xticks_locs, xticks_spaced_labels)
 
-    plt.plot(xticks, y[:, sensor], label="Ground Truth")
+    plt.plot(xticks, y[:, sensor], label="Ground Truth", c="black", alpha=0.6, lw=2)
 
-    reordered_colors =[6, 5, 2]
+    cmap = plt.get_cmap("jet")
+    reordered_colors =[0, 5, 2]
+
+    for i, h in enumerate([1, 3, 6]):
+        stretches = data_utils.get_stretches(x_array[:, h - 1], DETECTOR_DATA_FREQUENCY)
+        color = colors[reordered_colors[i]]
+        linestyle = linestyles[i]
+
+        for start, end in stretches:
+            x_stretch = x_array[start:end, h - 1]
+            y_hat_stretch = y_hat[h - 1, start:end, sensor]
+            x_stretch_range = fit_dates_to_timestamps(x, x_stretch, xticks)
+
+            if start == 0:
+                label = "{} min predictions".format(h * 5)
+            else:
+                label = None
+
+            plt.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.6, ls=linestyle, lw=3)
+
+    plt.legend(fontsize="large")
+    plt.xlim(xticks.shape[0] * 22 / 35 + 39, xticks.shape[0])
+
+    plt.show()
+
+def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title=None, num_xticks=12, xticks_datetime_precision="D",
+                                    condensed=False):
+    figsize = (16, 3.8 if condensed else 5)
+    plt.figure(figsize=figsize)
+    plt.title(title)
+
+    xticks = np.arange(x.shape[0])
+    xticks_labels = np.datetime_as_string(x, unit=xticks_datetime_precision)
+    x_stretches = data_utils.get_stretches_larger_than_freq(x, dt.timedelta(days=1))
+    x_stretches[:, 1] -= 36
+    xticks_locs = x_stretches.flatten()
+    xticks_spaced_labels = pd.DatetimeIndex(xticks_labels[xticks_locs]).strftime("%m/%d")
+
+    plt.xlabel("Time")
+    plt.ylabel("Flow (vph)")
+    plt.xticks(xticks_locs, xticks_spaced_labels)
+
+    linewidth = 2 if condensed else 1
+    plt.plot(xticks, y[:, sensor], label="Ground Truth", c="black", alpha=0.6, lw=linewidth)
+
+    reordered_colors =[0, 5, 2]
 
     #for i, h in enumerate([1, 3, 6]):
     h = 6
@@ -211,6 +279,7 @@ def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title
         stretches = data_utils.get_stretches(x_array[:, h - 1], DETECTOR_DATA_FREQUENCY)
         color = colors[reordered_colors[i]]
         #color = colors[i + 1]
+        linestyle = linestyles[i] if condensed else "-"
 
         for start, end in stretches:
             x_stretch = x_array[start:end, h - 1]
@@ -222,14 +291,14 @@ def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title
             else:
                 label = None
 
-            plt.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.7)
+            plt.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.7, ls=linestyle, lw=linewidth)
 
-    plt.legend()
+    plt.legend(fontsize="large")
     plt.xlim(xticks.shape[0] * 22 / 35 + 39, xticks.shape[0])
 
     plt.show()
 
-def graph4():
+def graph4(condensed=False):
     logdirs = [x for x in os.listdir(os.path.join("experiments", "weekday")) if x.startswith("full-information-weekday_")]
     if len(logdirs) > 1:
         raise ValueError("More than 1 full-information logdir: {}".format(logdirs))
@@ -249,10 +318,14 @@ def graph4():
     detector = 508306
     sensor = sensors[detector]
 
-    graph_predictions(groundtruth, predictions, timestamps, timestamps_array, sensor=sensor,
-                      title="Detector {} Full Information DCRNN Test Predictions".format(detector))
+    if condensed:
+        graph_predictions_condensed(groundtruth, predictions, timestamps, timestamps_array, sensor=sensor,
+                                    title="Detector {} Full Information DCRNN Test Predictions".format(detector))
+    else:
+        graph_predictions(groundtruth, predictions, timestamps, timestamps_array, sensor=sensor,
+                          title="Detector {} Full Information DCRNN Test Predictions".format(detector))
 
-def graph5():
+def graph5(condensed=False):
     logdirs = [x for x in os.listdir(os.path.join("experiments", "weekday")) if x.startswith("full-information-weekday_")]
     if len(logdirs) > 1:
         raise ValueError("More than 1 full-information logdir: {}".format(logdirs))
@@ -284,23 +357,38 @@ def graph5():
     graph_predictions_and_baselines(groundtruth, timestamps, timestamps_array,
                                     [dcrnn_predictions, gru_predictions, arimax_predictions],
                                     sensor=sensor,
-                                    title="Detector {} Full Information Test Predictions for a 30 Minute Horizon".format(detector))
+                                    title="Detector {} Full Information Test Predictions for a 30 Minute Horizon".format(detector),
+                                    condensed=condensed)
 
 
 def main(args):
     graph = args.graph
 
     if graph == 1:
+        # Master's advance detector data time series plot
         graph_detector_data_time_series(508302)
     elif graph == 2:
+        # Master's fundamental diagram plots
         plot_fundamental_diagram_color_by_plan(508302)
         plot_fundamental_diagram_color_by_plan(508306)
     elif graph == 3:
+        # Master's stopbar detector data time series plot
         graph_detector_data_time_series(608107)
     elif graph == 4:
+        # Master's test predictions
         graph4()
     elif graph == 5:
+        # Baseline comparisons
         graph5()
+    elif graph == 6:
+        # Paper advance detector data time series plot
+        graph_detector_data_time_series(508302, condensed=True)
+    elif graph == 7:
+        # Paper test predictions
+        graph4(condensed=True)
+    elif graph == 8:
+        # Paper baselines
+        graph5(condensed=True)
     else:
         raise ValueError("Invalid graph ID")
 
