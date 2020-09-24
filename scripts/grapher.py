@@ -210,24 +210,47 @@ def graph_predictions(y, y_hat, x, x_array, sensor, step=4, title=None, num_xtic
 
 def graph_predictions_condensed(y, y_hat, x, x_array, sensor, step=4, title=None,
                                 num_xticks=12, xticks_datetime_precision="D"):
-    plt.figure(figsize=(16, 3.7))
+    figsize = (8, 3.8)
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=figsize)
+    fig.add_subplot(111, frameon=False)
     plt.title(title)
 
     xticks = np.arange(x.shape[0])
     xticks_labels = np.datetime_as_string(x, unit=xticks_datetime_precision)
-    x_stretches = data_utils.get_stretches_larger_than_freq(x, dt.timedelta(days=1))
-    x_stretches[:, 1] -= 36
-    xticks_locs = x_stretches.flatten()
+    x_stretches = data_utils.get_stretches_larger_than_freq(x, DETECTOR_DATA_FREQUENCY)
+    xticks_locs = x_stretches[:, 0].flatten()
     xticks_spaced_labels = pd.DatetimeIndex(xticks_labels[xticks_locs]).strftime("%m/%d")
+    dec15_index = xticks_spaced_labels.get_loc("12/15")
+    xticks_locs = np.delete(xticks_locs, dec15_index)
+    xticks_spaced_labels = np.delete(xticks_spaced_labels, dec15_index)
 
     plt.xlabel("Time")
-    plt.ylabel("Flow (vph)")
-    plt.xticks(xticks_locs, xticks_spaced_labels)
+    ax1.set_ylabel("Flow (vph)")
 
-    plt.plot(xticks, y[:, sensor], label="Ground Truth", c="black", alpha=0.6, lw=2)
+    plt.tick_params(labelcolor="none", bottom=False, left=False)
+    ax1.set_xticks(xticks_locs)
+    ax2.set_xticks(xticks_locs)
+    ax1.set_xticklabels(xticks_spaced_labels)
+    ax2.set_xticklabels(xticks_spaced_labels)
 
-    cmap = plt.get_cmap("jet")
-    reordered_colors =[0, 5, 2]
+    ax1.plot(xticks, y[:, sensor], label="Ground Truth", c="black", alpha=0.6, lw=2)
+    ax2.plot(xticks, y[:, sensor], label="Ground Truth", c="black", alpha=0.6, lw=2)
+
+    ax1.set_xlim(xticks.shape[0] * 22 / 35 + 39, xticks.shape[0] * 26 / 35 + 5)
+    ax2.set_xlim(xticks.shape[0] * 30 / 35 + 6, xticks.shape[0] * 33 / 35 + 18)
+    ax1.spines["right"].set_visible(False)
+    ax2.spines["left"].set_visible(False)
+    ax2.set_yticks([])
+
+    dx = 0.015
+    dy = 0.025
+    ax1.plot((1 - dx, 1 + dx), (-dy, dy), transform=ax1.transAxes, c="black", lw=1, clip_on=False)
+    ax1.plot((1 - dx, 1 + dx), (1 - dy, 1 + dy), transform=ax1.transAxes, c="black", lw=1, clip_on=False)
+    ax2.plot((-dx, dx), (-dy, dy), transform=ax2.transAxes, c="black", lw=1, clip_on=False)
+    ax2.plot((-dx, dx), (1 - dy, 1 + dy), transform=ax2.transAxes, c="black", lw=1, clip_on=False)
+    fig.subplots_adjust(wspace=0.03)
+
+    reordered_colors = [0, 5, 2]
 
     for i, h in enumerate([1, 3, 6]):
         stretches = data_utils.get_stretches(x_array[:, h - 1], DETECTOR_DATA_FREQUENCY)
@@ -244,11 +267,10 @@ def graph_predictions_condensed(y, y_hat, x, x_array, sensor, step=4, title=None
             else:
                 label = None
 
-            plt.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.6, ls=linestyle, lw=3)
+            ax1.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.6, ls=linestyle, lw=3)
+            ax2.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.6, ls=linestyle, lw=3)
 
-    plt.legend(fontsize="large")
-    plt.xlim(xticks.shape[0] * 22 / 35 + 39, xticks.shape[0])
-
+    ax2.legend(fontsize="large")
     plt.show()
 
 def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title=None, num_xticks=12, xticks_datetime_precision="D",
