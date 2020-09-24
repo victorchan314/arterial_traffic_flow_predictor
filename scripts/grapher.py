@@ -253,7 +253,7 @@ def graph_predictions_condensed(y, y_hat, x, x_array, sensor, step=4, title=None
 
 def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title=None, num_xticks=12, xticks_datetime_precision="D",
                                     condensed=False):
-    figsize = (16, 3.8 if condensed else 5)
+    figsize = (16, 5)
     plt.figure(figsize=figsize)
     plt.title(title)
 
@@ -268,10 +268,9 @@ def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title
     plt.ylabel("Flow (vph)")
     plt.xticks(xticks_locs, xticks_spaced_labels)
 
-    linewidth = 2 if condensed else 1
-    plt.plot(xticks, y[:, sensor], label="Ground Truth", c="black", alpha=0.6, lw=linewidth)
+    plt.plot(xticks, y[:, sensor], label="Ground Truth", c="black", alpha=0.6)
 
-    reordered_colors =[0, 5, 2]
+    reordered_colors = [0, 5, 2]
 
     #for i, h in enumerate([1, 3, 6]):
     h = 6
@@ -279,7 +278,6 @@ def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title
         stretches = data_utils.get_stretches(x_array[:, h - 1], DETECTOR_DATA_FREQUENCY)
         color = colors[reordered_colors[i]]
         #color = colors[i + 1]
-        linestyle = linestyles[i] if condensed else "-"
 
         for start, end in stretches:
             x_stretch = x_array[start:end, h - 1]
@@ -291,11 +289,72 @@ def graph_predictions_and_baselines(y, x, x_array, y_hats, sensor, step=4, title
             else:
                 label = None
 
-            plt.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.7, ls=linestyle, lw=linewidth)
+            plt.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.7)
 
     plt.legend(fontsize="large")
     plt.xlim(xticks.shape[0] * 22 / 35 + 39, xticks.shape[0])
 
+    plt.show()
+
+def graph_predictions_and_baselines_condensed(y, x, x_array, y_hats, sensor, step=4, title=None, num_xticks=12, xticks_datetime_precision="D"):
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(8, 3.8))
+    fig.add_subplot(111, frameon=False)
+    plt.title(title)
+
+    xticks = np.arange(x.shape[0])
+    xticks_labels = np.datetime_as_string(x, unit=xticks_datetime_precision)
+    x_stretches = data_utils.get_stretches_larger_than_freq(x, DETECTOR_DATA_FREQUENCY)
+    xticks_locs = x_stretches[:, 0].flatten()
+    xticks_spaced_labels = pd.DatetimeIndex(xticks_labels[xticks_locs]).strftime("%m/%d")
+
+    plt.xlabel("Time")
+    ax1.set_ylabel("Flow (vph)")
+
+    plt.tick_params(labelcolor="none", bottom=False, left=False)
+    ax1.set_xticks(xticks_locs)
+    ax2.set_xticks(xticks_locs)
+    ax1.set_xticklabels(xticks_spaced_labels)
+    ax2.set_xticklabels(xticks_spaced_labels)
+
+    ax1.plot(xticks, y[:, sensor], label="Ground Truth", c="black", alpha=0.6, lw=2)
+    ax2.plot(xticks, y[:, sensor], label="Ground Truth", c="black", alpha=0.6, lw=2)
+
+    ax1.set_xlim(xticks.shape[0] * 22 / 35 + 39, xticks.shape[0] * 26 / 35 + 4)
+    ax2.set_xlim(xticks.shape[0] * 30 / 35 + 6, xticks.shape[0] * 33 / 35 + 18)
+    ax1.spines["right"].set_visible(False)
+    ax2.spines["left"].set_visible(False)
+    ax2.set_yticks([])
+
+    dx = 0.015
+    dy = 0.025
+    ax1.plot((1 - dx, 1 + dx), (-dy, dy), transform=ax1.transAxes, c="black", lw=1, clip_on=False)
+    ax1.plot((1 - dx, 1 + dx), (1 - dy, 1 + dy), transform=ax1.transAxes, c="black", lw=1, clip_on=False)
+    ax2.plot((-dx, dx), (-dy, dy), transform=ax2.transAxes, c="black", lw=1, clip_on=False)
+    ax2.plot((-dx, dx), (1 - dy, 1 + dy), transform=ax2.transAxes, c="black", lw=1, clip_on=False)
+    fig.subplots_adjust(wspace=0.03)
+
+    reordered_colors = [0, 5, 2]
+
+    h = 6
+    for i, (y_hat, model_name) in enumerate(zip(y_hats, ["DCRNN", "GRU", "ARIMAX"])):
+        stretches = data_utils.get_stretches(x_array[:, h - 1], DETECTOR_DATA_FREQUENCY)
+        color = colors[reordered_colors[i]]
+        linestyle = linestyles[i]
+
+        for start, end in stretches:
+            x_stretch = x_array[start:end, h - 1]
+            y_hat_stretch = y_hat[h - 1, start:end, sensor]
+            x_stretch_range = fit_dates_to_timestamps(x, x_stretch, xticks)
+
+            if start == 0:
+                label = "{}".format(model_name)
+            else:
+                label = None
+
+            ax1.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.7, ls=linestyle, lw=2)
+            ax2.plot(x_stretch_range, y_hat_stretch, label=label, c=color, alpha=0.7, ls=linestyle, lw=2)
+
+    ax2.legend(fontsize="large")
     plt.show()
 
 def graph4(condensed=False):
@@ -354,11 +413,11 @@ def graph5(condensed=False):
     detector = 508306
     sensor = sensors[detector]
 
-    graph_predictions_and_baselines(groundtruth, timestamps, timestamps_array,
-                                    [dcrnn_predictions, gru_predictions, arimax_predictions],
-                                    sensor=sensor,
-                                    title="Detector {} Full Information Test Predictions for a 30 Minute Horizon".format(detector),
-                                    condensed=condensed)
+    graph_func = graph_predictions_and_baselines_condensed if condensed else graph_predictions_and_baselines
+    graph_func(groundtruth, timestamps, timestamps_array,
+               [dcrnn_predictions, gru_predictions, arimax_predictions],
+               sensor=sensor,
+               title="Detector {} Full Information Test Predictions for a 30 Minute Horizon".format(detector))
 
 
 def main(args):
